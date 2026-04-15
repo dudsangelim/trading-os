@@ -1,0 +1,1 @@
+"""Overlay worker application."""
