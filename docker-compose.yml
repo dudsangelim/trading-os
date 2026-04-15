@@ -1,0 +1,129 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: trading_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jarvis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jarvispass}
+      POSTGRES_DB: ${POSTGRES_DB:-jarvis}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jarvis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: trading_redis
+    restart: unless-stopped
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  trading-worker:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.worker
+    container_name: trading_worker
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - DERIVATIVES_ENABLED=${DERIVATIVES_ENABLED:-true}
+      - DERIVATIVES_FEATURE_ADAPTER_ENABLED=${DERIVATIVES_FEATURE_ADAPTER_ENABLED:-true}
+      - ENGINE_DERIVATIVES_ADVISORY_ENABLED=${ENGINE_DERIVATIVES_ADVISORY_ENABLED:-true}
+      - ENGINE_DERIVATIVES_HARD_FILTER_ENABLED=${ENGINE_DERIVATIVES_HARD_FILTER_ENABLED:-false}
+      - DERIVATIVES_DATABASE_URL=${DERIVATIVES_DATABASE_URL:-}
+      - REDIS_URL=redis://redis:6379
+      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  trading-overlay-worker:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.worker
+    container_name: trading_overlay_worker
+    restart: unless-stopped
+    command: ["python", "-m", "trading.apps.overlay_worker.main"]
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - REDIS_URL=redis://redis:6379
+      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      trading-worker:
+        condition: service_started
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  trading-api:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.api
+    container_name: trading_api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:8090"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - DERIVATIVES_ENABLED=${DERIVATIVES_ENABLED:-true}
+      - DERIVATIVES_FEATURE_ADAPTER_ENABLED=${DERIVATIVES_FEATURE_ADAPTER_ENABLED:-true}
+      - ENGINE_DERIVATIVES_ADVISORY_ENABLED=${ENGINE_DERIVATIVES_ADVISORY_ENABLED:-true}
+      - ENGINE_DERIVATIVES_HARD_FILTER_ENABLED=${ENGINE_DERIVATIVES_HARD_FILTER_ENABLED:-false}
+      - DERIVATIVES_DATABASE_URL=${DERIVATIVES_DATABASE_URL:-}
+      - REDIS_URL=redis://redis:6379
+      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  pgdata:
+
+networks:
+  trading_net:
+    name: trading_net
+    driver: bridge
