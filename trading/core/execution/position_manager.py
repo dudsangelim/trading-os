@@ -13,6 +13,14 @@ Exit slippage (market orders only — SL and TIMEOUT):
   LONG  closes by selling → exit_price = ref * (1 - slippage_bps/10_000)
   SHORT closes by buying  → exit_price = ref * (1 + slippage_bps/10_000)
   TP uses a limit order → no exit slippage.
+
+SL fill model — gapped stops:
+  When price blows through the stop level within the bar (candle low < stop for LONG,
+  candle high > stop for SHORT), the fill reference is the worse of stop_price and the
+  bar extreme, not just stop_price.  This prevents the simulator from reporting an
+  unrealistically clean fill when the market gaps or crashes through the stop.
+    LONG SL ref  = min(stop_price, candle.low)
+    SHORT SL ref = max(stop_price, candle.high)
 """
 from __future__ import annotations
 
@@ -90,7 +98,10 @@ def check_position(
 
     # ---- Stop loss (market order → exit slippage applies) ----------------
     if direction == Direction.LONG and candle.low <= position.stop_price:
-        exit_price = exit_fill_price(position.stop_price, direction, engine_id)
+        # Use the worse of stop_price and candle.low so that stops gapped through
+        # by a crash are filled at the realistic bar extreme, not the stop level.
+        sl_ref = min(position.stop_price, candle.low)
+        exit_price = exit_fill_price(sl_ref, direction, engine_id)
         pnl_usd, pnl_pct = _pnl(position.entry_price, exit_price, direction, position.stake_usd, fee_bps)
         return CloseResult(
             action=PositionAction.CLOSE_SL,
@@ -101,7 +112,8 @@ def check_position(
             closed_at=now,
         )
     if direction == Direction.SHORT and candle.high >= position.stop_price:
-        exit_price = exit_fill_price(position.stop_price, direction, engine_id)
+        sl_ref = max(position.stop_price, candle.high)
+        exit_price = exit_fill_price(sl_ref, direction, engine_id)
         pnl_usd, pnl_pct = _pnl(position.entry_price, exit_price, direction, position.stake_usd, fee_bps)
         return CloseResult(
             action=PositionAction.CLOSE_SL,
