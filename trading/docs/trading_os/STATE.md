@@ -189,6 +189,45 @@ Updated: 2026-04-14 (Phase F.5)
   - trade outcome correlation (avg PnL / win rate for shadow-blocked vs shadow-passed)
 - asyncpg jsonb codec fix applied globally to both `trading_api` and `trading_worker` pools.
 
+## Runtime State After Fase 2 V2 (Liquidity Zones — LiquidationHeatmapProvider)
+
+- `LiquidationHeatmapProvider` delivers `LIQUIDATION_CLUSTER` zones from the pre-computed `liquidation_heatmap` table in the derivatives-collector DB.
+- Provider is async, tolerant to adapter failures, and never blocks the snapshot.
+- New repository method `get_liquidation_heatmap_snapshot()` follows the same guard pattern as `get_derivatives_feature_snapshot()`:
+  - Returns `None` if `DERIVATIVES_ENABLED=False` or `_derivatives_pool` unavailable
+  - Returns `None` on any query error (logged, not raised)
+  - Returns `None` if no snapshot within freshness window
+- Risk event `LIQUIDATION_HEATMAP_UNAVAILABLE` emitted (to `tr_risk_events`) when derivatives is enabled but snapshot returns empty.
+- New flags in `settings.py` (all default off):
+  - `LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED`
+  - `LIQUIDATION_HEATMAP_MIN_INTENSITY` (0.3)
+  - `LIQUIDATION_HEATMAP_MAX_ZONES_PER_SIDE` (5)
+  - `LIQUIDATION_HEATMAP_MAX_AGE_MINUTES` (10)
+- Integration into `BinanceLiquidityReader` and `overlay_evaluator` is deferred to Fase 4.
+
+## Runtime State After Fase 4 (Liquidity Zone Aggregator + Ghost Trade Variants)
+
+- `LiquidityZoneAggregator` (`core/liquidity/zone_aggregator.py`) consolidates zones from all providers — sync (OHLCV) + async (derivatives). Provider failures are silenced; snapshot always returned.
+- `BinanceLiquidityReader` routes through aggregator when `LIQUIDITY_AGGREGATOR_ENABLED=True`; legacy OHLCV path unchanged when disabled.
+- `LiquidityOverlayEvaluator.evaluate()` now returns `List[OverlayDecision]` (1 or 3 elements):
+  - `legacy` — existing behavior, byte-identical when variants disabled
+  - `zones_nearest` — stop/target at nearest qualifying zone above/below entry
+  - `zones_weighted` — stop/target at highest-intensity qualifying zone
+- `OVERLAY_GHOST_VARIANTS_ENABLED=False` (default) → single-element list, byte-identical behavior
+- Ghost trades now have `variant_label` column; dedup is by `(signal_id, variant_label)` — allows 3 ghost trades per signal
+- New repository methods:
+  - `get_ghost_trade_by_signal_variant(signal_id, variant_label)` — O(1) dedup lookup
+  - `get_zone_comparison_stats(since_days, engine_id, min_trades_per_variant)` — per-variant Sharpe/win rate/PnL with bootstrap p-value
+- New endpoint `GET /operator/zone-comparison-report` — read-only, operator-auth gated
+- Schema migrations (idempotent): `tr_ghost_trades` gets `variant_label`, `zone_sources_used`, `stop_zone_info`, `target_zone_info`
+- New flags in `settings.py` (all default off unless noted):
+  - `LIQUIDITY_AGGREGATOR_ENABLED` (default off)
+  - `LIQUIDITY_PROVIDER_SWING_ENABLED` (default on)
+  - `LIQUIDITY_PROVIDER_FVG_ENABLED` (default on)
+  - `LIQUIDITY_PROVIDER_PRIOR_LEVELS_ENABLED` (default on)
+  - `OVERLAY_GHOST_VARIANTS_ENABLED` (default off)
+  - `OVERLAY_VARIANTS_MIN_INTENSITY` (default 0.3)
+
 ## Explicitly Not Added Yet
 
 - No hard dependency on derivatives feed.

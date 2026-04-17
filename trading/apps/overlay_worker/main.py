@@ -16,7 +16,18 @@ import asyncpg
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from trading.core.config.settings import DATABASE_URL, WORKER_LOOP_INTERVAL_SECONDS
+from trading.core.config.settings import (
+    DATABASE_URL,
+    DERIVATIVES_DATABASE_URL,
+    DERIVATIVES_ENABLED,
+    LIQUIDITY_AGGREGATOR_ENABLED,
+    LIQUIDITY_PROVIDER_EQUAL_LEVELS_ENABLED,
+    LIQUIDITY_PROVIDER_FVG_ENABLED,
+    LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED,
+    LIQUIDITY_PROVIDER_PRIOR_LEVELS_ENABLED,
+    LIQUIDITY_PROVIDER_SWING_ENABLED,
+    WORKER_LOOP_INTERVAL_SECONDS,
+)
 from trading.core.data.candle_reader import CandleReader
 from trading.core.monitoring.structured_log import log
 from trading.core.monitoring.telegram_alerts import fmt_overlay_divergence, send_alert
@@ -42,14 +53,54 @@ signal.signal(signal.SIGTERM, _on_sigterm)
 signal.signal(signal.SIGINT, _on_sigterm)
 
 
+async def _init_conn(conn: asyncpg.Connection) -> None:
+    import json as _json
+    await conn.set_type_codec("jsonb", encoder=_json.dumps, decoder=_json.loads, schema="pg_catalog")
+    await conn.set_type_codec("json", encoder=_json.dumps, decoder=_json.loads, schema="pg_catalog")
+
+
 async def main() -> None:
     log("overlay_worker", "startup_begin")
-    pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+    pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5, init=_init_conn)
     await run_migrations(pool)
 
-    repo = TradingRepository(pool)
+    derivatives_pool = None
+    if DERIVATIVES_ENABLED and DERIVATIVES_DATABASE_URL:
+        try:
+            derivatives_pool = await asyncpg.create_pool(
+                DERIVATIVES_DATABASE_URL, min_size=1, max_size=2, init=_init_conn
+            )
+        except Exception as exc:
+            log("overlay_worker", "derivatives_pool_unavailable", error=str(exc))
+
+    repo = TradingRepository(pool, derivatives_pool=derivatives_pool)
     candle_reader = CandleReader(pool)
-    liquidity_reader = BinanceLiquidityReader(candle_reader)
+
+    aggregator = None
+    if LIQUIDITY_AGGREGATOR_ENABLED:
+        from trading.core.liquidity.zone_aggregator import LiquidityZoneAggregator
+        from trading.core.liquidity.providers import (
+            EqualLevelsProvider,
+            FairValueGapProvider,
+            LiquidationHeatmapProvider,
+            PriorLevelsProvider,
+            SwingProvider,
+        )
+        sync_providers = []
+        if LIQUIDITY_PROVIDER_EQUAL_LEVELS_ENABLED:
+            sync_providers.append(EqualLevelsProvider().detect_zones)
+        if LIQUIDITY_PROVIDER_SWING_ENABLED:
+            sync_providers.append(SwingProvider().detect_zones)
+        if LIQUIDITY_PROVIDER_FVG_ENABLED:
+            sync_providers.append(FairValueGapProvider().detect_zones)
+        if LIQUIDITY_PROVIDER_PRIOR_LEVELS_ENABLED:
+            sync_providers.append(PriorLevelsProvider().detect_zones)
+        async_providers = []
+        if LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED:
+            async_providers.append(LiquidationHeatmapProvider(repo).detect_zones)
+        aggregator = LiquidityZoneAggregator(sync_providers, async_providers)
+
+    liquidity_reader = BinanceLiquidityReader(candle_reader, aggregator=aggregator)
     evaluator = LiquidityOverlayEvaluator()
     ghost_manager = GhostTradeManager(repo, candle_reader)
 
@@ -79,38 +130,49 @@ async def main() -> None:
                 features=snapshot.features,
             )
 
-            decision = evaluator.evaluate(signal_row, base_decision, base_trade, snapshot, bankroll)
+            evaluations = evaluator.evaluate(signal_row, base_decision, base_trade, snapshot, bankroll)
+            primary = evaluations[0]  # baseline — used for overlay_decision record
+
             overlay_decision_id = await repo.insert_overlay_decision(
                 signal_id=int(signal_row["id"]),
                 engine_id=signal_row["engine_id"],
                 symbol=signal_row["symbol"],
                 overlay_name=evaluator.overlay_name,
-                action=decision.action,
-                comparison_label=decision.comparison_label,
-                reason=decision.reason,
-                entry_price=decision.entry_price,
-                stop_price=decision.stop_price,
-                target_price=decision.target_price,
-                stake_usd=decision.stake_usd,
-                trigger_bar_ts=decision.trigger_bar_ts,
-                features=decision.features,
+                action=primary.action,
+                comparison_label=primary.comparison_label,
+                reason=primary.reason,
+                entry_price=primary.entry_price,
+                stop_price=primary.stop_price,
+                target_price=primary.target_price,
+                stake_usd=primary.stake_usd,
+                trigger_bar_ts=primary.trigger_bar_ts,
+                features=primary.features,
             )
-            ghost_trade_id = await ghost_manager.maybe_open_ghost_trade(
-                overlay_decision_id=overlay_decision_id,
-                signal_row=signal_row,
-                overlay_decision={
-                    "action": decision.action,
-                    "entry_price": decision.entry_price,
-                    "stop_price": decision.stop_price,
-                    "target_price": decision.target_price,
-                    "stake_usd": decision.stake_usd,
-                },
-                base_trade=base_trade,
-            )
+
+            # Open ghost trades for each variant (1 or 3 depending on flag)
+            primary_ghost_id = None
+            for eval_decision in evaluations:
+                ghost_id = await ghost_manager.maybe_open_ghost_trade(
+                    overlay_decision_id=overlay_decision_id,
+                    signal_row=signal_row,
+                    overlay_decision={
+                        "action": eval_decision.action,
+                        "entry_price": eval_decision.entry_price,
+                        "stop_price": eval_decision.stop_price,
+                        "target_price": eval_decision.target_price,
+                        "stake_usd": eval_decision.stake_usd,
+                    },
+                    base_trade=base_trade,
+                    variant_label=eval_decision.variant_label,
+                )
+                if ghost_id is not None and eval_decision.variant_label == "legacy":
+                    primary_ghost_id = ghost_id
+
+            # Backward-compatible comparison uses baseline (legacy) ghost trade
             ghost_trade = None
-            if ghost_trade_id is not None:
+            if primary_ghost_id is not None:
                 for row in await repo.get_ghost_trades(engine_id=signal_row["engine_id"], limit=500):
-                    if int(row["id"]) == ghost_trade_id:
+                    if int(row["id"]) == primary_ghost_id:
                         ghost_trade = row
                         break
 
@@ -118,24 +180,24 @@ async def main() -> None:
                 signal_row=signal_row,
                 overlay_decision_id=overlay_decision_id,
                 overlay_decision={
-                    "action": decision.action,
-                    "comparison_label": decision.comparison_label,
-                    "reason": decision.reason,
+                    "action": primary.action,
+                    "comparison_label": primary.comparison_label,
+                    "reason": primary.reason,
                 },
                 base_trade=base_trade,
                 ghost_trade=ghost_trade,
             )
             await repo.insert_trade_comparison(**comparison)
             base_action = str((base_decision or {}).get("action") or ("ENTER" if base_trade else "UNKNOWN"))
-            if decision.action == "SKIP" or decision.comparison_label != "same":
+            if primary.action == "SKIP" or primary.comparison_label != "same":
                 await send_alert(
                     fmt_overlay_divergence(
                         signal_row["engine_id"],
                         signal_row["symbol"],
                         base_action=base_action,
-                        overlay_action=decision.action,
-                        comparison_label=decision.comparison_label,
-                        reason=decision.reason,
+                        overlay_action=primary.action,
+                        comparison_label=primary.comparison_label,
+                        reason=primary.reason,
                     )
                 )
             processed += 1
@@ -144,8 +206,9 @@ async def main() -> None:
                 "overlay_evaluated",
                 signal_id=signal_row["id"],
                 engine_id=signal_row["engine_id"],
-                action=decision.action,
-                comparison_label=decision.comparison_label,
+                action=primary.action,
+                comparison_label=primary.comparison_label,
+                variants=len(evaluations),
             )
 
         closed_ghosts = await ghost_manager.process_open_ghost_trades()

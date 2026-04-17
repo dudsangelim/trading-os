@@ -290,6 +290,13 @@ DDL_STATEMENTS = [
     "CREATE INDEX IF NOT EXISTS idx_tr_ghost_trades_open ON tr_ghost_trades (status) WHERE status = 'OPEN'",
     "CREATE INDEX IF NOT EXISTS idx_tr_ghost_trades_engine_opened ON tr_ghost_trades (engine_id, opened_at DESC)",
 
+    # Phase 4 additions to tr_ghost_trades (idempotent ALTER)
+    "ALTER TABLE tr_ghost_trades ADD COLUMN IF NOT EXISTS variant_label TEXT DEFAULT 'legacy'",
+    "ALTER TABLE tr_ghost_trades ADD COLUMN IF NOT EXISTS zone_sources_used JSONB",
+    "ALTER TABLE tr_ghost_trades ADD COLUMN IF NOT EXISTS stop_zone_info JSONB",
+    "ALTER TABLE tr_ghost_trades ADD COLUMN IF NOT EXISTS target_zone_info JSONB",
+    "CREATE INDEX IF NOT EXISTS idx_ghost_trades_variant ON tr_ghost_trades(variant_label, engine_id, opened_at)",
+
     # ------------------------------------------------------------------
     # tr_state_transitions — append-only audit log of status changes
     # ------------------------------------------------------------------

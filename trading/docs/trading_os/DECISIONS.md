@@ -2,6 +2,24 @@
 
 Updated: 2026-04-14
 
+## 2026-04-17 — Fase 2 V2: consumir liquidation_heatmap diretamente em vez de reimplementar o estimador
+
+- Decision: `LiquidationHeatmapProvider` lê a tabela `liquidation_heatmap` do derivatives-collector em vez de reimplementar projeção de liquidações a partir de OI bruto.
+- Why: diagnóstico confirmou que o derivatives-collector já executa o mesmo cálculo (OI série × leverage distribution × long/short ratio × calibração com liquidações reais em 3×). Reimplementar seria duplicação sem ganho.
+- Consequence: Fase 2 V2 é ~4× mais simples que V1, sem nova lógica de estimativa. Risco de divergência de modelo é eliminado. A tabela é atualizada a cada 5 min com TTL de 48h — fresher que qualquer snapshot OHLCV.
+
+## 2026-04-17 — Fase 2 V2: LiquidationHeatmapBin como modelo do adapter, não de zona
+
+- Decision: `LiquidationHeatmapBin` fica em `repository.py` (adapter layer), não em `zone_types.py`.
+- Why: é o modelo interno do adapter, não um modelo de domínio de liquidity zone. O output do provider é `LiquidityZone` — essa é a fronteira de domínio.
+- Consequence: `zone_types.py` permanece limpo; provider converte de bin para zona.
+
+## 2026-04-17 — Fase 2 V2: risk event só emitido quando DERIVATIVES_ENABLED=True
+
+- Decision: `LIQUIDATION_HEATMAP_UNAVAILABLE` risk event é emitido apenas quando `DERIVATIVES_ENABLED=True` e o snapshot retorna vazio.
+- Why: quando derivatives está desabilitado por design (default), emitir um risk event a cada ciclo seria spam na tabela `tr_risk_events` e levaria a falsos alertas operacionais.
+- Consequence: eventos de risco refletem falhas inesperadas, não estado intencional de feature flag.
+
 ## 2026-04-14 — Phase G: shadow filter requires 2+ rules to BLOCK (corroboration)
 
 - Decision: verdict is `BLOCK` only when ≥2 filter rules fire simultaneously.

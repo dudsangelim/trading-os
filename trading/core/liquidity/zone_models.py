@@ -3,10 +3,11 @@ OHLCV-derived liquidity zone models.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from ..data.candle_reader import Candle
+from .zone_types import LiquidityZone, SweepEvent
 
 
 @dataclass
@@ -15,6 +16,8 @@ class LiquiditySnapshot:
     timeframe: str
     zones: Dict[str, float]
     features: Dict[str, float | int | str | bool | None]
+    typed_zones: List[LiquidityZone] = field(default_factory=list)
+    sweep_events: List[SweepEvent] = field(default_factory=list)
 
 
 def build_liquidity_snapshot(symbol: str, candles: List[Candle], timeframe: str = "15m") -> LiquiditySnapshot:
