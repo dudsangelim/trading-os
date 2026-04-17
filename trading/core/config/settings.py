@@ -266,3 +266,44 @@ OVERLAY_GHOST_VARIANTS_ENABLED: bool = _bool_env("OVERLAY_GHOST_VARIANTS_ENABLED
 OVERLAY_VARIANTS_MIN_INTENSITY: float = float(
     os.environ.get("OVERLAY_VARIANTS_MIN_INTENSITY", "0.3")
 )
+
+# ---------------------------------------------------------------------------
+# Carry Neutral engine
+# ---------------------------------------------------------------------------
+CARRY_NEUTRAL_ENABLED: bool = _bool_env("CARRY_NEUTRAL_ENABLED", False)
+CARRY_NEUTRAL_THRESHOLD_UPPER_ANNUALIZED: float = float(
+    os.environ.get("CARRY_NEUTRAL_THRESHOLD_UPPER_ANNUALIZED", "0.15")
+)
+CARRY_NEUTRAL_THRESHOLD_LOWER_ANNUALIZED: float = float(
+    os.environ.get("CARRY_NEUTRAL_THRESHOLD_LOWER_ANNUALIZED", "0.05")
+)
+CARRY_NEUTRAL_MAX_HOLD_HOURS: int = int(
+    os.environ.get("CARRY_NEUTRAL_MAX_HOLD_HOURS", "168")
+)
+CARRY_NEUTRAL_VARIANT: str = os.environ.get("CARRY_NEUTRAL_VARIANT", "sell_accrual")
+CARRY_NEUTRAL_STAKE_USD: float = float(
+    os.environ.get("CARRY_NEUTRAL_STAKE_USD", "300.0")
+)
+CARRY_WORKER_LOOP_INTERVAL_SECONDS: int = int(
+    os.environ.get("CARRY_WORKER_LOOP_INTERVAL_SECONDS", "300")
+)
+
+# ---------------------------------------------------------------------------
+# Engine role configuration — explicit declaration of role for each engine
+# ---------------------------------------------------------------------------
+# ACTIVE: engine executes validate_signal → ENTER and opens paper trades
+# SIGNAL_ONLY: engine always emits SIGNAL_ONLY, never opens trades
+# EXPERIMENTAL: engine is disabled, registered but not called by worker
+# ARCHIVED: engine confirmed structurally unprofitable, registered but never called; see research_log/
+ENGINE_ROLES: Dict[str, str] = {
+    "m1_eth": "ARCHIVED",  # archived 2026-04-17 — see trading/research_log/m1_eth_autopsy_2026-04-17.md
+    "m2_btc": "ARCHIVED",  # archived 2026-04-17 — see trading/research_log/m2_btc_autopsy_2026-04-17.md
+    "m3_sol": "ACTIVE",
+    "m3_eth_shadow": "SIGNAL_ONLY",
+    "cn1_oi_divergence": "SIGNAL_ONLY",
+    "cn2_taker_momentum": "SIGNAL_ONLY",
+    "cn3_funding_reversal": "SIGNAL_ONLY",
+    "cn4_liquidation_cascade": "SIGNAL_ONLY",
+    "cn5_squeeze_zone": "SIGNAL_ONLY",
+    "carry_neutral_btc": "ACTIVE",
+}
