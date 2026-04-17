@@ -1,6 +1,48 @@
 # Decisions
 
-Updated: 2026-04-14
+Updated: 2026-04-17
+
+## D-01 (2026-04-17): Setups micro em TF ≤ 15m — critérios de promoção
+
+**Contexto:** m1_eth e m2_btc foram arquivados por expectancy estruturalmente negativa. Ambos seguiam o padrão "compression breakout em TF ≤ 15m com SL estrutural < 1% do preço". Backtests em 502 e 3.395 trades respectivamente confirmaram que o custo round-trip (32bps) aniquila o gross positivo gerado pelo sinal.
+
+**Decisão:** Setups em timeframe ≤ 15m cujo SL médio fique abaixo de 1.5× ATR do próprio TF **não podem receber role: ACTIVE** sem cumprir, cumulativamente:
+
+1. Backtest com N ≥ 300 trades em período ≥ 18 meses
+2. Expectancy líquida (após fees+slippage modelados realisticamente) positiva com margem ≥ 2× o custo round-trip
+3. WR empírico ≥ break-even WR + 10 p.p.
+4. Stop em ≤ 2 barras < 10% dos trades
+5. Cost/gross < 50%
+
+**Rationale:** Esses critérios garantem que o edge observado sobreviva a degradação de execução real (slippage variável, fills parciais, mudança de regime de liquidez).
+
+**Aplicabilidade retroativa:** Aplicar a qualquer engine em status SIGNAL_ONLY ou GHOST antes de considerar promoção para ACTIVE.
+
+**Evidências de origem:**
+- Autópsia m1_eth: `trading/research_log/m1_eth_autopsy_2026-04-17.md`
+- Autópsia m2_btc: `trading/research_log/m2_btc_autopsy_2026-04-17.md`
+
+## 2026-04-17 — Decision: keep SIGNAL_ONLY engines registered, not delete
+
+- Decision: engines `cn1-cn5` and `m3_eth_shadow` remain in registry as `SIGNAL_ONLY` despite never opening paper trades. Not removed from codebase.
+- Why:
+  1. They emit signals that feed the `shadow_filter` dataset (Phase G)
+  2. Removing them would delete historical signal data from `tr_signals`
+  3. Any can be promoted to `ACTIVE` by editing `ENGINE_ROLES` in `settings.py` without code changes
+  4. Dead code review performed: `build_order_plan` and `manage_open_position` retained as `# Reserved for future ACTIVE role` where non-trivial; pure stubs removed where present
+- How to change role: edit `core/config/settings.py → ENGINE_ROLES`, restart worker. Role is logged at startup and visible in `/system/status`.
+
+## 2026-04-17 — Carry Neutral BTC: autonomous loop, not standard worker
+
+- Decision: `carry_neutral_btc` engine runs via a dedicated `carry_worker` (5-min loop) instead of the standard `trading_worker` (1-min bar-based loop).
+- Why: carry operates on 8h funding cycles, not 15m bars. Running it through the standard worker would require complex special-casing. A dedicated worker is simpler and isolates failure domains.
+- Consequence: carry_worker has its own heartbeat (`carry_neutral_btc` in `tr_engine_heartbeat`). The standard worker's registry does not include carry. CARRY_NEUTRAL_ENABLED=false by default.
+
+## 2026-04-17 — ENGINE_ROLES as authoritative role registry
+
+- Decision: add `ENGINE_ROLES` dict to `settings.py` as the authoritative source for engine roles (`ACTIVE`, `SIGNAL_ONLY`, `EXPERIMENTAL`).
+- Why: previously `signal_only` was implicit (engines returning SIGNAL_ONLY in validate_signal). Bug-prone: a code change in any engine could accidentally open trades. Explicit config is robust.
+- Consequence: worker startup logs each engine's role. Worker loop enforces SIGNAL_ONLY at the architectural level even if validate_signal returns ENTER. `/system/status` exposes `role` per engine.
 
 ## 2026-04-17 — Fase 2 V2: consumir liquidation_heatmap diretamente em vez de reimplementar o estimador
 
