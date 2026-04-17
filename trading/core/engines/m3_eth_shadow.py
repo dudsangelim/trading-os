@@ -1,14 +1,20 @@
 """
-Engine M3-ETH-Shadow — signal-only mirror of M3 for ETH.
+Engine M3-ETH-Shadow — ETH zone retest, promoted to ACTIVE 2026-04-17.
 
-signal_only=True means the worker will NEVER open a position for this engine.
-It records signals and decisions but never creates a tr_paper_trades row
-with status=OPEN.
-
-Strategy: Identical to M3 SOL but with tighter parameters:
+Strategy: Zone breakout on 1h with EMA20/50 trend gate on 4h.
   - LOOKBACK = 8 (8h window instead of 12h)
   - MAX_WIDTH = 2.0 (tighter zone)
-  - Entry is DIRECT (no retest wait) — enters on the FIRST 15m bar after 1h breakout
+  - Entry uses conservative fill: price must sweep the zone by ≥ ZONE_SWEEP_THRESHOLD_BPS
+    on the first 15m bar after the breakout before the signal fires.
+
+Conservative fill was adopted on promotion to ACTIVE because the original
+"direct" (optimistic) model assumed a guaranteed limit fill on the first bar
+regardless of whether price returned to the zone. Backtest validation showed
+79% of those fills would not execute in production. The conservative subset
+(N=77 trades) has WR 64.9% and edge +17 p.p. — the statistical basis of this
+engine's ACTIVE promotion.
+
+Ref: ~/m3_validation/results/VALIDATION_REPORT.md (2026-04-17)
 """
 from __future__ import annotations
 
@@ -38,6 +44,13 @@ logger = logging.getLogger(__name__)
 LOOKBACK = 8        # 8h window instead of 12h
 MAX_WIDTH = 2.0     # tighter zone
 ATR_PERIOD = 14     # 1h bars
+
+# Conservative fill: price must sweep through the zone by this many bps on
+# the entry bar before the signal fires. Prevents fills on mere touches that
+# would not execute as limit orders in production.
+# Value calibrated against backtest validation (2026-04-17): 5bps retains
+# N=77 trades with WR 64.9% vs 370 trades at WR 60.3% under optimistic model.
+ZONE_SWEEP_THRESHOLD_BPS: int = 5
 
 
 def _ema(values: List[float], span: int) -> List[float]:
@@ -195,7 +208,7 @@ class M3EthShadowEngine(BaseEngine):
             return None
 
         pending = self._pending_direct
-        self._pending_direct = None  # direct entry: only valid for 1 bar
+        self._pending_direct = None  # consumed regardless of fill outcome
 
         direction = pending["direction"]
         trend_ok = (
@@ -209,6 +222,29 @@ class M3EthShadowEngine(BaseEngine):
 
         comp_high = pending["comp_high"]
         comp_low = pending["comp_low"]
+
+        # Conservative fill guard: price must sweep the zone by ZONE_SWEEP_THRESHOLD_BPS
+        # on this bar before we treat the limit order as filled.
+        sweep_factor = ZONE_SWEEP_THRESHOLD_BPS / 10000.0
+        if direction == "LONG":
+            pierce_level = comp_high * (1.0 - sweep_factor)
+            fill_ok = ctx.bar_low <= pierce_level and ctx.bar_close > comp_high
+        else:
+            pierce_level = comp_low * (1.0 + sweep_factor)
+            fill_ok = ctx.bar_high >= pierce_level and ctx.bar_close < comp_low
+
+        if not fill_ok:
+            self.set_skip_reason(
+                ctx,
+                "CONSERVATIVE_FILL_NOT_MET",
+                direction=direction,
+                threshold_bps=ZONE_SWEEP_THRESHOLD_BPS,
+                bar_low=ctx.bar_low,
+                bar_high=ctx.bar_high,
+                bar_close=ctx.bar_close,
+                pierce_level=pierce_level,
+            )
+            return None
 
         return Signal(
             engine_id=self.ENGINE_ID,
