@@ -46,6 +46,7 @@ from trading.core.config.settings import (
     ENGINE_DERIVATIVES_ADVISORY_ENABLED,
     ENGINE_DERIVATIVES_HARD_FILTER_ENABLED,
     ENGINE_DERIVATIVES_SHADOW_FILTER_ENABLED,
+    ENGINE_ROLES,
     WORKER_LOOP_INTERVAL_SECONDS,
 )
 from trading.core.data.candle_reader import CandleReader
@@ -972,7 +973,10 @@ async def _process_engine(
             )
         )
 
-        if cfg.signal_only or action == "SIGNAL_ONLY":
+        # Architectural role guard: ENGINE_ROLES is the authoritative source.
+        # Even if validate_signal() returned ENTER, a SIGNAL_ONLY role blocks execution.
+        engine_role = ENGINE_ROLES.get(engine_id, "ACTIVE")
+        if cfg.signal_only or action == "SIGNAL_ONLY" or engine_role == "SIGNAL_ONLY":
             await send_alert(
                 fmt_signal_accepted(
                     engine_id,
@@ -1198,6 +1202,15 @@ async def main() -> None:
             bankroll = await repo.get_current_bankroll(engine_id)
             await repo.upsert_daily_equity(engine_id, today, bankroll, bankroll, 0.0, 0)
 
+    # Log engine roles at startup for observability
+    for eid in _registry:
+        role = ENGINE_ROLES.get(eid, "ACTIVE")
+        log(eid, "engine_role", role=role)
+        if role == "EXPERIMENTAL":
+            log(eid, "engine_skipped", reason="EXPERIMENTAL_ROLE")
+        if role == "ARCHIVED":
+            log(eid, "engine_skipped", reason="ARCHIVED_ROLE")
+
     log("worker", "startup_complete", engines=list(_registry.keys()))
     await _persist_worker_runtime_state(
         repo,
@@ -1326,6 +1339,8 @@ async def main() -> None:
                 pass
 
         for engine_id in list(_registry.keys()):
+            if ENGINE_ROLES.get(engine_id, "ACTIVE") in ("EXPERIMENTAL", "ARCHIVED"):
+                continue  # EXPERIMENTAL/ARCHIVED engines are registered but not called
             try:
                 await _process_engine(
                     engine_id,
