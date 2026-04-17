@@ -65,6 +65,13 @@ Updated: 2026-04-14
 - `core/monitoring/operational_readiness.py` — defensive json.loads fallback for payload field
 - `core/monitoring/healthcheck.py` — same defensive fallback
 
+## Engine Archival (2026-04-17)
+
+- `m1_eth` archived: role changed to ARCHIVED. Backtest audit (502 trades) confirmed structural negative expectancy. See `trading/research_log/m1_eth_autopsy_2026-04-17.md`.
+- `m2_btc` archived: role changed to ARCHIVED. Backtest audit (3395 trades) confirmed structural negative expectancy. See `trading/research_log/m2_btc_autopsy_2026-04-17.md`.
+- ARCHIVED role added to ENGINE_ROLES; worker skips ARCHIVED engines at architectural loop level.
+- Promotion criteria for TF ≤ 15m setups formalized in DECISIONS.md D-01.
+
 ## In Progress
 
 - No active implementation in progress.
