@@ -96,6 +96,39 @@ Updated: 2026-04-14
   - `GET /operator/shadow-filter-report` — counterfactual analysis endpoint with trade outcome correlation
   - 14 unit tests in `tests/test_derivatives_filter.py`
 
+## Fase 1 (Liquidity Zones) — Equal Levels + Sweeps
+
+- Status: completed.
+- `EqualLevelsProvider`, `SweepDetector` — OHLCV-based.
+
+## Fase 1.5 (Liquidity Zones) — Swing, FVG, Prior Levels
+
+- Status: completed.
+- `SwingProvider`, `FairValueGapProvider`, `PriorLevelsProvider` — OHLCV-based.
+- `LiquiditySnapshot` extended with `typed_zones` and `sweep_events`.
+
+## Fase 2 V2 (Liquidity Zones) — LiquidationHeatmapProvider
+
+- Status: completed 2026-04-17.
+- Delivered:
+  - `LiquidationHeatmapBin` dataclass + `get_liquidation_heatmap_snapshot()` in repository
+  - `LiquidationHeatmapProvider` — async, fault-tolerant, reads pre-computed table from derivatives-collector
+  - `LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED` flag + 3 tuning flags
+  - 10 unit tests (mocks only), smoke script
+- Original V1 approach (LiquidationEstimator with OI-delta projection) was replaced after diagnostic confirmed that the derivatives-collector already performs this calculation in `liquidation_heatmap` (updated every 5 min, calibrated with real liquidation events at 3× weight).
+
+## Fase 3 (Liquidity Zones) — Volume Profile
+
+- Status: planned. Scope: HVN/LVN detection from candle volume distribution.
+
+## Fase 4 (Liquidity Zones) — Aggregator + Overlay Integration
+
+- Status: planned. Integrates all providers (including LiquidationHeatmapProvider) into `BinanceLiquidityReader` and `overlay_evaluator`.
+
+## Fase 5 (Liquidity Zones) — Validação Estatística
+
+- Status: planned. Statistical evaluation of zone prediction accuracy.
+
 ## Next Phase (Planned)
 
 - Phase H: analysis of shadow filter outcome correlation after ≥50 evaluations; optional threshold tuning and progression criteria for controlled hard-filter activation (still paper-only, no live execution).

@@ -25,6 +25,7 @@ Endpoints:
   GET  /operator/derivatives-snapshot          ← canonical derivatives snapshot
   GET  /operator/derivatives-readiness         ← derivatives value/readiness
   GET  /operator/shadow-filter-report          ← Phase G shadow filter evaluation report
+  GET  /operator/zone-comparison-report        ← Phase 4 ghost trade variant comparison
 """
 from __future__ import annotations
 
@@ -776,3 +777,34 @@ async def operator_shadow_filter_report(
             }
         )
     )
+
+
+@app.get("/operator/zone-comparison-report")
+async def operator_zone_comparison_report(
+    engine_id: Optional[str] = Query(default=None, description="Filter by engine_id"),
+    since_days: int = Query(default=30, ge=1, le=365, description="Lookback window in days"),
+    min_trades_per_variant: int = Query(default=30, ge=1, description="Minimum closed ghost trades per variant to include in stats"),
+    x_operator_token: Optional[str] = Header(default=None),
+):
+    """
+    Phase 4 — Ghost trade variant zone-comparison report.
+
+    Compares performance of the three ghost trade variants:
+      - legacy: baseline (current overlay logic, stops/targets unchanged)
+      - zones_nearest: stop/target pinned to nearest qualifying zone
+      - zones_weighted: stop/target pinned to highest-intensity qualifying zone
+
+    Returns per-variant Sharpe ratio, win rate, PnL statistics, and a
+    bootstrap permutation p-value for the Sharpe delta between variants.
+
+    Read-only. Does not affect runtime, risk, or execution.
+    """
+    _check_operator_token(x_operator_token)
+    assert _pool is not None, "Pool not initialised"
+    repo = TradingRepository(_pool, derivatives_pool=_derivatives_pool)
+    stats = await repo.get_zone_comparison_stats(
+        since_days=since_days,
+        engine_id=engine_id,
+        min_trades_per_variant=min_trades_per_variant,
+    )
+    return JSONResponse(_jsonify(stats))

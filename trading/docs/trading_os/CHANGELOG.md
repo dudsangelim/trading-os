@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-04-17 — Fase 4: LiquidityZoneAggregator + Ghost Trade Variants
+
+### Code changes
+
+- `core/liquidity/zone_aggregator.py` (new): `LiquidityZoneAggregator` with `AggregatedLiquiditySnapshot` — consolidates sync+async providers; provider failures silenced
+- `core/liquidity/overlay_evaluator.py`: `evaluate()` returns `List[OverlayDecision]`; new `variant_label` field; added `zones_nearest` and `zones_weighted` variant helpers; `OVERLAY_GHOST_VARIANTS_ENABLED` guard
+- `core/liquidity/binance_liquidity_reader.py`: aggregator path added; `_adapt_aggregated_to_legacy()` bridges to legacy `LiquiditySnapshot`; legacy path byte-unchanged
+- `core/liquidity/ghost_trade_manager.py`: `maybe_open_ghost_trade()` accepts `variant_label`, `zone_sources_used`, `stop_zone_info`, `target_zone_info`; dedup changed to `get_ghost_trade_by_signal_variant`
+- `core/storage/repository.py`: `open_ghost_trade()` extended with new columns; `get_ghost_trade_by_signal_variant()`; `get_zone_comparison_stats()` with bootstrap Sharpe p-value
+- `core/storage/migrations.py`: idempotent ALTERs for `tr_ghost_trades` Phase 4 columns + variant index
+- `core/config/settings.py`: 6 new flags (all default-off or default-on as specified)
+- `apps/api/main.py`: `GET /operator/zone-comparison-report`
+- `apps/overlay_worker/main.py`: aggregator wiring; multi-variant ghost trade loop; `derivatives_pool` init
+
+### Tests
+
+- `tests/test_liquidity_overlay_unit.py`: updated 2 existing tests for `List[OverlayDecision]` return type
+- `tests/test_zone_aggregator.py` (new): 10 unit tests
+- `tests/test_overlay_variants.py` (new): 7 unit tests
+- `tests/test_binance_liquidity_reader_v2.py` (new): 3 unit tests
+- `tests/test_zone_comparison_endpoint.py` (new): 4 unit tests
+- `scripts/smoke_aggregator_e2e.py` (new): E2E smoke test (21 checks)
+
+### No-change boundaries preserved
+
+- Legacy behavior when `LIQUIDITY_AGGREGATOR_ENABLED=False` and `OVERLAY_GHOST_VARIANTS_ENABLED=False`: byte-identical
+- `UNIQUE (signal_id, overlay_name)` constraint on `tr_overlay_decisions` preserved
+- All pre-existing tests pass
+
+## 2026-04-17 — Fase 2 V2: LiquidationHeatmapProvider
+
+### Code changes
+
+- `core/storage/repository.py`:
+  - `LiquidationHeatmapBin` dataclass — typed model for a single heatmap price bin
+  - `get_liquidation_heatmap_snapshot(symbol, reference_ts, max_age_minutes=10)` — reads latest snapshot from `liquidation_heatmap` table (derivatives-collector DB) with freshness guard; returns `None` on any failure (never raises)
+- `core/liquidity/providers/liquidation_heatmap_provider.py` (new):
+  - `LiquidationHeatmapProvider` — async provider; converts bins to `LiquidityZone(zone_type="LIQUIDATION_CLUSTER")` with `intensity >= min_intensity` filter and `max_zones_per_side` cap per direction
+  - Emits `LIQUIDATION_HEATMAP_UNAVAILABLE` risk event when `DERIVATIVES_ENABLED=True` and snapshot returns `None`
+  - Returns `[]` silently when derivatives disabled — never fails the snapshot
+- `core/liquidity/providers/__init__.py`: exports `LiquidationHeatmapProvider`
+- `core/config/settings.py`:
+  - `LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED` (default `False`)
+  - `LIQUIDATION_HEATMAP_MIN_INTENSITY` (default `0.3`)
+  - `LIQUIDATION_HEATMAP_MAX_ZONES_PER_SIDE` (default `5`)
+  - `LIQUIDATION_HEATMAP_MAX_AGE_MINUTES` (default `10`)
+- `tests/test_liquidation_heatmap_provider.py` (new): 10 unit tests (mocks only)
+- `scripts/smoke_liquidation_heatmap.py` (new): smoke test against live derivatives DB
+
+### No-change boundaries preserved
+
+- `overlay_evaluator.py` not modified — integration deferred to Fase 4
+- `binance_liquidity_reader.py` not modified — integration deferred to Fase 4
+- No new DB tables — reads existing `liquidation_heatmap` table read-only
+- No hard dependency on derivatives feed
+
 ## 2026-04-14 — Phase G: Shadow Hard-Filter Experiment
 
 ### Code changes

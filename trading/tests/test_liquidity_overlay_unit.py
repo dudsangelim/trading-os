@@ -60,13 +60,14 @@ def test_overlay_evaluator_skips_long_into_nearby_liquidity():
         "bar_timestamp": datetime(2026, 4, 13, 12, 0, tzinfo=timezone.utc),
         "signal_data": {"bar_close": 100.0, "timeframe": "15m"},
     }
-    decision = evaluator.evaluate(
+    evaluations = evaluator.evaluate(
         signal_row=signal_row,
         base_decision={"action": "ENTER"},
         base_trade=None,
         snapshot=snapshot,
         bankroll=200.0,
     )
+    decision = evaluations[0]
     assert decision.action == "SKIP"
     assert decision.comparison_label == "skip"
     assert decision.reason == "LIQUIDITY_REJECTION_ABOVE"
@@ -92,13 +93,14 @@ def test_overlay_evaluator_adjusts_long_stop_and_target():
         "target_price": entry + 0.5,
         "stake_usd": 5.0,
     }
-    decision = evaluator.evaluate(
+    evaluations = evaluator.evaluate(
         signal_row=signal_row,
         base_decision={"action": "ENTER"},
         base_trade=base_trade,
         snapshot=snapshot,
         bankroll=200.0,
     )
+    decision = evaluations[0]
     assert decision.action == "ADJUST"
     assert decision.stop_price is not None
     assert decision.target_price is not None

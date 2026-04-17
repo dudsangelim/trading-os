@@ -24,6 +24,10 @@ class GhostTradeManager:
         signal_row: Dict[str, Any],
         overlay_decision: Dict[str, Any],
         base_trade: Optional[Dict[str, Any]],
+        variant_label: str = "legacy",
+        zone_sources_used: Optional[Dict[str, Any]] = None,
+        stop_zone_info: Optional[Dict[str, Any]] = None,
+        target_zone_info: Optional[Dict[str, Any]] = None,
     ) -> Optional[int]:
         action = overlay_decision["action"]
         if action not in {"ENTER", "ADJUST"}:
@@ -36,10 +40,10 @@ class GhostTradeManager:
         if signal_row["bar_timestamp"] < fresh_cutoff:
             return None
 
-        existing = await self._repo.get_ghost_trades(engine_id=signal_row["engine_id"], limit=500)
-        for row in existing:
-            if int(row["signal_id"]) == signal_id:
-                return int(row["id"])
+        # Dedup by (signal_id, variant_label) — allows 3 ghost trades per signal
+        existing = await self._repo.get_ghost_trade_by_signal_variant(signal_id, variant_label)
+        if existing is not None:
+            return int(existing["id"])
 
         entry = _as_float(overlay_decision.get("entry_price"))
         stop = _as_float(overlay_decision.get("stop_price"))
@@ -61,6 +65,10 @@ class GhostTradeManager:
             target_price=target,
             stake_usd=stake,
             opened_at=signal_row["bar_timestamp"],
+            variant_label=variant_label,
+            zone_sources_used=zone_sources_used,
+            stop_zone_info=stop_zone_info,
+            target_zone_info=target_zone_info,
         )
 
     async def process_open_ghost_trades(self) -> int:
@@ -119,6 +127,8 @@ def _tf_minutes(signal_row: Dict[str, Any]) -> int:
             signal_data = json.loads(signal_data)
         except json.JSONDecodeError:
             signal_data = {}
+    if not isinstance(signal_data, dict):
+        signal_data = {}
     tf = signal_data.get("timeframe", "15m")
     try:
         return int(str(tf).replace("m", ""))

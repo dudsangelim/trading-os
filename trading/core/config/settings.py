@@ -224,3 +224,45 @@ DERIVATIVES_STALE_THRESHOLD_SECONDS: int = int(
 DERIVATIVES_MIN_FEATURES_REQUIRED: int = int(
     os.environ.get("DERIVATIVES_MIN_FEATURES_REQUIRED", "3")
 )
+
+# ---------------------------------------------------------------------------
+# Liquidity zone providers (Phases 1–2)
+# ---------------------------------------------------------------------------
+# Phase 1: Equal Levels provider — enabled by default (pure OHLCV, no new deps)
+LIQUIDITY_PROVIDER_EQUAL_LEVELS_ENABLED: bool = _bool_env("LIQUIDITY_PROVIDER_EQUAL_LEVELS_ENABLED", True)
+
+# Phase 2 (V1 legacy, unused): Liquidation estimator — off by default
+LIQUIDITY_PROVIDER_LIQUIDATION_ESTIMATOR_ENABLED: bool = _bool_env(
+    "LIQUIDITY_PROVIDER_LIQUIDATION_ESTIMATOR_ENABLED", False
+)
+LIQUIDATION_ESTIMATOR_LOOKBACK_HOURS: int = int(os.environ.get("LIQUIDATION_ESTIMATOR_LOOKBACK_HOURS", "24"))
+LIQUIDATION_ESTIMATOR_WINDOW_MINUTES: int = int(os.environ.get("LIQUIDATION_ESTIMATOR_WINDOW_MINUTES", "60"))
+LIQUIDATION_ESTIMATOR_MIN_INTENSITY: float = float(os.environ.get("LIQUIDATION_ESTIMATOR_MIN_INTENSITY", "0.1"))
+
+# Phase 2 (V2): Liquidation heatmap provider — reads pre-computed table from derivatives-collector
+LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED: bool = _bool_env(
+    "LIQUIDITY_PROVIDER_LIQUIDATION_HEATMAP_ENABLED", False
+)
+LIQUIDATION_HEATMAP_MIN_INTENSITY: float = float(
+    os.environ.get("LIQUIDATION_HEATMAP_MIN_INTENSITY", "0.3")
+)
+LIQUIDATION_HEATMAP_MAX_ZONES_PER_SIDE: int = int(
+    os.environ.get("LIQUIDATION_HEATMAP_MAX_ZONES_PER_SIDE", "5")
+)
+LIQUIDATION_HEATMAP_MAX_AGE_MINUTES: int = int(
+    os.environ.get("LIQUIDATION_HEATMAP_MAX_AGE_MINUTES", "10")
+)
+
+# ---------------------------------------------------------------------------
+# Liquidity Zones — Fase 4: Aggregator + Overlay Variants
+# ---------------------------------------------------------------------------
+LIQUIDITY_AGGREGATOR_ENABLED: bool = _bool_env("LIQUIDITY_AGGREGATOR_ENABLED", False)
+
+LIQUIDITY_PROVIDER_SWING_ENABLED: bool = _bool_env("LIQUIDITY_PROVIDER_SWING_ENABLED", True)
+LIQUIDITY_PROVIDER_FVG_ENABLED: bool = _bool_env("LIQUIDITY_PROVIDER_FVG_ENABLED", True)
+LIQUIDITY_PROVIDER_PRIOR_LEVELS_ENABLED: bool = _bool_env("LIQUIDITY_PROVIDER_PRIOR_LEVELS_ENABLED", True)
+
+OVERLAY_GHOST_VARIANTS_ENABLED: bool = _bool_env("OVERLAY_GHOST_VARIANTS_ENABLED", False)
+OVERLAY_VARIANTS_MIN_INTENSITY: float = float(
+    os.environ.get("OVERLAY_VARIANTS_MIN_INTENSITY", "0.3")
+)

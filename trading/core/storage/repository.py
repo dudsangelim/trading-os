@@ -4,10 +4,14 @@ Repository — asyncpg CRUD for all tr_* tables.
 from __future__ import annotations
 
 import json
+import logging
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import asyncpg
+
+log = logging.getLogger(__name__)
 
 from ..config.settings import (
     DERIVATIVES_ENABLED,
@@ -19,6 +23,47 @@ from ..config.settings import (
     ENGINE_DERIVATIVES_HARD_FILTER_ENABLED,
 )
 from ..engines.base import Direction, Position, Signal, SignalDecision
+
+@dataclass
+class LiquidationHeatmapBin:
+    symbol: str
+    snapshot_ts: datetime
+    price_low: float
+    price_high: float
+    price_mid: float
+    long_liq_volume_usd: float
+    short_liq_volume_usd: float
+    net_liq_volume_usd: float
+    total_liq_volume_usd: float
+    intensity: float
+    distance_from_price_pct: float
+    nearest_side: str  # "LONG" | "SHORT"
+
+
+_HEATMAP_SQL = """
+    SELECT
+        symbol,
+        timestamp,
+        price_low,
+        price_high,
+        total_long_liq_volume,
+        total_short_liq_volume,
+        net_liq_volume,
+        intensity,
+        distance_from_price_pct,
+        nearest_side
+    FROM liquidation_heatmap
+    WHERE symbol = $1
+      AND timestamp = (
+          SELECT MAX(timestamp)
+          FROM liquidation_heatmap
+          WHERE symbol = $1
+      )
+      AND timestamp <= $2
+      AND timestamp >= $2 - INTERVAL '1 minute' * $3
+    ORDER BY price_low ASC
+"""
+
 
 DERIVATIVE_FEATURE_KEYS: Tuple[str, ...] = (
     "orderbook_imbalance",
@@ -432,6 +477,55 @@ class TradingRepository:
                 "collector_error_ratio_30m": round(error_ratio, 4),
             },
         }
+
+    async def get_liquidation_heatmap_snapshot(
+        self,
+        symbol: str,
+        reference_ts: datetime,
+        max_age_minutes: int = 10,
+    ) -> Optional[List[LiquidationHeatmapBin]]:
+        """
+        Returns the latest liquidation_heatmap snapshot for symbol, provided it
+        is no older than max_age_minutes relative to reference_ts.
+
+        Returns None if:
+        - DERIVATIVES_ENABLED is False or _derivatives_pool is unavailable
+        - No snapshot within the freshness window
+        - Any connection/query error (never propagates exceptions)
+        """
+        if not DERIVATIVES_ENABLED or self._derivatives_pool is None:
+            return None
+        try:
+            async with self._derivatives_pool.acquire() as conn:
+                rows = await conn.fetch(_HEATMAP_SQL, symbol, reference_ts, max_age_minutes)
+        except Exception as exc:
+            log.warning("get_liquidation_heatmap_snapshot failed for %s: %s", symbol, exc)
+            return None
+
+        if not rows:
+            return None
+
+        bins: List[LiquidationHeatmapBin] = []
+        for row in rows:
+            p_low = float(row["price_low"])
+            p_high = float(row["price_high"])
+            long_vol = float(row["total_long_liq_volume"])
+            short_vol = float(row["total_short_liq_volume"])
+            bins.append(LiquidationHeatmapBin(
+                symbol=row["symbol"],
+                snapshot_ts=row["timestamp"],
+                price_low=p_low,
+                price_high=p_high,
+                price_mid=(p_low + p_high) / 2.0,
+                long_liq_volume_usd=long_vol,
+                short_liq_volume_usd=short_vol,
+                net_liq_volume_usd=float(row["net_liq_volume"]),
+                total_liq_volume_usd=long_vol + short_vol,
+                intensity=float(row["intensity"]),
+                distance_from_price_pct=float(row["distance_from_price_pct"]),
+                nearest_side=str(row["nearest_side"]),
+            ))
+        return bins
 
     # ------------------------------------------------------------------
     # tr_signals
@@ -1409,14 +1503,20 @@ class TradingRepository:
         target_price: float,
         stake_usd: float,
         opened_at: datetime,
+        variant_label: str = "legacy",
+        zone_sources_used: Optional[Dict[str, Any]] = None,
+        stop_zone_info: Optional[Dict[str, Any]] = None,
+        target_zone_info: Optional[Dict[str, Any]] = None,
     ) -> int:
         async with self._pool.acquire() as conn:
             row = await conn.fetchrow(
                 """
                 INSERT INTO tr_ghost_trades
                     (overlay_decision_id, signal_id, base_trade_id, engine_id, symbol,
-                     direction, entry_price, stop_price, target_price, stake_usd, status, opened_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'OPEN', $11)
+                     direction, entry_price, stop_price, target_price, stake_usd, status, opened_at,
+                     variant_label, zone_sources_used, stop_zone_info, target_zone_info)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'OPEN', $11,
+                        $12, $13::jsonb, $14::jsonb, $15::jsonb)
                 RETURNING id
                 """,
                 overlay_decision_id,
@@ -1430,8 +1530,155 @@ class TradingRepository:
                 target_price,
                 stake_usd,
                 opened_at,
+                variant_label,
+                json.dumps(zone_sources_used) if zone_sources_used else None,
+                json.dumps(stop_zone_info) if stop_zone_info else None,
+                json.dumps(target_zone_info) if target_zone_info else None,
             )
         return row["id"]
+
+    async def get_ghost_trade_by_signal_variant(
+        self,
+        signal_id: int,
+        variant_label: str,
+    ) -> Optional[Dict[str, Any]]:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT * FROM tr_ghost_trades
+                WHERE signal_id = $1 AND variant_label = $2
+                ORDER BY opened_at DESC, id DESC
+                LIMIT 1
+                """,
+                signal_id,
+                variant_label,
+            )
+        return dict(row) if row else None
+
+    async def get_zone_comparison_stats(
+        self,
+        since_days: int = 30,
+        engine_id: Optional[str] = None,
+        min_trades_per_variant: int = 30,
+    ) -> Dict[str, Any]:
+        """
+        Computes per-variant performance metrics from closed ghost trades.
+        Returns bootstrap p-value (1000 resamples) for Sharpe comparison vs legacy.
+        """
+        import random
+        import math
+
+        where = "WHERE status != 'OPEN' AND closed_at >= NOW() - ($1 || ' days')::interval"
+        params: list = [since_days]
+        if engine_id:
+            where += " AND engine_id = $2"
+            params.append(engine_id)
+
+        query = f"""
+            SELECT variant_label, engine_id, pnl_usd, pnl_pct,
+                   entry_price, stop_price, stake_usd
+            FROM tr_ghost_trades
+            {where}
+            ORDER BY variant_label, opened_at DESC
+        """
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(query, *params)
+
+        # Group returns by variant
+        by_variant: Dict[str, list] = {}
+        by_engine: Dict[str, Dict[str, list]] = {}
+        for row in rows:
+            vlabel = str(row["variant_label"] or "legacy")
+            pnl_pct = float(row["pnl_pct"]) if row["pnl_pct"] is not None else None
+            if pnl_pct is None:
+                continue
+            by_variant.setdefault(vlabel, []).append(pnl_pct)
+            eng = str(row["engine_id"])
+            by_engine.setdefault(eng, {}).setdefault(vlabel, []).append(pnl_pct)
+
+        def _metrics(returns: list) -> Dict[str, Any]:
+            if not returns:
+                return {"n_trades_closed": 0, "win_rate": None, "avg_pnl_pct": None,
+                        "sharpe_ratio": None, "avg_r_multiple": None, "expectancy_r": None}
+            n = len(returns)
+            wins = sum(1 for r in returns if r > 0)
+            avg = sum(returns) / n
+            std = math.sqrt(sum((r - avg) ** 2 for r in returns) / n) if n > 1 else 0.0
+            sharpe = avg / std if std > 0 else 0.0
+            return {
+                "n_trades_closed": n,
+                "win_rate": round(wins / n, 4),
+                "avg_pnl_pct": round(avg, 6),
+                "sharpe_ratio": round(sharpe, 4),
+                "avg_r_multiple": round(avg, 6),
+                "expectancy_r": round(avg, 6),
+            }
+
+        def _bootstrap_sharpe_pvalue(base_returns: list, variant_returns: list, n_resamples: int = 1000) -> float:
+            if len(base_returns) < 5 or len(variant_returns) < 5:
+                return 1.0
+            rng = random.Random(42)
+
+            def sharpe(rs: list) -> float:
+                if len(rs) < 2:
+                    return 0.0
+                m = sum(rs) / len(rs)
+                s = math.sqrt(sum((r - m) ** 2 for r in rs) / len(rs))
+                return m / s if s > 0 else 0.0
+
+            observed_diff = sharpe(variant_returns) - sharpe(base_returns)
+            combined = base_returns + variant_returns
+            count_extreme = 0
+            for _ in range(n_resamples):
+                rng.shuffle(combined)
+                half = len(base_returns)
+                diff = sharpe(combined[:half]) - sharpe(combined[half:])
+                if abs(diff) >= abs(observed_diff):
+                    count_extreme += 1
+            return round(count_extreme / n_resamples, 4)
+
+        variants_out: Dict[str, Any] = {}
+        for vlabel, returns in by_variant.items():
+            variants_out[vlabel] = _metrics(returns)
+
+        # Ensure all known variants appear
+        for vlabel in ("legacy", "zones_nearest", "zones_weighted"):
+            if vlabel not in variants_out:
+                variants_out[vlabel] = _metrics([])
+
+        legacy_returns = by_variant.get("legacy", [])
+        statistical: Dict[str, Any] = {"min_required": min_trades_per_variant}
+        can_decide = all(
+            m["n_trades_closed"] >= min_trades_per_variant
+            for m in variants_out.values()
+        )
+        statistical["can_decide"] = can_decide
+
+        for vlabel in ("zones_nearest", "zones_weighted"):
+            v_returns = by_variant.get(vlabel, [])
+            if can_decide:
+                p = _bootstrap_sharpe_pvalue(legacy_returns, v_returns)
+                statistical[f"sharpe_delta_{vlabel}_vs_legacy"] = round(
+                    (variants_out[vlabel].get("sharpe_ratio") or 0.0)
+                    - (variants_out["legacy"].get("sharpe_ratio") or 0.0), 4
+                )
+                statistical[f"sharpe_bootstrap_p_value_{vlabel}"] = p
+            else:
+                statistical[f"sharpe_delta_{vlabel}_vs_legacy"] = None
+                statistical[f"sharpe_bootstrap_p_value_{vlabel}"] = None
+        statistical["sample_size_adequate"] = can_decide
+
+        # Per-engine breakdown
+        per_engine: Dict[str, Any] = {}
+        for eng, vmap in by_engine.items():
+            per_engine[eng] = {vlabel: _metrics(rets) for vlabel, rets in vmap.items()}
+
+        return {
+            "window_days": since_days,
+            "variants": variants_out,
+            "statistical_comparison": statistical,
+            "per_engine_breakdown": per_engine,
+        }
 
     async def close_ghost_trade(
         self,
