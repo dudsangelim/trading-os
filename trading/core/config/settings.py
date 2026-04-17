@@ -299,7 +299,7 @@ ENGINE_ROLES: Dict[str, str] = {
     "m1_eth": "ARCHIVED",  # archived 2026-04-17 — see trading/research_log/m1_eth_autopsy_2026-04-17.md
     "m2_btc": "ARCHIVED",  # archived 2026-04-17 — see trading/research_log/m2_btc_autopsy_2026-04-17.md
     "m3_sol": "ACTIVE",
-    "m3_eth_shadow": "SIGNAL_ONLY",
+    "m3_eth_shadow": "ACTIVE",  # promoted 2026-04-17 — see trading/docs/engine_specs/m3_eth_shadow_SPEC.md
     "cn1_oi_divergence": "SIGNAL_ONLY",
     "cn2_taker_momentum": "SIGNAL_ONLY",
     "cn3_funding_reversal": "SIGNAL_ONLY",
