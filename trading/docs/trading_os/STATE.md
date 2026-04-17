@@ -1,6 +1,40 @@
 # Trading OS State
 
-Updated: 2026-04-14 (Phase F.5)
+Updated: 2026-04-17 (Engine Archival — m1_eth, m2_btc)
+
+## Runtime State After Engine Archival (2026-04-17)
+
+- `m1_eth` and `m2_btc` archived (role: ARCHIVED) — structural negative expectancy confirmed by backtest audit.
+  - m1_eth: 502 trades, WR 30.9% vs 49.2% break-even, Net PnL -$287.78
+  - m2_btc: 3395 trades, WR 24.5% vs 61.1% break-even, Net PnL -$961.62
+  - Autópsias: `trading/research_log/m1_eth_autopsy_2026-04-17.md`, `trading/research_log/m2_btc_autopsy_2026-04-17.md`
+- Added ARCHIVED role to ENGINE_ROLES; worker skips ARCHIVED engines (same guard as EXPERIMENTAL).
+- Promotion criteria for TF ≤ 15m setups formalized in DECISIONS.md D-01.
+
+### Engines por role (2026-04-17)
+
+| Engine | Role |
+|--------|------|
+| m1_eth | ARCHIVED |
+| m2_btc | ARCHIVED |
+| m3_sol | ACTIVE |
+| m3_eth_shadow | SIGNAL_ONLY |
+| cn1_oi_divergence | SIGNAL_ONLY |
+| cn2_taker_momentum | SIGNAL_ONLY |
+| cn3_funding_reversal | SIGNAL_ONLY |
+| cn4_liquidation_cascade | SIGNAL_ONLY |
+| cn5_squeeze_zone | SIGNAL_ONLY |
+| carry_neutral_btc | ACTIVE (CARRY_NEUTRAL_ENABLED=false) |
+
+## Runtime State After Carry Neutral + Cleanup (2026-04-17)
+
+- `carry_neutral_btc` engine added. CARRY_NEUTRAL_ENABLED=false by default.
+- `carry_worker` is a new autonomous loop (5-min interval, 8h funding cycle logic).
+- `ENGINE_ROLES` is the canonical engine role registry in `settings.py`.
+- `/system/status` now exposes `role` per engine.
+- Worker enforces SIGNAL_ONLY and EXPERIMENTAL roles at the architectural loop level.
+- Engines cn1-cn5 and m3_eth_shadow remain registered as SIGNAL_ONLY.
+- `tr_paper_trades` extended with carry columns (trade_type, spot/perp prices, funding fields).
 
 ## Canonical Baseline
 
