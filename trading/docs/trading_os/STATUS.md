@@ -65,6 +65,16 @@ Updated: 2026-04-14
 - `core/monitoring/operational_readiness.py` — defensive json.loads fallback for payload field
 - `core/monitoring/healthcheck.py` — same defensive fallback
 
+## Engine Promotion: m3_eth_shadow → ACTIVE (2026-04-17)
+
+- `m3_eth_shadow` promoted from SIGNAL_ONLY to ACTIVE.
+- Conservative fill mode: `ZONE_SWEEP_THRESHOLD_BPS=5` in `m3_eth_shadow.py`.
+  Signal fires only if price sweeps zone by ≥5bps on entry bar.
+- `risk_per_trade_pct=0.015` (50% of standard) — pending N≥30 real trades for WR validation.
+- `signal_only` flag cleared in `ENGINE_CONFIGS`. `ENGINE_ROLES` set to `"ACTIVE"`.
+- Spec + auto-review criteria: `trading/docs/engine_specs/m3_eth_shadow_SPEC.md`.
+- Commits in order: 096cddc (logic) → 9381345 (sizing) → c7a1a83 (spec) → a0eb537 (role).
+
 ## Engine Archival (2026-04-17)
 
 - `m1_eth` archived: role changed to ARCHIVED. Backtest audit (502 trades) confirmed structural negative expectancy. See `trading/research_log/m1_eth_autopsy_2026-04-17.md`.

@@ -1,6 +1,14 @@
 # Trading OS State
 
-Updated: 2026-04-17 (Engine Archival — m1_eth, m2_btc)
+Updated: 2026-04-17 (m3_eth_shadow promoted to ACTIVE)
+
+## Runtime State After m3_eth_shadow Promotion (2026-04-17)
+
+- `m3_eth_shadow` promoted from SIGNAL_ONLY → ACTIVE.
+- Conservative fill logic added: signal fires only when `bar.low ≤ comp_high × (1-5bps) AND bar.close > comp_high` (LONG); espelhado (SHORT).
+- `risk_per_trade_pct = 0.015` (50% do padrão) até N ≥ 30 trades reais.
+- Spec e critérios de revisão: `trading/docs/engine_specs/m3_eth_shadow_SPEC.md`.
+- Base estatística: backtest conservador N=77, WR 64.9%, edge +17 p.p.
 
 ## Runtime State After Engine Archival (2026-04-17)
 
@@ -18,7 +26,7 @@ Updated: 2026-04-17 (Engine Archival — m1_eth, m2_btc)
 | m1_eth | ARCHIVED |
 | m2_btc | ARCHIVED |
 | m3_sol | ACTIVE |
-| m3_eth_shadow | SIGNAL_ONLY |
+| m3_eth_shadow | ACTIVE (conservative fill, stake 50%) |
 | cn1_oi_divergence | SIGNAL_ONLY |
 | cn2_taker_momentum | SIGNAL_ONLY |
 | cn3_funding_reversal | SIGNAL_ONLY |
