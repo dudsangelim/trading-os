@@ -27,6 +27,7 @@ Endpoints:
   GET  /operator/shadow-filter-report          ← Phase G shadow filter evaluation report
   GET  /operator/zone-comparison-report        ← Phase 4 ghost trade variant comparison
   GET  /operator/fill-stats?engine_id=&hours=  ← fill decision counters (skip event aggregation)
+  GET  /operator/cost-tracker?period_days=     ← gross/fees/slippage/net per engine (7|30|90 days)
 """
 from __future__ import annotations
 
@@ -48,6 +49,7 @@ from trading.core.config.settings import (
     DERIVATIVES_DATABASE_URL,
     DERIVATIVES_ENABLED,
     DERIVATIVES_FEATURE_ADAPTER_ENABLED,
+    ENGINE_CONFIGS,
     OPERATOR_TOKEN,
 )
 from trading.core.monitoring.healthcheck import build_system_status, healthcheck
@@ -945,6 +947,151 @@ async def operator_fill_stats(
                 else None,
                 "skip_breakdown": summary,
                 "note": "skip_events populated since worker deploy with fill observability patch",
+            }
+        )
+    )
+
+
+@app.get("/operator/cost-tracker")
+async def operator_cost_tracker(
+    x_operator_token: Optional[str] = Header(default=None),
+    period_days: int = Query(default=30, ge=1, le=90),
+):
+    """
+    Cost tracker per engine — gross PnL, fees, slippage, net PnL for closed trades.
+
+    gross_pnl_usd: price movement × leverage, computed from stored entry/exit prices
+                   (post entry-slippage, pre fees — matches position_manager's "gross")
+    fees_usd:      exact back-calculation (gross - pnl_usd); covers all fee friction
+    slippage_usd:  estimated from engine slippage_bps config (already absorbed into
+                   entry_price, reported separately for transparency)
+    net_pnl_usd:   pnl_usd as stored — what was actually earned
+
+    Accepts period_days = 7 | 30 | 90 (default 30).
+    """
+    _check_operator_token(x_operator_token)
+    assert _pool is not None, "Pool not initialised"
+
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=period_days)
+
+    # Slippage bps per engine from config (fallback 5)
+    slip_bps: Dict[str, int] = {
+        eid: cfg.slippage_bps for eid, cfg in ENGINE_CONFIGS.items()
+    }
+    fee_bps: int = 10  # Binance taker per side — same for all engines
+
+    async with _pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT
+                engine_id,
+                direction,
+                entry_price,
+                exit_price,
+                stake_usd,
+                pnl_usd
+            FROM tr_paper_trades
+            WHERE status = 'CLOSED'
+              AND closed_at >= $1
+              AND exit_price  IS NOT NULL
+              AND entry_price IS NOT NULL
+              AND entry_price > 0
+              AND pnl_usd     IS NOT NULL
+            ORDER BY engine_id, closed_at
+            """,
+            since,
+        )
+
+    # Aggregate per engine
+    agg: Dict[str, Dict[str, Any]] = {}
+    for r in rows:
+        eid = r["engine_id"]
+        if eid not in agg:
+            agg[eid] = {
+                "n_trades": 0,
+                "gross_pnl_usd": 0.0,
+                "fees_usd": 0.0,
+                "slippage_usd": 0.0,
+                "net_pnl_usd": 0.0,
+            }
+        entry = float(r["entry_price"])
+        exit_p = float(r["exit_price"])
+        stake = float(r["stake_usd"])
+        pnl = float(r["pnl_usd"])
+        direction = r["direction"].upper()
+
+        direction_factor = 1.0 if direction == "LONG" else -1.0
+        gross = (exit_p - entry) / entry * direction_factor * stake
+        fees = gross - pnl          # exact back-calculation
+        slippage_est = stake * slip_bps.get(eid, 5) / 10000.0
+
+        agg[eid]["n_trades"] += 1
+        agg[eid]["gross_pnl_usd"] += gross
+        agg[eid]["fees_usd"] += fees
+        agg[eid]["slippage_usd"] += slippage_est
+        agg[eid]["net_pnl_usd"] += pnl
+
+    # Format per-engine output
+    def _engine_summary(eid: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        gross = data["gross_pnl_usd"]
+        fees = data["fees_usd"]
+        slip = data["slippage_usd"]
+        net = data["net_pnl_usd"]
+        total_cost = fees + slip
+        n = data["n_trades"]
+        cost_pct = round(total_cost / gross * 100, 1) if gross != 0 else "N/A (gross=0)"
+        return {
+            "n_trades": n,
+            "gross_pnl_usd": round(gross, 2),
+            "fees_usd": round(fees, 2),
+            "slippage_usd": round(slip, 2),
+            "total_cost_usd": round(total_cost, 2),
+            "net_pnl_usd": round(net, 2),
+            "cost_as_pct_of_gross": cost_pct,
+            "avg_cost_per_trade_usd": round(total_cost / n, 2) if n > 0 else 0.0,
+        }
+
+    engines_out: Dict[str, Any] = {}
+    # Include all known engines, even with 0 trades
+    for eid in sorted(ENGINE_CONFIGS.keys()):
+        if eid in agg:
+            engines_out[eid] = _engine_summary(eid, agg[eid])
+        else:
+            engines_out[eid] = {
+                "n_trades": 0, "gross_pnl_usd": 0.0, "fees_usd": 0.0,
+                "slippage_usd": 0.0, "total_cost_usd": 0.0, "net_pnl_usd": 0.0,
+                "cost_as_pct_of_gross": "N/A (no trades)", "avg_cost_per_trade_usd": 0.0,
+            }
+
+    # Totals
+    total_n = sum(d["n_trades"] for d in agg.values())
+    total_gross = sum(d["gross_pnl_usd"] for d in agg.values())
+    total_fees = sum(d["fees_usd"] for d in agg.values())
+    total_slip = sum(d["slippage_usd"] for d in agg.values())
+    total_net = sum(d["net_pnl_usd"] for d in agg.values())
+
+    return JSONResponse(
+        _jsonify(
+            {
+                "period_days": period_days,
+                "period_start": since.isoformat(),
+                "period_end": now.isoformat(),
+                "engines": engines_out,
+                "totals": {
+                    "n_trades": total_n,
+                    "total_gross": round(total_gross, 2),
+                    "total_fees": round(total_fees, 2),
+                    "total_slippage_est": round(total_slip, 2),
+                    "total_cost": round(total_fees + total_slip, 2),
+                    "total_net": round(total_net, 2),
+                },
+                "methodology": {
+                    "gross_pnl": "price movement from stored entry/exit (post entry-slippage, pre fees)",
+                    "fees_usd": "exact back-calculation: gross - pnl_usd",
+                    "slippage_usd": "estimated from engine slippage_bps config, already absorbed into entry_price",
+                    "carry_neutral_btc": "pnl_usd used directly; carry trades have separate fee structure",
+                },
             }
         )
     )
