@@ -90,6 +90,39 @@ services:
       retries: 3
       start_period: 30s
 
+  # carry_worker: autonomous 5-min loop for carry_neutral_btc (delta-neutral funding)
+  # Disabled by default via CARRY_NEUTRAL_ENABLED=false — enable to start paper trading
+  trading-carry-worker:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.worker
+    container_name: trading_carry_worker
+    restart: unless-stopped
+    command: ["python", "-m", "trading.apps.carry_worker.main"]
+    environment:
+      # jarvis_postgres alias (jarvis_net) — unambiguous; avoids DNS conflict with trading_net's postgres
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@jarvis_postgres:5432/${POSTGRES_DB:-jarvis}
+      - DERIVATIVES_ENABLED=${DERIVATIVES_ENABLED:-true}
+      - DERIVATIVES_FEATURE_ADAPTER_ENABLED=${DERIVATIVES_FEATURE_ADAPTER_ENABLED:-true}
+      - DERIVATIVES_DATABASE_URL=${DERIVATIVES_DATABASE_URL:-}
+      - CARRY_NEUTRAL_ENABLED=${CARRY_NEUTRAL_ENABLED:-false}
+      - CARRY_NEUTRAL_VARIANT=${CARRY_NEUTRAL_VARIANT:-sell_accrual}
+      - CARRY_NEUTRAL_STAKE_USD=${CARRY_NEUTRAL_STAKE_USD:-300}
+      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trading_net
+      - jarvis_net
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   trading-api:
     build:
       context: .
@@ -99,7 +132,8 @@ services:
     ports:
       - "127.0.0.1:8091:8090"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@postgres:5432/${POSTGRES_DB:-jarvis}
+      # jarvis_postgres alias (jarvis_net) — unambiguous; avoids DNS conflict with trading_net's postgres
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-jarvispass}@jarvis_postgres:5432/${POSTGRES_DB:-jarvis}
       - DERIVATIVES_ENABLED=${DERIVATIVES_ENABLED:-true}
       - DERIVATIVES_FEATURE_ADAPTER_ENABLED=${DERIVATIVES_FEATURE_ADAPTER_ENABLED:-true}
       - ENGINE_DERIVATIVES_ADVISORY_ENABLED=${ENGINE_DERIVATIVES_ADVISORY_ENABLED:-true}
@@ -113,6 +147,7 @@ services:
         condition: service_healthy
     networks:
       - trading_net
+      - jarvis_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
       interval: 30s
@@ -127,3 +162,6 @@ networks:
   trading_net:
     name: trading_net
     driver: bridge
+  jarvis_net:
+    name: jarvis_net
+    external: true
