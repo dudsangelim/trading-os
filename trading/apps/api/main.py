@@ -28,6 +28,7 @@ Endpoints:
   GET  /operator/zone-comparison-report        ← Phase 4 ghost trade variant comparison
   GET  /operator/fill-stats?engine_id=&hours=  ← fill decision counters (skip event aggregation)
   GET  /operator/cost-tracker?period_days=     ← gross/fees/slippage/net per engine (7|30|90 days)
+  GET  /operator/exposure                      ← cross-engine notional exposure by asset/direction/engine
 """
 from __future__ import annotations
 
@@ -1092,6 +1093,152 @@ async def operator_cost_tracker(
                     "slippage_usd": "estimated from engine slippage_bps config, already absorbed into entry_price",
                     "carry_neutral_btc": "pnl_usd used directly; carry trades have separate fee structure",
                 },
+            }
+        )
+    )
+
+
+@app.get("/operator/exposure")
+async def operator_exposure(
+    x_operator_token: Optional[str] = Header(default=None),
+):
+    """
+    Cross-engine exposure aggregator — notional breakdown by asset, direction, and engine.
+
+    notional_usd: stake_usd × leverage (entry_price proxy; ±1% typical error vs current price).
+    Alerting: log-only warning if total_notional / account_equity > EXPOSURE_ALERT_THRESHOLD_PCT.
+    No enforcement — observability only.
+
+    Equity source priority:
+      1. tr_daily_equity (sum of most recent ending_equity per engine)
+      2. ACCOUNT_EQUITY_USD env var
+      3. sum of initial_capital_usd across ENGINE_CONFIGS (static fallback)
+    """
+    import logging as _logging
+
+    _check_operator_token(x_operator_token)
+    assert _pool is not None, "Pool not initialised"
+
+    now = datetime.now(timezone.utc)
+    leverage_map: Dict[str, int] = {eid: cfg.leverage for eid, cfg in ENGINE_CONFIGS.items()}
+    alert_threshold_pct = float(os.environ.get("EXPOSURE_ALERT_THRESHOLD_PCT", "50.0"))
+
+    async with _pool.acquire() as conn:
+        open_rows = await conn.fetch(
+            """
+            SELECT engine_id, symbol, direction, entry_price, stake_usd, opened_at
+            FROM tr_paper_trades
+            WHERE status = 'OPEN'
+            ORDER BY opened_at
+            """,
+        )
+        equity_rows = await conn.fetch(
+            """
+            SELECT DISTINCT ON (engine_id) engine_id, ending_equity
+            FROM tr_daily_equity
+            WHERE ending_equity IS NOT NULL
+            ORDER BY engine_id, date_utc DESC
+            """,
+        )
+
+    # Resolve account equity
+    equity_by_engine: Dict[str, float] = {
+        r["engine_id"]: float(r["ending_equity"]) for r in equity_rows
+    }
+    total_equity_from_db = sum(equity_by_engine.values())
+    account_equity_env = float(os.environ.get("ACCOUNT_EQUITY_USD", "0"))
+    if total_equity_from_db > 0:
+        total_equity_usd = total_equity_from_db
+        equity_source = "tr_daily_equity (sum of latest ending_equity per engine)"
+    elif account_equity_env > 0:
+        total_equity_usd = account_equity_env
+        equity_source = "ACCOUNT_EQUITY_USD env var"
+    else:
+        total_equity_usd = sum(cfg.initial_capital_usd for cfg in ENGINE_CONFIGS.values())
+        equity_source = "initial_capital_usd sum (fallback — no live equity data)"
+
+    # Build aggregates
+    by_asset: Dict[str, Dict[str, Any]] = {}
+    by_engine: List[Dict[str, Any]] = []
+    total_notional = 0.0
+
+    for r in open_rows:
+        eid = r["engine_id"]
+        symbol = r["symbol"]
+        direction = r["direction"].upper()
+        stake = float(r["stake_usd"])
+        entry = float(r["entry_price"])
+        lev = leverage_map.get(eid, 1)  # delta-neutral engines (e.g. carry_neutral_btc) default to 1
+        notional = stake * lev
+
+        opened_at = r["opened_at"]
+        if opened_at.tzinfo is None:
+            opened_at = opened_at.replace(tzinfo=timezone.utc)
+        age_minutes = round((now - opened_at).total_seconds() / 60, 1)
+
+        total_notional += notional
+
+        if symbol not in by_asset:
+            by_asset[symbol] = {
+                "long_notional_usd": 0.0,
+                "short_notional_usd": 0.0,
+                "net_notional_usd": 0.0,
+                "n_positions": 0,
+            }
+        if direction == "LONG":
+            by_asset[symbol]["long_notional_usd"] += notional
+        else:
+            by_asset[symbol]["short_notional_usd"] += notional
+        by_asset[symbol]["n_positions"] += 1
+
+        by_engine.append({
+            "engine_id": eid,
+            "symbol": symbol,
+            "direction": direction,
+            "notional_usd": round(notional, 2),
+            "stake_usd": round(stake, 2),
+            "leverage": lev,
+            "entry_price": round(entry, 4),
+            "age_minutes": age_minutes,
+            "opened_at": opened_at.isoformat(),
+        })
+
+    for sym in by_asset:
+        long_n = by_asset[sym]["long_notional_usd"]
+        short_n = by_asset[sym]["short_notional_usd"]
+        by_asset[sym]["net_notional_usd"] = round(long_n - short_n, 2)
+        by_asset[sym]["long_notional_usd"] = round(long_n, 2)
+        by_asset[sym]["short_notional_usd"] = round(short_n, 2)
+
+    exposure_pct = round(total_notional / total_equity_usd * 100, 2) if total_equity_usd > 0 else 0.0
+    alert_triggered = exposure_pct > alert_threshold_pct
+
+    if alert_triggered:
+        _logging.warning(
+            "EXPOSURE_ALERT: total_notional=%.2f total_equity=%.2f exposure_pct=%.1f%% threshold=%.1f%%",
+            total_notional, total_equity_usd, exposure_pct, alert_threshold_pct,
+        )
+
+    return JSONResponse(
+        _jsonify(
+            {
+                "timestamp": now.isoformat(),
+                "open_positions": len(by_engine),
+                "total_notional_usd": round(total_notional, 2),
+                "by_asset": by_asset,
+                "by_engine": by_engine,
+                "equity": {
+                    "total_equity_usd": round(total_equity_usd, 2),
+                    "source": equity_source,
+                    "exposure_pct": exposure_pct,
+                    "alert_threshold_pct": alert_threshold_pct,
+                    "alert_triggered": alert_triggered,
+                },
+                "caveats": [
+                    "notional_usd = stake_usd × leverage (entry_price proxy; ±1% typical error vs current price)",
+                    "correlation risk not quantified — same-asset positions across engines are not netted",
+                    "equity from tr_daily_equity.ending_equity (latest UTC date per engine); may lag intraday PnL by up to 24h",
+                ],
             }
         )
     )
