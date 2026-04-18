@@ -932,6 +932,18 @@ async def _process_engine(
             return
 
         if signal_obj is None:
+            skip_payload = ctx.extra.get("skip_reason")
+            if skip_payload:
+                try:
+                    await repo.insert_skip_event(
+                        engine_id=engine_id,
+                        symbol=cfg.symbol,
+                        bar_timestamp=bar_open,
+                        reason=skip_payload.get("reason", "UNKNOWN"),
+                        details={k: v for k, v in skip_payload.items() if k != "reason"},
+                    )
+                except Exception:
+                    pass  # never block the loop on observability writes
             await _set_engine_heartbeat(repo, engine_id, "OK", last_bar_at=bar_open, now=now)
             return
 
