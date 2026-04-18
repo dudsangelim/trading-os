@@ -76,6 +76,56 @@ Plano para consolidação futura (ordem):
 
 ---
 
+## 2026-04-18 — Observabilidade operacional adicionada (RESOLVIDO)
+
+Três endpoints de observabilidade implementados:
+- GET /operator/fill-stats?engine_id=&hours= (skip events per reason)
+- GET /operator/cost-tracker?period_days= (gross/fees/slippage/net por engine)
+- GET /operator/exposure (notional agregado cross-engine + alerta 50%)
+
+Split-brain de deploy resolvido no mesmo ciclo:
+- trading_carry_worker e trading_api agora em jarvis_net + trading_net
+- DATABASE_URL usa alias jarvis_postgres (não postgres) para eliminar
+  ambiguidade de DNS entre as duas redes
+- 10 engines agora consolidados em jarvis_postgres
+- trading_postgres ficou órfão (zero writers, zero readers) e pode
+  ser desativado quando TD-002 for executado
+
+Commits: ac626f7 (split-brain fix), 28a1bcb (exposure), 1fd3e12
+(fill-stats), 1bb106d (cost-tracker).
+
+---
+
+## TD-004 — trading_postgres órfão (baixa prioridade)
+
+Após a correção do split-brain em 2026-04-18, o container
+trading_postgres não tem mais nenhum writer nem reader. Pode ser
+desativado sem impacto. Decisão de não remover agora: baixo custo
+operacional de manter rodando vs risco de quebrar algo inesperado
+(ex: algum script esquecido em /home/agent/ que conectava lá).
+
+Plano: remover no ciclo de TD-002 (consolidação de deploy), quando
+a arquitetura de stacks vai ser repensada por completo.
+
+---
+
+## TD-005 — Exposure enforcement pendente
+
+O endpoint /operator/exposure implementa apenas visibilidade.
+Enforcement (kill switch ao ultrapassar threshold) não foi
+implementado. Requer:
+- 1-2 meses de observação para entender distribuição real de
+  notional agregado
+- Decisão de design sobre correlação entre BTC/ETH/SOL em stress events
+- Política de intervenção (fechar qual posição? qual engine tem
+  prioridade? stop total?)
+
+Prioridade: média. Não urgente porque hoje o volume agregado é baixo
+(4 engines ACTIVE, stakes modestos), mas vira crítico se o sistema
+crescer.
+
+---
+
 ## TD-003 — Ghost trades mistos pré/pós-rebuild (RESOLVIDO apenas pela documentação)
 
 Em 2026-04-18 rebuild, o overlay_worker migrou de evaluator single-variant para multi-variant. Implicação:
