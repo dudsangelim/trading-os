@@ -28,6 +28,7 @@ import json
 import logging
 import os
 import signal
+import subprocess
 import sys
 from datetime import date, datetime, timezone
 from typing import Any, Dict, List, Optional, Set
@@ -1118,9 +1119,33 @@ async def _process_engine(
 _registry: Dict[str, Any] = {}
 
 
+def _log_startup_version() -> None:
+    try:
+        repo_root = os.path.dirname(os.path.abspath(__file__))
+        git_hash = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_root,
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+    except Exception:
+        git_hash = "UNKNOWN (no git in container)"
+
+    by_role: Dict[str, list] = {}
+    for engine_id, role in ENGINE_ROLES.items():
+        by_role.setdefault(role, []).append(engine_id)
+
+    log(
+        "worker",
+        "startup_version",
+        git_hash=git_hash,
+        engine_roles=by_role,
+    )
+
+
 async def main() -> None:
     global _registry, _global_blocked_since, _derivatives_pool
 
+    _log_startup_version()
     log("worker", "startup_begin")
 
     async def _init_conn(conn: asyncpg.Connection) -> None:
