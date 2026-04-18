@@ -26,6 +26,7 @@ Endpoints:
   GET  /operator/derivatives-readiness         ← derivatives value/readiness
   GET  /operator/shadow-filter-report          ← Phase G shadow filter evaluation report
   GET  /operator/zone-comparison-report        ← Phase 4 ghost trade variant comparison
+  GET  /operator/fill-stats?engine_id=&hours=  ← fill decision counters (skip event aggregation)
 """
 from __future__ import annotations
 
@@ -33,7 +34,7 @@ import os
 import sys
 import json
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 import asyncpg
@@ -613,7 +614,6 @@ async def operator_shadow_filter_report(
     risk_payload = await _build_risk_events_payload(repo, limit=events_limit)
     all_risk_events = risk_payload.get("risk_events", [])
 
-    from datetime import timedelta
     cutoff = now - timedelta(hours=lookback_hours)
 
     def _parse_dt(v: Any) -> Optional[datetime]:
@@ -808,3 +808,143 @@ async def operator_zone_comparison_report(
         min_trades_per_variant=min_trades_per_variant,
     )
     return JSONResponse(_jsonify(stats))
+
+
+@app.get("/operator/carry-status")
+async def operator_carry_status(
+    x_operator_token: Optional[str] = Header(default=None),
+):
+    """
+    Carry Neutral BTC engine status.
+
+    Returns current carry position (or null if none), recent carry risk events,
+    and current configuration flags.
+    """
+    _check_operator_token(x_operator_token)
+    assert _pool is not None, "Pool not initialised"
+    from trading.core.config.settings import (
+        CARRY_NEUTRAL_ENABLED,
+        CARRY_NEUTRAL_MAX_HOLD_HOURS,
+        CARRY_NEUTRAL_STAKE_USD,
+        CARRY_NEUTRAL_THRESHOLD_LOWER_ANNUALIZED,
+        CARRY_NEUTRAL_THRESHOLD_UPPER_ANNUALIZED,
+        CARRY_NEUTRAL_VARIANT,
+    )
+
+    repo = TradingRepository(_pool, derivatives_pool=_derivatives_pool)
+    now = datetime.now(timezone.utc)
+
+    open_position = await repo.get_open_carry_position("carry_neutral_btc")
+    recent_risk = await repo.get_risk_events(limit=200)
+    carry_events = [
+        e for e in recent_risk
+        if (e.get("event_type") or "").startswith("CARRY_NEUTRAL")
+    ][:20]
+
+    heartbeats = await repo.get_heartbeats()
+    carry_heartbeat = next(
+        (h for h in heartbeats if h.get("engine_id") == "carry_neutral_btc"),
+        None,
+    )
+
+    return JSONResponse(
+        _jsonify(
+            {
+                "timestamp": now.isoformat(),
+                "config": {
+                    "carry_neutral_enabled": CARRY_NEUTRAL_ENABLED,
+                    "threshold_upper_annualized": CARRY_NEUTRAL_THRESHOLD_UPPER_ANNUALIZED,
+                    "threshold_lower_annualized": CARRY_NEUTRAL_THRESHOLD_LOWER_ANNUALIZED,
+                    "max_hold_hours": CARRY_NEUTRAL_MAX_HOLD_HOURS,
+                    "stake_usd": CARRY_NEUTRAL_STAKE_USD,
+                    "variant": CARRY_NEUTRAL_VARIANT,
+                },
+                "open_position": open_position,
+                "heartbeat": carry_heartbeat,
+                "recent_carry_events": carry_events,
+            }
+        )
+    )
+
+
+@app.get("/operator/fill-stats")
+async def operator_fill_stats(
+    x_operator_token: Optional[str] = Header(default=None),
+    engine_id: Optional[str] = Query(default="m3_eth_shadow"),
+    hours: int = Query(default=24, ge=1, le=720),
+):
+    """
+    Fill decision counters — aggregated skip events per reason for an engine.
+
+    Returns counts since `now - hours` (default 24h). Use engine_id=m3_eth_shadow
+    to validate that ZONE_SWEEP_THRESHOLD_BPS is filtering signals as expected.
+
+    Reasons for m3_eth_shadow:
+      NO_PENDING_DIRECT_BREAKOUT   — no 1h breakout pending on this bar
+      TREND_FILTER_FALSE           — breakout existed but 4h trend gate blocked it
+      CONSERVATIVE_FILL_NOT_MET    — breakout + trend ok but sweep threshold not reached
+    """
+    _check_operator_token(x_operator_token)
+    repo = get_repo()
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(hours=hours)
+
+    # Aggregate counts from tr_skip_events
+    async with _pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT reason, COUNT(*) AS count, MAX(created_at) AS last_seen_at
+            FROM tr_skip_events
+            WHERE engine_id = $1
+              AND created_at >= $2
+            GROUP BY reason
+            ORDER BY count DESC
+            """,
+            engine_id,
+            since,
+        )
+
+    summary = [
+        {
+            "reason": r["reason"],
+            "count": r["count"],
+            "last_seen_at": r["last_seen_at"].isoformat() if r["last_seen_at"] else None,
+        }
+        for r in rows
+    ]
+
+    total_skipped = sum(r["count"] for r in summary)
+
+    # Count generated signals in the same window
+    async with _pool.acquire() as conn:
+        sig_row = await conn.fetchrow(
+            """
+            SELECT COUNT(*) AS count
+            FROM tr_signals
+            WHERE engine_id = $1
+              AND created_at >= $2
+            """,
+            engine_id,
+            since,
+        )
+    signals_generated = sig_row["count"] if sig_row else 0
+    total_candidates = total_skipped + signals_generated
+
+    return JSONResponse(
+        _jsonify(
+            {
+                "engine_id": engine_id,
+                "window_hours": hours,
+                "window_start": since.isoformat(),
+                "window_end": now.isoformat(),
+                "signals_generated": signals_generated,
+                "signals_skipped": total_skipped,
+                "total_candidates": total_candidates,
+                "pass_rate_pct": round(signals_generated / total_candidates * 100, 1)
+                if total_candidates > 0
+                else None,
+                "skip_breakdown": summary,
+                "note": "skip_events populated since worker deploy with fill observability patch",
+            }
+        )
+    )
