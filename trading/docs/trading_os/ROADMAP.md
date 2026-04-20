@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-04-14
+Updated: 2026-04-20
 
 ## Phase A — Hardening do Core
 
@@ -128,6 +128,34 @@ Updated: 2026-04-14
 ## Fase 5 (Liquidity Zones) — Validação Estatística
 
 - Status: planned. Statistical evaluation of zone prediction accuracy.
+
+## Carry Neutral BTC — Delta-Neutral Funding Capture
+
+- Status: completed 2026-04-20. CARRY_NEUTRAL_ENABLED=false (ativar quando quiser iniciar paper trading).
+- Delivered:
+  - `core/engines/carry_neutral_btc.py` — `CarryNeutralBtcEngine` with `evaluate_carry()` interface
+  - `core/execution/carry_fill_model.py` — open/funding/close simulation
+  - `apps/carry_worker/main.py` — autonomous 5-min loop (independent of standard worker)
+  - `GET /operator/carry-status` — status endpoint
+  - `tr_paper_trades` extended with carry columns (idempotent migration)
+  - `ENGINE_ROLES` dict in `settings.py` — explicit role declaration for all engines
+  - Worker enforces ENGINE_ROLES at architectural level (SIGNAL_ONLY guard, EXPERIMENTAL skip)
+  - `/system/status` exposes `role` per engine
+  - docker-compose: `trading-carry-worker` service (disabled by default)
+  - 26 unit tests across fill model and engine
+
+## Cleanup de Narrativa — 2026-04-20
+
+- Status: completed 2026-04-20.
+- Delivered:
+  - `ENGINE_ROLES` dict in `settings.py` as single source of truth for engine roles
+  - Worker startup logs role of each engine; enforces SIGNAL_ONLY/EXPERIMENTAL at loop level
+  - `/system/status` `role` field on each engine
+  - README.md engines section rewritten to show ACTIVE/SIGNAL_ONLY clearly
+  - `engine_specs_frozen.md` canonical state section added at top
+  - DECISIONS.md 3 new entries (keep SIGNAL_ONLY engines, carry worker, ENGINE_ROLES)
+  - `cn1-cn5` dead code tagged `# Reserved for future ACTIVE role`
+  - docker-compose comments on service roles
 
 ## Next Phase (Planned)
 
