@@ -134,6 +134,7 @@ class CN4LiquidationCascadeEngine(BaseEngine):
         )
 
     def build_order_plan(self, signal: Signal, bankroll: float) -> OrderPlan:
+        # Reserved for future ACTIVE role
         entry = signal.signal_data.get("price_ref", 0.0) or 0.0
         atr = entry * 0.005  # wider ATR for post-cascade volatility
         stop_dist = 2.0 * atr
@@ -157,4 +158,5 @@ class CN4LiquidationCascadeEngine(BaseEngine):
     def manage_open_position(
         self, position: Position, ctx: EngineContext
     ) -> PositionAction:
+        # Reserved for future ACTIVE role
         return PositionAction.HOLD
