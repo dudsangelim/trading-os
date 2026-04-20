@@ -11,7 +11,9 @@ fi
 CHAT_ID="${TRADING_ALLOWED_USERS:-6127917209}"
 TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-DIFF=$(diff -rq /home/agent/trading-os/trading/ \
+DIFF=$(diff -rq \
+                 --exclude="state" \
+                 /home/agent/trading-os/trading/ \
                  /home/agent/agents/stack/trading/ \
                  2>/dev/null | \
        grep -v "__pycache__" | grep -v ".pyc$" || true)
