@@ -1,3 +1,36 @@
+# Portfólio Trading OS — Estado Canônico
+
+**Atualizado:** 2026-04-20
+
+## Engines ACTIVE (paper trading)
+- M3 SOL: retest, TF 15m com signal em 1h, trend_ok EMA
+- M3 ETH Shadow: direct breakout ajustado (lookback 8, max_width 2.0) — promovida 2026-04-17
+- Carry Neutral BTC: delta-neutral, TF 8h (funding cycle), multi-dia
+
+> **carry_neutral_btc** roda em worker dedicado (`trading-carry-worker`), não passa pelo
+> registry do `trading_worker` principal. A mensagem `ENGINE_ROLE_LOADED` não é emitida
+> para esta engine — o startup log equivalente é `carry_enabled: true` no carry-worker.
+
+## Engines ARCHIVED (código preservado, engine não chamada pelo worker)
+- M1 ETH: compression breakout + HMM regime — arquivada 2026-04-17 (expectancy negativa, ver research_log/)
+- M2 BTC: sweep+reclaim — arquivada 2026-04-17 (expectancy negativa, ver research_log/)
+
+## Engines SIGNAL_ONLY (dataset apenas)
+- CN1-5: experimentos crypto-native shadow
+
+### Como mudar o role de uma engine
+Edite `core/config/settings.py` → `ENGINE_ROLES`.
+Valores válidos: `ACTIVE`, `SIGNAL_ONLY`, `EXPERIMENTAL`, `ARCHIVED`.
+Reinicie o worker. Status é logado no startup e aparece em `/system/status` (campo `role`).
+
+## Decisões de design vigentes
+- HMM em produção: Opção B (modelo fixo, treinamento único), pendente resolução
+- Carry variant: `sell_accrual` (Presto Sharpe 6.71)
+- Overlay aplicado apenas a engines direcionais (m1/m2/m3, não carry)
+- Todas engines `SIGNAL_ONLY` alimentam shadow filter da Fase G
+
+---
+
 # Engine Specs — SPEC FREEZE
 ## Sistema B: Trading em Corretoras / Jarvis Capital Exchange
 **Versão:** 3.0-frozen
