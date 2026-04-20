@@ -19,6 +19,7 @@ import asyncpg
 
 from ..config.settings import (
     ENGINE_CONFIGS,
+    ENGINE_ROLES,
     HEARTBEAT_STALE_MINUTES,
     WORKER_LOOP_INTERVAL_SECONDS,
 )
@@ -237,6 +238,7 @@ async def build_system_status(
                 {
                     "engine_id": engine_id,
                     "symbol": cfg.symbol,
+                    "role": ENGINE_ROLES.get(engine_id, "ACTIVE"),
                     "mode": "SIGNAL_ONLY" if cfg.signal_only else "ACTIVE",
                     "timeframe_minutes": cfg.timeframe_minutes,
                     "heartbeat_status": heartbeat_status,
