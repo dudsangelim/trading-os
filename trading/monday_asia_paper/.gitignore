@@ -1,0 +1,28 @@
+# Runtime state — regenerated automatically, never versioned
+state/
+runner.log
+*.log
+events.csv
+trades.csv
+state.json
+
+# Python environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets — config.json contains real token; use config.example.json as template
+config.json
+config.json.bak
+config.json.pre-*
+.env
+.env.*
+
+# System
+.DS_Store
+Thumbs.db
+
+# Backup do sed
+*.pre-sync-*
+*.pre-rotation-*
