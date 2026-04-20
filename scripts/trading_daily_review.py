@@ -194,7 +194,7 @@ def _section_engines(conn, since: datetime) -> str:
     if not rows:
         return ""
 
-    lines = ["⚙️ <b>Performance por Engine</b>", ""]
+    lines = ["⚙️ <b>Engines</b>", ""]
     for r in rows:
         eid = r["engine_id"]
         total = r["total"]
@@ -206,12 +206,9 @@ def _section_engines(conn, since: datetime) -> str:
         tp = r["tp_count"]
         to_ = r["to_count"]
         emoji = "🟢" if net > 0 else "🔴" if net < 0 else "⚪"
-
-        short_id = eid.replace("_", "")[:10]
         lines.append(
-            f"{emoji} <b>{eid}</b>: {total}t | WR {wr:.0f}% | ${net:+.2f}"
+            f"{emoji} <b>{eid}</b> {total}t WR{wr:.0f}% {net:+.2f} · TP{tp} SL{sl} TO{to_} avg{avg:+.2f}"
         )
-        lines.append(f"   TP:{tp} SL:{sl} TO:{to_} | avg ${avg:+.2f}")
 
     # Engines with zero trades in the period
     active_engines = {r["engine_id"] for r in rows}
@@ -274,20 +271,14 @@ def _section_costs(conn, since: datetime) -> str:
 
     actual_costs = total_gross_pnl - total_net_pnl
     n = len(rows)
+    ratio = actual_costs / total_theoretical_cost if total_theoretical_cost > 0 else 0
 
     lines = [
-        "💰 <b>Custos Reais</b>",
-        "",
-        f"Gross PnL: ${total_gross_pnl:+.2f}",
-        f"Custos totais: ${actual_costs:.2f} ({n} trades)",
-        f"Custo médio/trade: ${actual_costs/n:.2f}" if n else "",
-        f"Teórico esperado: ${total_theoretical_cost:.2f}",
+        "💰 <b>Custos</b>",
+        f"  Gross {total_gross_pnl:+.2f} → fees {actual_costs:.2f} → net {total_net_pnl:+.2f}",
+        f"  Custo/trade ${actual_costs/n:.2f} | Real/Teórico {ratio:.1f}x ({n}t)" if n else "",
     ]
-    if total_theoretical_cost > 0:
-        ratio = actual_costs / total_theoretical_cost
-        lines.append(f"Real/Teórico: {ratio:.1f}x")
-
-    return "\n".join(lines) + "\n"
+    return "\n".join(l for l in lines if l) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -313,10 +304,12 @@ def _section_skips(conn, since: datetime) -> str:
         reason = s["reason"] or "UNKNOWN"
         reason_counts[reason] = reason_counts.get(reason, 0) + 1
 
+    reasons_str = " · ".join(
+        f"{r}:{c}" for r, c in sorted(reason_counts.items(), key=lambda x: -x[1])
+    )
     lines = [
-        "🔍 <b>Skip Analysis</b>",
-        "",
-        f"Total skips: {len(skips)}",
+        "🔍 <b>Skips</b>",
+        f"  {len(skips)} skips: {reasons_str}",
     ]
     for reason, count in sorted(reason_counts.items(), key=lambda x: -x[1]):
         lines.append(f"  • {reason}: {count}")
@@ -595,14 +588,17 @@ def main() -> None:
         return
 
     try:
+        _SEP = "·  ·  ·  ·  ·  ·  ·  ·"
         sections = [
-            f"📋 <b>Trading OS — Daily Review</b>",
-            f"<i>{now.strftime('%d/%m/%Y %H:%M UTC')} | {REVIEW_LOOKBACK_DAYS}d lookback</i>",
+            f"📋 <b>Trading OS — {now.strftime('%d/%m %H:%M UTC')}</b> ({REVIEW_LOOKBACK_DAYS}d)",
             "",
             _section_summary(conn, since),
+            _SEP,
             _section_engines(conn, since),
+            _SEP,
             _section_costs(conn, since),
             _section_skips(conn, since),
+            _SEP,
             _section_exposure(conn, since),
             _section_alerts(conn, since),
             _section_derivatives_quality(),
