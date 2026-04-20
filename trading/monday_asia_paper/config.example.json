@@ -1,0 +1,15 @@
+{
+  "assets": ["BTC", "ETH", "SOL"],
+  "sunday_window_h": 10,
+  "sunday_end_hour_utc": 22,
+  "tp_multiplier": 1.5,
+  "exit_hour_utc": 12,
+  "entry_filter_minutes": 180,
+  "cost_bps_per_side": 3.0,
+  "state_dir": "./state",
+  "telegram": {
+    "enabled": true,
+    "bot_token": "SEU_BOT_TOKEN_AQUI",
+    "chat_id": "SEU_CHAT_ID_AQUI"
+  }
+}
