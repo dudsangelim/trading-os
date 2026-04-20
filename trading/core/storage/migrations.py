@@ -341,6 +341,19 @@ DDL_STATEMENTS = [
     )
     """,
     "CREATE INDEX IF NOT EXISTS idx_tr_trade_comparisons_engine_created ON tr_trade_comparisons (engine_id, created_at DESC)",
+
+    # ------------------------------------------------------------------
+    # Carry Neutral additions to tr_paper_trades (idempotent ALTER)
+    # ------------------------------------------------------------------
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS trade_type TEXT DEFAULT 'directional'",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS spot_entry_price NUMERIC(18,8)",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS perp_entry_price NUMERIC(18,8)",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS spot_exit_price NUMERIC(18,8)",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS perp_exit_price NUMERIC(18,8)",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS funding_accrued_usd NUMERIC(18,8) DEFAULT 0",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS funding_events_count INTEGER DEFAULT 0",
+    "ALTER TABLE tr_paper_trades ADD COLUMN IF NOT EXISTS carry_variant TEXT",
+    "CREATE INDEX IF NOT EXISTS idx_paper_trades_type ON tr_paper_trades(trade_type, engine_id, status)",
 ]
 
 
