@@ -25,6 +25,7 @@ trading_api (read-only) ----> endpoints de status, health, operator repair
 | Servico | Container | Porta | Descricao |
 |---------|-----------|-------|-----------|
 | trading-worker | `trading_worker` | - | Loop principal — 9 engines, 60s/ciclo |
+| trading-carry-worker | `trading_carry_worker` | - | Carry neutral BTC — loop autonomo 5min, funding capture delta-neutral |
 | trading-overlay-worker | `trading_overlay_worker` | - | Avaliacao de liquidez + ghost trades |
 | trading-api | `trading_api` | 8091 | FastAPI read-only + operator endpoints |
 | PostgreSQL 16 | `trading_postgres` | 5432 | Storage principal (tabelas `tr_*`) |
@@ -38,26 +39,36 @@ trading_api (read-only) ----> endpoints de status, health, operator repair
 
 ## Engines
 
-### Classic (15m bars, paper trading)
+O papel de cada engine e declarado explicitamente em `core/config/settings.py → ENGINE_ROLES`.
+Roles: `ACTIVE` (abre paper trades), `SIGNAL_ONLY` (gera sinais apenas), `EXPERIMENTAL` (desabilitada).
 
-| Engine | Par | Estrategia | Timeout |
-|--------|-----|------------|---------|
-| **m1_eth** | ETHUSDT | Compression breakout + HMM regime (4h) | 8 bars |
-| **m2_btc** | BTCUSDT | Compression breakout 24/7 | 6 bars |
-| **m3_sol** | SOLUSDT | Compression breakout | 64 bars |
-| **m3_eth_shadow** | ETHUSDT | Signal-only (teste de regime) | 96 bars |
+### ACTIVE (abrem paper trades)
 
-### Crypto-Native (15m bars, signal-only, usam dados derivativos)
+| Engine | Par | Estrategia | Timeout | Notas |
+|--------|-----|------------|---------|-------|
+| **m3_sol** | SOLUSDT | Retest com trend_ok EMA | 64 bars | Spec frozen |
+| **m3_eth_shadow** | ETHUSDT | Direct ajustado (lookback 8) | 64 bars | Promovida 2026-04-17 |
+| **carry_neutral_btc** | BTCUSDT spot+perp | Delta-neutral funding capture | 168h | Worker dedicado (trading-carry-worker) |
 
-| Engine | Estrategia | Descricao | Timeout |
-|--------|------------|-----------|---------|
-| **cn1_oi_divergence** | OI-price divergence | Preco em alta mas OI caindo = rally fraco | 16 bars |
-| **cn2_taker_momentum** | Taker buy/sell ratio | Agressao de takers no mercado | 8 bars |
-| **cn3_funding_reversal** | Funding rate extremo | Funding >0.10%/8h + reversao de preco | 32 bars |
-| **cn4_liquidation_cascade** | Proximidade de zonas de liquidacao | Preco perto de cluster de liquidacoes | 16 bars |
-| **cn5_squeeze_zone** | BB squeeze + metricas cripto | Breakout de baixa volatilidade | 12 bars |
+### SIGNAL_ONLY (geram sinais, nao abrem trades — para analise e shadow filter)
 
-Todas as engines: **$1000 capital, 3% risco/trade, 10x leverage, $300 stake maximo**.
+| Engine | Estrategia | Proposito |
+|--------|------------|-----------|
+| **cn1_oi_divergence** | OI-price divergence | Shadow dataset para derivatives filter |
+| **cn2_taker_momentum** | Taker buy/sell ratio | Shadow dataset |
+| **cn3_funding_reversal** | Funding rate extremo | Shadow dataset (relacionado ao carry) |
+| **cn4_liquidation_cascade** | Proximidade de zonas | Shadow dataset |
+| **cn5_squeeze_zone** | BB squeeze + metricas cripto | Shadow dataset |
+
+### ARCHIVED (codigo preservado, engine nao executada)
+
+| Engine | Par | Motivo | Evidencia |
+|--------|-----|--------|-----------|
+| **m1_eth** | ETHUSDT | Expectancy negativa — custo round-trip aniquila gross | `research_log/m1_eth_autopsy_2026-04-17.md` |
+| **m2_btc** | BTCUSDT | Expectancy negativa — custo round-trip aniquila gross | `research_log/m2_btc_autopsy_2026-04-17.md` |
+
+Classic engines: **$1000 capital, 3% risco/trade, 10x leverage, $300 stake maximo**.
+Carry: stake fixo $300 por posicao, sem leverage aplicada (delta-neutral).
 
 ## Gestao de Risco
 

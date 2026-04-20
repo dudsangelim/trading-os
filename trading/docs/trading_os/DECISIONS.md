@@ -1,6 +1,27 @@
 # Decisions
 
-Updated: 2026-04-17
+Updated: 2026-04-20
+
+## 2026-04-20 — Bugs de ativação do carry neutral
+
+- **Bug 1:** `DERIVATIVES_DATABASE_URL` não propagada do `.env` para o container por 39h → `derivatives_pool = None` → `NO_FUNDING_DATA` em loop (container `healthy` mas cego). Resolvido com `docker compose up --no-deps -d trading-carry-worker`.
+- **Bug 2:** `_get_funding_rate()` e `_get_funding_history_24h()` em `carry_worker/main.py` consultavam coluna `timestamp`, mas o schema real do derivatives-collector é `funding_time`. Falha silenciosa (exception capturada, retorna None). Corrigido nas duas queries.
+- **Lição:** testes unitários atuais usam mocks e não validam integração com o schema real do derivatives-collector. Considerar teste de integração leve em iteração futura (não escopo desta spec).
+
+## 2026-04-20 — 8 testes pré-existentes failing (backlog)
+
+Identificados durante CLEANUP_NARRATIVE_SPEC. Não introduzidos por este commit (confirmado via `git stash` + rerun). Registrados para backlog.
+
+- `trading/tests/test_close_by_stop.py::test_long_stop_triggered`
+- `trading/tests/test_close_by_stop.py::test_stop_not_triggered_if_price_holds`
+- `trading/tests/test_close_by_target.py::test_short_target_hit`
+- `trading/tests/test_close_by_target.py::test_target_not_hit_if_candle_short`
+- `trading/tests/test_close_by_timeout.py::test_timeout_on_exact_bar`
+- `trading/tests/test_close_by_timeout.py::test_no_timeout_before_limit`
+- `trading/tests/test_close_by_timeout.py::test_timeout_beyond_limit`
+- `trading/tests/test_operational_readiness.py::test_readiness_ready_for_phase_f_when_all_gates_pass`
+
+Módulos afetados: `close_by_stop`, `close_by_target`, `close_by_timeout`, `operational_readiness`. Ação: investigar em iteração futura, fora do escopo desta spec.
 
 ## D-01 (2026-04-17): Setups micro em TF ≤ 15m — critérios de promoção
 
