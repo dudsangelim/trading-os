@@ -28,7 +28,9 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 TRADING_API   = "http://127.0.0.1:8091"
-BOT_TOKEN     = os.environ.get("TELEGRAM_BOT_TOKEN", "8541911949:AAFdM-_MFKSMXd79hprzUPlVxDkItKOUNeo")
+BOT_TOKEN     = os.environ.get("TELEGRAM_BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("TELEGRAM_BOT_TOKEN env var not set")
 CHAT_ID       = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].strip()
 STATE_FILE    = Path("/tmp/trading_watcher_state.json")
 TIMEOUT       = 10

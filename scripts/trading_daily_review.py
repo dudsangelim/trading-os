@@ -44,10 +44,9 @@ DERIV_DB_NAME = os.environ.get("DERIV_DB_NAME", "derivatives_data")
 DERIV_DB_USER = os.environ.get("DERIV_DB_USER", "derivatives")
 DERIV_DB_PASS = os.environ.get("DERIV_DB_PASS", "gerar_senha_forte_aqui_32chars")
 
-BOT_TOKEN = os.environ.get(
-    "TELEGRAM_BOT_TOKEN",
-    "8541911949:AAFdM-_MFKSMXd79hprzUPlVxDkItKOUNeo",
-)
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("TELEGRAM_BOT_TOKEN env var not set")
 CHAT_ID = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].strip()
 
 STATE_FILE = Path("/tmp/trading_daily_review_state.json")
@@ -311,8 +310,6 @@ def _section_skips(conn, since: datetime) -> str:
         "🔍 <b>Skips</b>",
         f"  {len(skips)} skips: {reasons_str}",
     ]
-    for reason, count in sorted(reason_counts.items(), key=lambda x: -x[1]):
-        lines.append(f"  • {reason}: {count}")
 
     # Try to check what happened after skipped signals using 15m candles
     # (retrospective analysis — would the trade have hit TP or SL?)
