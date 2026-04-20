@@ -2,6 +2,38 @@
 
 Updated: 2026-04-20
 
+## 2026-04-20 — Token Telegram exposto em commit inicial 976592a
+
+**Contexto:** Durante auditoria de secrets antes de primeiro push ao origin/main (20 commits locais acumulados), descobrimos que o bot Telegram token estava hardcoded como fallback em múltiplos scripts desde o commit inicial (976592a) do repo público github.com/dudsangelim/trading-os.
+
+**Descobertas:**
+- 4 scripts em trading/scripts/ com padrão VAR="${ENV_VAR:-TOKEN_HARDCODED}"
+- check_deploy_sync.sh commitado em bf3b8d6 (18/04, não pushed)
+- trading_watcher.py e trading_daily_review.py commitados em 976592a (Initial, pushed)
+- Token também em monday_asia_paper/config.json (nunca commitado)
+
+**Ações tomadas:**
+1. Token Telegram antigo revogado via BotFather e substituído por novo token
+2. Novo token distribuído em .env locais (openclaw/.env, stack/.env, monday_asia_paper/config.json)
+3. openclaw_gateway container reiniciado, teste de envio confirmou funcionamento
+4. 4 scripts sanitizados (fallback hardcoded substituído por "fail fast" quando env var ausente)
+5. Rebase local do bf3b8d6 → e0da9d1 removeu token do commit não-pushado
+6. GitHub PAT hardcoded em .git/config removido, migrado para autenticação SSH
+
+**Decisão sobre commit inicial 976592a:**
+NÃO fazer force push para reescrever histórico público. Justificativa:
+- Token antigo está revogado — valor histórico é inerte para autenticação
+- Force push reescreve todos os hashes do repo, invalida clones e forks existentes
+- Benefício real do force push é apenas estético (não vê token em histórico público), pois quem copiou antes da revogação não é afetado
+- Bot Telegram usa chat_id pessoal sem permissões especiais — dano potencial pré-revogação já era limitado
+- Custo operacional do force push é desproporcional ao ganho
+
+**Aprendizados documentados para o futuro:**
+- Auditoria de secrets obrigatória antes de QUALQUER commit novo, não só antes de push
+- Padrão bash ${VAR:-default_hardcoded} é anti-padrão — sempre usar "fail fast" quando env var obrigatória ausente
+- Secrets em config files sempre via .env.example template, nunca config.json direto
+- Auditar .git/config em repo novo (cat .git/config) — PATs hardcoded em URLs de remote são armadilha comum
+
 ## 2026-04-20 — Bugs de ativação do carry neutral
 
 - **Bug 1:** `DERIVATIVES_DATABASE_URL` não propagada do `.env` para o container por 39h → `derivatives_pool = None` → `NO_FUNDING_DATA` em loop (container `healthy` mas cego). Resolvido com `docker compose up --no-deps -d trading-carry-worker`.

@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-04-20 — Carry Neutral BTC + Cleanup de Narrativa
+
+### Carry Neutral BTC (nova engine)
+
+- `core/engines/carry_neutral_btc.py` (new): `CarryNeutralBtcEngine` com interface `evaluate_carry()`. Herda BaseEngine; abstract methods implementados como stubs (Reserved for future ACTIVE role).
+- `core/execution/carry_fill_model.py` (new): `CarryFillModel` com simulate_open / simulate_funding_event / simulate_close.
+- `apps/carry_worker/main.py` (new): worker autônomo, loop 5min, ciclos de funding 8h.
+- `apps/api/main.py`: `GET /operator/carry-status` adicionado.
+- `core/storage/repository.py`: `open_carry_trade`, `update_carry_funding`, `close_carry_trade`, `get_open_carry_position`.
+- `core/storage/migrations.py`: ALTERs idempotentes em `tr_paper_trades` (trade_type, spot/perp prices, funding_accrued_usd, funding_events_count, carry_variant, index).
+- `core/config/settings.py`: 6 flags de carry (CARRY_NEUTRAL_ENABLED=false, thresholds, max_hold_hours, stake, variant, loop interval).
+- `scripts/smoke_carry.py` (new): smoke test autônomo (sem banco).
+- `docker-compose.yml`: serviço `trading-carry-worker` (CARRY_NEUTRAL_ENABLED=false por default).
+
+### Cleanup de Narrativa
+
+- `core/config/settings.py`: `ENGINE_ROLES` dict como fonte canônica de roles por engine.
+- `apps/worker/main.py`: lê ENGINE_ROLES no startup (loga roles), guarda arquitetural SIGNAL_ONLY no loop, skip de EXPERIMENTAL.
+- `core/monitoring/healthcheck.py`: campo `role` em cada engine no `/system/status`.
+- `README.md`: seção Engines reescrita com tabelas ACTIVE/SIGNAL_ONLY.
+- `docs/engine_specs_frozen.md`: seção canônica no topo com estado atual do portfólio.
+- `docs/trading_os/DECISIONS.md`: 3 entries novas (keep SIGNAL_ONLY engines, carry worker, ENGINE_ROLES).
+- `core/engines/cn1-cn5`: `# Reserved for future ACTIVE role` em `build_order_plan` e `manage_open_position`.
+- `docker-compose.yml`: comentários de serviço.
+
+### Tests
+
+- `tests/test_carry_fill_model.py` (new): 16 unit tests para CarryFillModel.
+- `tests/test_carry_engine.py` (new): 14 unit tests para CarryNeutralBtcEngine decisions.
+
+Nota: spec originalmente datada de 2026-04-17; materialização no repo em 2026-04-20 após rotação de token e auditoria de segurança.
+
 ## 2026-04-17 — Fase 4: LiquidityZoneAggregator + Ghost Trade Variants
 
 ### Code changes
