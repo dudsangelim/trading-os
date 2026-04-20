@@ -136,6 +136,7 @@ class CN3FundingReversalEngine(BaseEngine):
         )
 
     def build_order_plan(self, signal: Signal, bankroll: float) -> OrderPlan:
+        # Reserved for future ACTIVE role
         entry = signal.signal_data.get("price_ref", 0.0) or 0.0
         atr = entry * 0.004
         stop_dist = 1.5 * atr
@@ -159,4 +160,5 @@ class CN3FundingReversalEngine(BaseEngine):
     def manage_open_position(
         self, position: Position, ctx: EngineContext
     ) -> PositionAction:
+        # Reserved for future ACTIVE role
         return PositionAction.HOLD

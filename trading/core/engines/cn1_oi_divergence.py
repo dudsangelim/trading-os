@@ -147,6 +147,7 @@ class CN1OiDivergenceEngine(BaseEngine):
         )
 
     def build_order_plan(self, signal: Signal, bankroll: float) -> OrderPlan:
+        # Reserved for future ACTIVE role
         closes = signal.signal_data.get("recent_closes", [])
         entry = signal.signal_data.get("price_ref", 0.0)
 
@@ -173,6 +174,7 @@ class CN1OiDivergenceEngine(BaseEngine):
     def manage_open_position(
         self, position: Position, ctx: EngineContext
     ) -> PositionAction:
+        # Reserved for future ACTIVE role
         return PositionAction.HOLD
 
     @staticmethod
