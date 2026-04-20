@@ -668,6 +668,109 @@ class TradingRepository:
                 closed_at,
             )
 
+    async def open_carry_trade(
+        self,
+        engine_id: str,
+        symbol: str,
+        stake_usd: float,
+        spot_entry_price: float,
+        perp_entry_price: float,
+        entry_fees_usd: float,
+        variant: str,
+    ) -> int:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO tr_paper_trades
+                    (engine_id, symbol, signal_id, direction,
+                     entry_price, stop_price, target_price, stake_usd, status,
+                     trade_type, spot_entry_price, perp_entry_price,
+                     funding_accrued_usd, funding_events_count, carry_variant)
+                VALUES ($1, $2, NULL, 'CARRY_NEUTRAL',
+                        $3, 0, 0, $4, 'OPEN',
+                        'carry_neutral', $5, $6,
+                        $7, 0, $8)
+                RETURNING id
+                """,
+                engine_id,
+                symbol,
+                entry_fees_usd,   # entry_price stores entry fees for PnL accounting
+                stake_usd,
+                spot_entry_price,
+                perp_entry_price,
+                -entry_fees_usd,  # funding_accrued starts negative (entry cost)
+                variant,
+            )
+        return row["id"]
+
+    async def update_carry_funding(
+        self,
+        trade_id: int,
+        funding_accrued_usd: float,
+        funding_events_count: int,
+    ) -> None:
+        async with self._pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE tr_paper_trades
+                SET funding_accrued_usd = $2,
+                    funding_events_count = $3
+                WHERE id = $1
+                """,
+                trade_id,
+                funding_accrued_usd,
+                funding_events_count,
+            )
+
+    async def close_carry_trade(
+        self,
+        trade_id: int,
+        spot_exit_price: float,
+        perp_exit_price: float,
+        pnl_usd: float,
+        pnl_pct: float,
+        close_reason: str,
+        closed_at: datetime,
+    ) -> None:
+        async with self._pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE tr_paper_trades
+                SET exit_price   = $2,
+                    pnl_usd      = $3,
+                    pnl_pct      = $4,
+                    status       = 'CLOSED',
+                    close_reason = $5,
+                    closed_at    = $6,
+                    spot_exit_price  = $7,
+                    perp_exit_price  = $8
+                WHERE id = $1
+                """,
+                trade_id,
+                (spot_exit_price + perp_exit_price) / 2.0,
+                pnl_usd,
+                pnl_pct,
+                close_reason,
+                closed_at,
+                spot_exit_price,
+                perp_exit_price,
+            )
+
+    async def get_open_carry_position(self, engine_id: str) -> Optional[Dict[str, Any]]:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT * FROM tr_paper_trades
+                WHERE engine_id = $1
+                  AND trade_type = 'carry_neutral'
+                  AND status = 'OPEN'
+                ORDER BY opened_at ASC
+                LIMIT 1
+                """,
+                engine_id,
+            )
+        return dict(row) if row else None
+
     async def update_trade_stop(self, trade_id: int, stop_price: float) -> None:
         async with self._pool.acquire() as conn:
             await conn.execute(
