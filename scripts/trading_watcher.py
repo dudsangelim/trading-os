@@ -30,6 +30,16 @@ from pathlib import Path
 TRADING_API     = "http://127.0.0.1:8091"
 NY_OPEN_API     = "http://127.0.0.1:8094"
 DOW_3LEGS_API   = "http://127.0.0.1:8096"
+
+# Paper traders monitored via generic check (name, port, health_path, label)
+PAPER_TRADERS = [
+    ("rsi_reversion_paper",  8093, "/healthz", "RSI Reversion"),
+    ("asian_dema_paper",     8095, "/healthz", "Asian DEMA"),
+    ("bw_jawcross_paper",    8097, "/healthz", "BW Jawcross"),
+    ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
+    ("ef3_fa1mf_paper",      8102, "/healthz", "EF3 FA1-M"),
+    ("ef3_fb2af_paper",      8103, "/healthz", "EF3 FB2-A"),
+]
 BOT_TOKEN       = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("TELEGRAM_BOT_TOKEN env var not set")
@@ -243,6 +253,57 @@ def _check_dow_3legs_paper(state: dict) -> list[str]:
     return []
 
 
+def _check_paper_trader(state: dict, container: str, port: int,
+                        health_path: str, label: str) -> list[str]:
+    """Generic health check for paper trader containers.
+
+    Alerts on: container offline, halted gate triggered.
+    """
+    url = f"http://127.0.0.1:{port}{health_path}"
+    health = _get_url(url)
+    state_key_offline = f"{container}_offline"
+    state_key_halted  = f"{container}_halted"
+    was_offline  = state.get(state_key_offline, False)
+    was_halted   = state.get(state_key_halted, False)
+    service_name = container.replace("_", "-")
+    notifs = []
+
+    if "error" in health:
+        state[state_key_offline] = True
+        if not was_offline:
+            notifs.append(
+                f"🚨 <b>{label} — Container OFFLINE</b>\n\n"
+                f"<code>trading_{container}</code> não responde em {url}:\n"
+                f"<code>{health.get('error', '?')}</code>\n\n"
+                f"Restart: <code>docker compose up -d trading-{service_name}</code>"
+            )
+        return notifs
+
+    state[state_key_offline] = False
+
+    # Phase-0 gate: halted flag
+    halted = health.get("halted", False)
+    if halted and not was_halted:
+        symbol   = health.get("symbol", "?")
+        n_trades = health.get("n_trades", "?")
+        pnl      = health.get("pnl_total", health.get("pnl_total_bps", "?"))
+        notifs.append(
+            f"🛑 <b>{label} — Gate HALTED</b>\n\n"
+            f"O Phase-0 gate travou o engine <code>trading_{container}</code>.\n"
+            f"Symbol: {symbol} | Trades: {n_trades} | PnL: {pnl}\n\n"
+            f"Revisar: <code>docker logs trading_{container} --tail=30</code>"
+        )
+    state[state_key_halted] = halted
+
+    # Log summary
+    equity   = health.get("equity", health.get("pnl_total", health.get("pnl_total_bps", "?")))
+    n_trades = health.get("n_trades", "?")
+    eng_state = health.get("state", "running")
+    print(f"[watcher] {container}: state={eng_state} equity/pnl={equity} "
+          f"trades={n_trades} halted={halted}")
+    return notifs
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -278,6 +339,10 @@ def main() -> None:
 
     # 5. DOW 3-legs paper trader health
     notifications.extend(_check_dow_3legs_paper(state))
+
+    # 6. Generic paper traders (RSI, Asian DEMA, BW, SOL Burst, EF3 x2)
+    for container, port, health_path, label in PAPER_TRADERS:
+        notifications.extend(_check_paper_trader(state, container, port, health_path, label))
 
     # Send notifications
     for text in notifications:
