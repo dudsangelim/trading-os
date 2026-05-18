@@ -52,6 +52,18 @@ CHAT_ID = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].st
 STATE_FILE = Path("/tmp/trading_daily_review_state.json")
 REVIEW_LOOKBACK_DAYS = int(os.environ.get("REVIEW_LOOKBACK_DAYS", "7"))
 
+# Standalone paper traders polled via HTTP (not in Postgres)
+PAPER_TRADER_ENDPOINTS = [
+    ("NY Open 2C",     "http://127.0.0.1:8094/healthz"),
+    ("DOW 3-Legs",     "http://127.0.0.1:8096/health"),
+    ("RSI Reversion",  "http://127.0.0.1:8093/healthz"),
+    ("Asian DEMA",     "http://127.0.0.1:8095/healthz"),
+    ("BW Jawcross",    "http://127.0.0.1:8097/healthz"),
+    ("SOL Burst",      "http://127.0.0.1:8101/healthz"),
+    ("EF3 FA1-M",      "http://127.0.0.1:8102/healthz"),
+    ("EF3 FB2-A",      "http://127.0.0.1:8103/healthz"),
+]
+
 # Engine configs (mirrored from settings.py for cost calculations)
 ENGINE_META = {
     "m3_sol":    {"symbol": "SOLUSDT", "fee_bps": 10, "slip_bps": 8,  "lev": 10, "capital": 1000},
@@ -539,6 +551,67 @@ def _section_derivatives_quality() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Section 8 — Standalone paper traders (healthz poll)
+# ---------------------------------------------------------------------------
+
+def _fetch_url(url: str, timeout: int = 8) -> dict:
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return json.loads(r.read().decode())
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _section_paper_traders() -> str:
+    lines = ["📄 <b>Paper Traders</b>", ""]
+
+    for label, url in PAPER_TRADER_ENDPOINTS:
+        h = _fetch_url(url)
+
+        if "error" in h:
+            lines.append(f"  🔴 <b>{label}</b>: OFFLINE")
+            continue
+
+        state = h.get("state") or h.get("engine_state")
+        if state is None:
+            state = "flat" if h.get("position") is None else "in_pos"
+        n       = h.get("n_trades", h.get("processed_trades", 0))
+        halted  = h.get("halted", False)
+
+        # Equity or PnL depending on the engine type
+        equity  = h.get("equity")
+        pnl_usd = h.get("pnl_total")
+        pnl_bps = h.get("pnl_total_bps")
+
+        if equity is not None:
+            perf = f"eq ${equity:.2f}"
+        elif pnl_usd is not None:
+            sign = "+" if pnl_usd >= 0 else ""
+            perf = f"pnl {sign}{pnl_usd:.2f}"
+        elif pnl_bps is not None:
+            sign = "+" if pnl_bps >= 0 else ""
+            perf = f"pnl {sign}{pnl_bps:.1f}bps"
+        else:
+            perf = "—"
+
+        if halted:
+            status_icon = "🛑"
+            state_str = "HALTED"
+        elif state in ("flat", "IDLE", "init"):
+            status_icon = "⚪"
+            state_str = state
+        else:
+            status_icon = "🟡"
+            state_str = state
+
+        lines.append(
+            f"  {status_icon} <b>{label}</b>: {state_str} | {perf} | {n}t"
+        )
+
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # State management (dedup daily)
 # ---------------------------------------------------------------------------
 
@@ -597,6 +670,8 @@ def main() -> None:
             _section_exposure(conn, since),
             _section_alerts(conn, since),
             _section_derivatives_quality(),
+            _SEP,
+            _section_paper_traders(),
         ]
     finally:
         conn.close()
