@@ -27,13 +27,15 @@ from pathlib import Path
 # Config
 # ---------------------------------------------------------------------------
 
-TRADING_API   = "http://127.0.0.1:8091"
-BOT_TOKEN     = os.environ.get("TELEGRAM_BOT_TOKEN")
+TRADING_API     = "http://127.0.0.1:8091"
+NY_OPEN_API     = "http://127.0.0.1:8094"
+DOW_3LEGS_API   = "http://127.0.0.1:8096"
+BOT_TOKEN       = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("TELEGRAM_BOT_TOKEN env var not set")
-CHAT_ID       = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].strip()
-STATE_FILE    = Path("/tmp/trading_watcher_state.json")
-TIMEOUT       = 10
+CHAT_ID         = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].strip()
+STATE_FILE      = Path("/tmp/trading_watcher_state.json")
+TIMEOUT         = 10
 
 # Shadow filter milestones to notify
 SHADOW_MILESTONES = [50, 100, 200, 500]
@@ -43,8 +45,7 @@ SHADOW_MILESTONES = [50, 100, 200, 500]
 # HTTP helpers
 # ---------------------------------------------------------------------------
 
-def _get(path: str) -> dict:
-    url = f"{TRADING_API}{path}"
+def _get_url(url: str) -> dict:
     try:
         with urllib.request.urlopen(url, timeout=TIMEOUT) as r:
             return json.loads(r.read().decode())
@@ -52,6 +53,10 @@ def _get(path: str) -> dict:
         return {"error": str(e)}
     except Exception as e:
         return {"error": str(e)}
+
+
+def _get(path: str) -> dict:
+    return _get_url(f"{TRADING_API}{path}")
 
 
 def _send_telegram(text: str) -> bool:
@@ -184,6 +189,60 @@ def _check_readiness_regression(state: dict, readiness: dict) -> list[str]:
     return []
 
 
+def _check_ny_open_paper(state: dict) -> list[str]:
+    """Alert if trading_ny_open_paper healthz is unreachable."""
+    health = _get_url(f"{NY_OPEN_API}/healthz")
+    was_offline = state.get("ny_open_paper_offline", False)
+
+    if "error" in health:
+        state["ny_open_paper_offline"] = True
+        if not was_offline:
+            return [
+                "🚨 <b>NY Open Paper — Container OFFLINE</b>\n\n"
+                f"O container <code>trading_ny_open_paper</code> não responde "
+                f"em {NY_OPEN_API}/healthz:\n"
+                f"<code>{health.get('error', '?')}</code>\n\n"
+                "Verificar: <code>docker ps | grep ny_open</code>\n"
+                "Restart: <code>docker compose up -d trading-ny-open-paper</code>"
+            ]
+        return []
+
+    state["ny_open_paper_offline"] = False
+    engine_state = health.get("engine_state", "?")
+    equity = health.get("equity", "?")
+    trades = health.get("processed_trades", "?")
+    print(f"[watcher] ny_open_paper: state={engine_state} equity={equity} trades={trades}")
+    return []
+
+
+def _check_dow_3legs_paper(state: dict) -> list[str]:
+    """Alert if trading_dow_3legs_paper health is unreachable."""
+    health = _get_url(f"{DOW_3LEGS_API}/health")
+    was_offline = state.get("dow_3legs_paper_offline", False)
+
+    if "error" in health:
+        state["dow_3legs_paper_offline"] = True
+        if not was_offline:
+            return [
+                "🚨 <b>DOW 3-Legs Paper — Container OFFLINE</b>\n\n"
+                f"O container <code>trading_dow_3legs_paper</code> não responde "
+                f"em {DOW_3LEGS_API}/health:\n"
+                f"<code>{health.get('error', '?')}</code>\n\n"
+                "Verificar: <code>docker ps | grep dow</code>\n"
+                "Restart: <code>docker compose up -d trading-dow-3legs-paper</code>"
+            ]
+        return []
+
+    state["dow_3legs_paper_offline"] = False
+    eng_state = health.get("state", "?")
+    equity = health.get("equity", "?")
+    n_trades = health.get("n_trades", "?")
+    gate = health.get("gate", {})
+    print(f"[watcher] dow_3legs_paper: state={eng_state} equity={equity} "
+          f"trades={n_trades} gate={gate.get('gate', '?')}")
+    return []
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -213,6 +272,12 @@ def main() -> None:
         notifications.extend(milestone_notifs)
     else:
         print(f"[watcher] readiness error: {readiness.get('error')}")
+
+    # 4. NY Open paper trader health
+    notifications.extend(_check_ny_open_paper(state))
+
+    # 5. DOW 3-legs paper trader health
+    notifications.extend(_check_dow_3legs_paper(state))
 
     # Send notifications
     for text in notifications:

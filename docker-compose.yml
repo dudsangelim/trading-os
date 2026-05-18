@@ -39,7 +39,7 @@ services:
     container_name: trading_worker
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@jarvis_postgres:5432/${POSTGRES_DB:-jarvis}
       - DERIVATIVES_ENABLED=${DERIVATIVES_ENABLED:-true}
       - DERIVATIVES_FEATURE_ADAPTER_ENABLED=${DERIVATIVES_FEATURE_ADAPTER_ENABLED:-true}
       - ENGINE_DERIVATIVES_ADVISORY_ENABLED=${ENGINE_DERIVATIVES_ADVISORY_ENABLED:-true}
@@ -55,6 +55,7 @@ services:
         condition: service_healthy
     networks:
       - trading_net
+      - jarvis_net
     healthcheck:
       test: ["CMD-SHELL", "kill -0 1"]
       interval: 60s
@@ -70,7 +71,7 @@ services:
     restart: unless-stopped
     command: ["python", "-m", "trading.apps.overlay_worker.main"]
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@jarvis_postgres:5432/${POSTGRES_DB:-jarvis}
       - REDIS_URL=redis://redis:6379
       - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
       - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
@@ -83,6 +84,7 @@ services:
         condition: service_started
     networks:
       - trading_net
+      - jarvis_net
     healthcheck:
       test: ["CMD-SHELL", "kill -0 1"]
       interval: 60s
@@ -123,6 +125,239 @@ services:
       retries: 3
       start_period: 30s
 
+  # ny_open_paper: standalone 2C fade NY Open paper trader (BTCUSDT 5m, $100/1x)
+  # Fully isolated: no postgres, no redis, no registry entry.
+  # Stop with: docker compose stop trading-ny-open-paper
+  trading-ny-open-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.ny_open_paper
+    container_name: trading_ny_open_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8094:8094"
+    environment:
+      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
+      - NY_OPEN_DATA_DIR=/data
+      - NY_OPEN_LOG_DIR=/logs
+      - NY_OPEN_HEALTH_PORT=8094
+    volumes:
+      - ./trading/ny_open_paper/data:/data
+      - ./trading/ny_open_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8094/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # dow_3legs_paper: standalone DOW 3-legs skip_low paper trader (BTCUSDT, $50/1.0x)
+  # Fully isolated: no postgres, no redis, no registry entry.
+  # Stop with: docker compose stop trading-dow-3legs-paper
+  trading-dow-3legs-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.dow_3legs_paper
+    container_name: trading_dow_3legs_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8096:8096"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TELEGRAM_TAG=DOW3L
+      - DOW_OUTDIR=/data
+      - DOW_LOG_DIR=/logs
+      - DOW_CAPITAL=50.0
+      - DOW_LEVERAGE=1.0
+      - DOW_HEALTH_PORT=8096
+      - DOW_DISABLE_GATE=false
+      - TZ=UTC
+    volumes:
+      - ./trading/dow_3legs_paper/data:/data
+      - ./trading/dow_3legs_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # rsi_reversion_paper: R021-A C1 RSI Extreme Reversion 5m paper trader (SOLUSDT, $1000 / 1x)
+  # Phase 0 watcher: RSI(14)<10 LONG / >85 SHORT, exit RSI=50. Blacklist: 13-16h UTC + Tuesdays.
+  # Data via asyncpg → jarvis_postgres (candle_collector el_candles_1m → resample 5m).
+  # Stop with: docker compose stop trading-rsi-reversion-paper
+  trading-rsi-reversion-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.rsi_reversion_paper
+    container_name: trading_rsi_reversion_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8093:8093"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - RSI_SYMBOL=SOLUSDT
+      - RSI_NOTIONAL=1000.0
+      - RSI_FEE_RT=0.0013
+      - RSI_PERIOD=14
+      - RSI_OVERSOLD=10
+      - RSI_OVERBOUGHT=85
+      - RSI_EXIT_LEVEL=50
+      - RSI_DB_HOST=172.18.0.2
+      - RSI_DB_PORT=5432
+      - RSI_DB_USER=jarvis
+      - RSI_DB_PASS=CHANGE_ME
+      - RSI_DB_NAME=jarvis
+      - RSI_HEALTH_PORT=8093
+      - RSI_DATA_DIR=/data
+      - RSI_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/rsi_reversion_paper/data:/data
+      - ./trading/rsi_reversion_paper/logs:/logs
+    networks:
+      - trading_net
+      - jarvis_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8093/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # asian_dema_paper: R021-B Asian Session DEMA 1h paper trader (SOLUSDT, $1000 / 1x)
+  # Phase 0 watcher: DEMA(13)/DEMA(34) crossover + slope filter, Asian hours 00-07h UTC.
+  # Data via asyncpg → jarvis_postgres (candle_collector el_candles_1m).
+  # Stop with: docker compose stop trading-asian-dema-paper
+  trading-asian-dema-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.asian_dema_paper
+    container_name: trading_asian_dema_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8095:8095"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - ADEMA_SYMBOL=SOLUSDT
+      - ADEMA_NOTIONAL=1000.0
+      - ADEMA_FEE_RT=0.0013
+      - ADEMA_FAST=13
+      - ADEMA_SLOW=34
+      - ADEMA_SLOPE_BARS=3
+      - ADEMA_DB_HOST=172.18.0.2
+      - ADEMA_DB_PORT=5432
+      - ADEMA_DB_USER=jarvis
+      - ADEMA_DB_PASS=CHANGE_ME
+      - ADEMA_DB_NAME=jarvis
+      - ADEMA_HEALTH_PORT=8095
+      - ADEMA_DATA_DIR=/data
+      - ADEMA_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/asian_dema_paper/data:/data
+      - ./trading/asian_dema_paper/logs:/logs
+    networks:
+      - trading_net
+      - jarvis_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8095/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # bw_jawcross_paper: Alligator BTC 6h order-flip paper trader ($1000 / 5x / 30% stake)
+  # Fully isolated: no postgres, no redis. Polls hourly and processes latest closed 6h bar.
+  # Stop with: docker compose stop trading-bw-jawcross-paper
+  trading-bw-jawcross-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.bw_jawcross_paper
+    container_name: trading_bw_jawcross_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8097:8097"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TELEGRAM_TAG=BWJC
+      - BW_SYMBOL=BTCUSDT
+      - BW_TIMEFRAME=6h
+      - BW_STRATEGY_ID=alligator_btc6h_order_flip_lips_long_v1
+      - BW_CAPITAL=1000.0
+      - BW_LEVERAGE=5.0
+      - BW_STAKE_PCT=0.30
+      - BW_FEE_RT=0.0008
+      - BW_SLIPPAGE_PCT=0.0002
+      - BW_DATA_DIR=/data
+      - BW_LOG_DIR=/logs
+      - BW_HEALTH_PORT=8097
+      - TZ=UTC
+    volumes:
+      - ./trading/bw_jawcross_paper/data:/data
+      - ./trading/bw_jawcross_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8097/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # sol_burst_paper: R012 SOL Extreme Burst Reversal 5m paper trader (SOLUSDT, $1000 / 1x)
+  # Phase 0 watcher: |ret_5m|>2% → fade. TP=0.5% SL=0.25% Timeout=30m.
+  # Data via asyncpg → jarvis_postgres (candle_collector el_candles_1m).
+  # Stop with: docker compose stop trading-sol-burst-paper
+  trading-sol-burst-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.sol_burst_paper
+    container_name: trading_sol_burst_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8101:8101"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - BURST_SYMBOL=SOLUSDT
+      - BURST_NOTIONAL=1000.0
+      - BURST_FEE_RT_BPS=13.0
+      - BURST_SIGNAL_THR=0.020
+      - BURST_TP_FRAC=0.005
+      - BURST_SL_FRAC=0.0025
+      - BURST_TIMEOUT_BARS=6
+      - BURST_DB_HOST=172.18.0.2
+      - BURST_DB_PORT=5432
+      - BURST_DB_USER=jarvis
+      - BURST_DB_PASS=CHANGE_ME
+      - BURST_DB_NAME=jarvis
+      - BURST_HEALTH_PORT=8101
+      - BURST_DATA_DIR=/data
+      - BURST_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/sol_burst_paper/data:/data
+      - ./trading/sol_burst_paper/logs:/logs
+    networks:
+      - trading_net
+      - jarvis_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8101/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   trading-api:
     build:
       context: .
@@ -154,6 +389,89 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  # ef3_fa1mf_paper: F-A.1.M.f — 30H4 breakout + SMA200 + ATR14×2.0 trailing
+  trading-ef3-fa1mf-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.ef3_fa1mf_paper
+    container_name: trading_ef3_fa1mf_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8102:8102"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TELEGRAM_TAG=EF3_FA1
+      - FA1_SYMBOL=BTCUSDT
+      - FA1_STRATEGY_ID=ef3_fa1mf_30h4_sma200_atr14x2_trailing_v1
+      - FA1_CAPITAL=1000.0
+      - FA1_FEE_RT_BPS=12.0
+      - FA1_SLIPPAGE_BPS=1.0
+      - FA1_N_BREAKOUT=30
+      - FA1_ATR_WIN=14
+      - FA1_ATR_MULT=2.0
+      - FA1_SMA_WIN=200
+      - FA1_H4_LOOKBACK=400
+      - FA1_D1_LOOKBACK=310
+      - FA1_DATA_DIR=/data
+      - FA1_LOG_DIR=/logs
+      - FA1_HEALTH_PORT=8102
+      - TZ=UTC
+    volumes:
+      - ./trading/ef3_fa1mf_paper/data:/data
+      - ./trading/ef3_fa1mf_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8102/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ef3_fb2af_paper: F-B.2.A.f — 20H4 breakout + compress <12% + SMA200 + SL 1×ATR14 + TP 8:1
+  trading-ef3-fb2af-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.ef3_fb2af_paper
+    container_name: trading_ef3_fb2af_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8103:8103"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TELEGRAM_TAG=EF3_FB2A
+      - FB2_SYMBOL=BTCUSDT
+      - FB2_STRATEGY_ID=ef3_fb2af_20h4_compress12_sma200_sl1_tp8_v1
+      - FB2_CAPITAL=1000.0
+      - FB2_FEE_RT_BPS=12.0
+      - FB2_SLIPPAGE_BPS=1.0
+      - FB2_N_BREAKOUT=20
+      - FB2_COMP_THRESH=0.12
+      - FB2_ATR_WIN=14
+      - FB2_ATR_SL_MULT=1.0
+      - FB2_TP_RR=8.0
+      - FB2_SMA_WIN=200
+      - FB2_H4_LOOKBACK=400
+      - FB2_D1_LOOKBACK=310
+      - FB2_DATA_DIR=/data
+      - FB2_LOG_DIR=/logs
+      - FB2_HEALTH_PORT=8103
+      - TZ=UTC
+    volumes:
+      - ./trading/ef3_fb2af_paper/data:/data
+      - ./trading/ef3_fb2af_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8103/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
 
 volumes:
   pgdata:

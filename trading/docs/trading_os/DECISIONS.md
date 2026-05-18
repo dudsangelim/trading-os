@@ -10,11 +10,10 @@ Updated: 2026-04-20
 - 4 scripts em trading/scripts/ com padrão VAR="${ENV_VAR:-TOKEN_HARDCODED}"
 - check_deploy_sync.sh commitado em bf3b8d6 (18/04, não pushed)
 - trading_watcher.py e trading_daily_review.py commitados em 976592a (Initial, pushed)
-- Token também em monday_asia_paper/config.json (nunca commitado)
 
 **Ações tomadas:**
 1. Token Telegram antigo revogado via BotFather e substituído por novo token
-2. Novo token distribuído em .env locais (openclaw/.env, stack/.env, monday_asia_paper/config.json)
+2. Novo token distribuído em .env locais (openclaw/.env, stack/.env)
 3. openclaw_gateway container reiniciado, teste de envio confirmou funcionamento
 4. 4 scripts sanitizados (fallback hardcoded substituído por "fail fast" quando env var ausente)
 5. Rebase local do bf3b8d6 → e0da9d1 removeu token do commit não-pushado

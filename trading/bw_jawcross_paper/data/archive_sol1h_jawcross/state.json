@@ -1,0 +1,14 @@
+{
+  "engine": {
+    "equity": 999.5481616221082,
+    "position_side": 0,
+    "position_entry_px": null,
+    "position_entry_ts": null,
+    "bars_held": 0,
+    "last_bar_ts": "2026-05-10T23:00:00+00:00",
+    "n_trades": 12,
+    "prev_close": 96.42,
+    "prev_jaw": 93.36889212194589
+  },
+  "saved_at": "2026-05-11T00:35:05.622301+00:00"
+}

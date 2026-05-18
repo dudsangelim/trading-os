@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-11 — BW Jaw-Cross paper trader reconfigurado
+
+Switch SOL/1h/jaw-cross/bidirectional → BTC/6h/order-flip/long-only após audit
+do Codex revelar viés de execução grave na config antiga (as_coded +786% vs
+realistic -51% em SOL/1h). Nova config BTC 6h order-flip valida +157% realistic
+em backtest 2021-2026 (200 trades, PF 1.38, max DD -49%).
+
+- `trading/bw_jawcross_paper/engine.py` reescrito: `order_flip_long = bull_order AND NOT prev_bull_order`; exit `close < lips`; long-only (sem branch short).
+- `trading/bw_jawcross_paper/config.py`: SYMBOL=BTCUSDT, TIMEFRAME=6h, STRATEGY_ID=alligator_btc6h_order_flip_lips_long_v1.
+- `trading/bw_jawcross_paper/persistence.py`: filenames prefixados com STRATEGY_ID (auto-migra ao trocar de estratégia, ignora arquivos da config antiga).
+- `trading/bw_jawcross_paper/CHANGELOG.md` (new): detalhes da migração + riscos identificados.
+- `backtests/audit_bw_btc6h_engine_logic.py` (new): audit espelhando engine 1:1 na config atual.
+- `backtests/audit_bw_signal_compare.py` (new): matriz 2×2×2 signal × timeframe × exit isolando fatores; confirma 6h+order_flip+close_lips como única célula viável das 8 combinações.
+- `CLAUDE.md`: tabela de strategies e bw_jawcross_paper specifics atualizados.
+- Data antiga (12 trades SOL/1h paper) arquivada em `bw_jawcross_paper/data/archive_sol1h_jawcross/`.
+
 ## 2026-04-20 — Carry Neutral BTC + Cleanup de Narrativa
 
 ### Carry Neutral BTC (nova engine)

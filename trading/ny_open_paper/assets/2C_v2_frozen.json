@@ -1,0 +1,75 @@
+{
+  "model_version": "2C_v2",
+  "model_type": "logistic_regression_l2",
+  "train_date_utc": "2026-04-28T20:09:01.148109+00:00",
+  "train_data_range": {
+    "start": "2021-01-01",
+    "end": "2026-04-22",
+    "n_trades_unfiltered": 1087,
+    "win_rate_unfiltered": 0.45906163753449863
+  },
+  "hyperparams": {
+    "lr": 0.05,
+    "iters": 5000,
+    "l2": 0.01
+  },
+  "fee_schedule": {
+    "name": "binance_vip0",
+    "maker": 0.0002,
+    "taker": 0.0005
+  },
+  "strategy_params": {
+    "window_min": 30,
+    "break_buffer": 0.0005,
+    "stop_kind": "alpha",
+    "stop_alpha": 0.4,
+    "stop_min_pct": 0.003,
+    "stop_max_pct": 0.008,
+    "max_wait_retest_min": 15,
+    "session_open_utc": "13:30",
+    "session_close_utc": "20:00"
+  },
+  "feature_names": [
+    "range_first_30m_pct",
+    "overshoot_close_pct",
+    "vol_20d_pct",
+    "btc_vs_sma200_pct",
+    "direction_first_30m",
+    "time_to_break_min"
+  ],
+  "feature_mean": [
+    0.9045094319557112,
+    0.06868805565846459,
+    0.5818154989381739,
+    4.885201568639148,
+    -0.08371665133394664,
+    38.813247470101196
+  ],
+  "feature_std": [
+    0.7436357432256612,
+    0.2810761459689565,
+    0.23342312953657138,
+    23.719769191970485,
+    0.9964895996895454,
+    65.26338322313613
+  ],
+  "weights": {
+    "bias": -0.27980532680935,
+    "coef": [
+      -0.4217607159790945,
+      -1.3010213237253032,
+      0.04125042236797006,
+      -0.05393360689721625,
+      -0.060021702445031605,
+      0.023531032527018988
+    ]
+  },
+  "recommended_threshold": 0.55,
+  "estimated_pct_filtered_in": 0.3311867525298988,
+  "execution_notes": {
+    "leverage_target": 5,
+    "rationale": "Lev 5x sobre S3+F_reduced thr=0.55 dá ~+44%/ano com DD ~-11% e P(DD>50)<0.1% no MC 5y. Slippage NAO modelada — em 5x cada 0.05% de slip vira 0.25% extra; monitorar fill quality.",
+    "max_dd_alert_pct": 15,
+    "max_dd_kill_pct": 25
+  }
+}

@@ -54,8 +54,6 @@ REVIEW_LOOKBACK_DAYS = int(os.environ.get("REVIEW_LOOKBACK_DAYS", "7"))
 
 # Engine configs (mirrored from settings.py for cost calculations)
 ENGINE_META = {
-    "m1_eth":    {"symbol": "ETHUSDT", "fee_bps": 10, "slip_bps": 5,  "lev": 10, "capital": 1000},
-    "m2_btc":    {"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5,  "lev": 10, "capital": 1000},
     "m3_sol":    {"symbol": "SOLUSDT", "fee_bps": 10, "slip_bps": 8,  "lev": 10, "capital": 1000},
     "m3_eth_shadow":       {"symbol": "ETHUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
     "cn1_oi_divergence":   {"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
