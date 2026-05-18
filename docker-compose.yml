@@ -213,7 +213,7 @@ services:
       - RSI_DB_HOST=172.18.0.2
       - RSI_DB_PORT=5432
       - RSI_DB_USER=jarvis
-      - RSI_DB_PASS=CHANGE_ME
+      - RSI_DB_PASS=${DB_PASS:-CHANGE_ME}
       - RSI_DB_NAME=jarvis
       - RSI_HEALTH_PORT=8093
       - RSI_DATA_DIR=/data
@@ -256,7 +256,7 @@ services:
       - ADEMA_DB_HOST=172.18.0.2
       - ADEMA_DB_PORT=5432
       - ADEMA_DB_USER=jarvis
-      - ADEMA_DB_PASS=CHANGE_ME
+      - ADEMA_DB_PASS=${DB_PASS:-CHANGE_ME}
       - ADEMA_DB_NAME=jarvis
       - ADEMA_HEALTH_PORT=8095
       - ADEMA_DATA_DIR=/data
@@ -339,7 +339,7 @@ services:
       - BURST_DB_HOST=172.18.0.2
       - BURST_DB_PORT=5432
       - BURST_DB_USER=jarvis
-      - BURST_DB_PASS=CHANGE_ME
+      - BURST_DB_PASS=${DB_PASS:-CHANGE_ME}
       - BURST_DB_NAME=jarvis
       - BURST_HEALTH_PORT=8101
       - BURST_DATA_DIR=/data
