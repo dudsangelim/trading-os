@@ -17,6 +17,7 @@ Acessa diretamente o PostgreSQL do trading (jarvis DB).
 """
 from __future__ import annotations
 
+import csv
 import json
 import os
 import sys
@@ -51,6 +52,32 @@ CHAT_ID = os.environ.get("TRADING_ALLOWED_USERS", "6127917209").split(",")[0].st
 
 STATE_FILE = Path("/tmp/trading_daily_review_state.json")
 REVIEW_LOOKBACK_DAYS = int(os.environ.get("REVIEW_LOOKBACK_DAYS", "7"))
+
+_TRADING_OS_ROOT = Path(__file__).resolve().parent.parent
+
+# CSV config for each standalone paper trader
+# exit_ts_col: column used to filter by lookback period
+# side_col: None if always long (e.g. EF3 breakout)
+# pnl_col / pnl_type: "usd" | "pct" | "bps"
+# equity_col: column with running equity (None = use healthz)
+PAPER_TRADER_CSV = [
+    ("NY Open 2C",  "trading/ny_open_paper/data/trades.csv",
+     "ts_exit",  "direction", {"1":"LONG","-1":"SHORT"}, "pnl_pct_net", "pct",  "equity_after"),
+    ("DOW 3-Legs", "trading/dow_3legs_paper/data/trades.csv",
+     "exit_ts",  "side",      {},                        "ret_pct_net",  "pct",  "equity_after"),
+    ("RSI Reversion", "trading/rsi_reversion_paper/data/trades.csv",
+     "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  None),
+    ("Asian DEMA",    "trading/asian_dema_paper/data/trades.csv",
+     "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  "pnl_total_after"),
+    ("BW Jawcross",   "trading/bw_jawcross_paper/data/alligator_btc6h_order_flip_lips_long_v1_trades.csv",
+     "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  "equity_after"),
+    ("SOL Burst",     "trading/sol_burst_paper/data/trades.csv",
+     "ts_close", "direction", {},                        "pnl_bps",     "bps",  None),
+    ("EF3 FA1-M",     "trading/ef3_fa1mf_paper/data/ef3_fa1mf_30h4_sma200_atr14x2_trailing_v1_trades.csv",
+     "exit_ts",  None,        {},                        "pnl_usd",     "usd",  "equity_after"),
+    ("EF3 FB2-A",     "trading/ef3_fb2af_paper/data/ef3_fb2af_20h4_compress12_sma200_sl1_tp8_v1_trades.csv",
+     "exit_ts",  None,        {},                        "pnl_usd",     "usd",  "equity_after"),
+]
 
 # Standalone paper traders polled via HTTP (not in Postgres)
 PAPER_TRADER_ENDPOINTS = [
@@ -612,6 +639,162 @@ def _section_paper_traders() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Section 9 — Paper trader trade history (CSV-based)
+# ---------------------------------------------------------------------------
+
+def _parse_ts(val: str) -> datetime | None:
+    if not val:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z",
+                "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(val[:26], fmt[:len(val[:26])])
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        except ValueError:
+            continue
+    return None
+
+
+def _section_paper_trade_history(since: datetime) -> str:
+    lines = [f"📈 <b>Paper Trades ({REVIEW_LOOKBACK_DAYS}d)</b>", ""]
+    any_trades = False
+
+    for label, rel_path, exit_col, side_col, side_map, pnl_col, pnl_type, eq_col in PAPER_TRADER_CSV:
+        csv_path = _TRADING_OS_ROOT / rel_path
+        if not csv_path.exists():
+            continue
+
+        try:
+            with csv_path.open(newline="") as f:
+                reader = csv.DictReader(f)
+                rows = list(reader)
+        except Exception:
+            continue
+
+        # Filter to lookback window
+        period_rows = []
+        for r in rows:
+            ts = _parse_ts(r.get(exit_col, ""))
+            if ts and ts >= since:
+                period_rows.append(r)
+
+        total = len(period_rows)
+        all_time_total = len(rows)
+
+        if total == 0:
+            lines.append(f"  <b>{label}</b>: 0t no período (total: {all_time_total}t)")
+            continue
+
+        any_trades = True
+
+        # Equity at start of period: last equity_after before period_rows[0], or 0
+        start_equity = None
+        if eq_col:
+            period_first_idx = rows.index(period_rows[0]) if period_rows[0] in rows else -1
+            if period_first_idx > 0:
+                try:
+                    start_equity = float(rows[period_first_idx - 1].get(eq_col) or 0)
+                except ValueError:
+                    pass
+            elif period_first_idx == 0 and len(rows) > 0:
+                # First ever trade — no prior equity row
+                start_equity = None
+
+        # Compute stats
+        wins = losses = 0
+        pnl_sum = 0.0
+        last_equity = None
+
+        for r in period_rows:
+            try:
+                pnl_val = float(r.get(pnl_col, 0) or 0)
+            except ValueError:
+                pnl_val = 0.0
+            pnl_sum += pnl_val
+            if pnl_val > 0:
+                wins += 1
+            else:
+                losses += 1
+            if eq_col and r.get(eq_col):
+                try:
+                    last_equity = float(r[eq_col])
+                except ValueError:
+                    pass
+
+        wr = wins / total * 100 if total else 0
+
+        # Prefer equity delta in $ when available; fall back to pnl_col sum
+        if eq_col and last_equity is not None and start_equity is not None:
+            period_pnl_usd = last_equity - start_equity
+            pnl_str = f"${period_pnl_usd:+.2f}"
+            pnl_positive = period_pnl_usd > 0
+        elif pnl_type == "usd":
+            pnl_str = f"${pnl_sum:+.2f}"
+            pnl_positive = pnl_sum > 0
+        elif pnl_type == "pct":
+            pnl_str = f"{pnl_sum:+.4f}%"
+            pnl_positive = pnl_sum > 0
+        else:
+            pnl_str = f"{pnl_sum:+.1f}bps"
+            pnl_positive = pnl_sum > 0
+
+        eq_str = f" eq ${last_equity:.2f}" if last_equity is not None else ""
+        emoji = "🟢" if pnl_positive else "🔴" if not pnl_positive else "⚪"
+
+        lines.append(
+            f"  {emoji} <b>{label}</b>: {total}t {wins}W/{losses}L WR{wr:.0f}% {pnl_str}{eq_str}"
+        )
+
+        # Show up to last 5 trades
+        recent = period_rows[-5:]
+        for r in recent:
+            ts = _parse_ts(r.get(exit_col, ""))
+            date_str = ts.strftime("%d/%m") if ts else "?"
+
+            if side_col:
+                raw_side = r.get(side_col, "?")
+                side = side_map.get(raw_side, raw_side).upper()
+            else:
+                side = "LONG"
+
+            try:
+                pnl_val = float(r.get(pnl_col, 0) or 0)
+            except ValueError:
+                pnl_val = 0.0
+
+            # Per-trade: show equity delta when possible, else pnl_col
+            if eq_col and r.get(eq_col):
+                try:
+                    eq_after = float(r[eq_col])
+                    idx = rows.index(r)
+                    eq_before = float(rows[idx - 1][eq_col]) if idx > 0 and rows[idx - 1].get(eq_col) else None
+                    if eq_before is not None:
+                        pnl_line = f"${eq_after - eq_before:+.2f}"
+                    elif pnl_type == "usd":
+                        pnl_line = f"${pnl_val:+.2f}"
+                    else:
+                        pnl_line = f"eq ${eq_after:.2f}"
+                except (ValueError, IndexError):
+                    pnl_line = f"${pnl_val:+.2f}" if pnl_type == "usd" else f"{pnl_val:+.4f}%"
+            elif pnl_type == "usd":
+                pnl_line = f"${pnl_val:+.2f}"
+            elif pnl_type == "pct":
+                pnl_line = f"{pnl_val:+.4f}%"
+            else:
+                pnl_line = f"{pnl_val:+.1f}bps"
+
+            win_icon = "✅" if pnl_val > 0 else "❌"
+            lines.append(f"    {win_icon} {date_str} {side} {pnl_line}")
+
+    if not any_trades:
+        lines.append("  Nenhum trade fechado no período.")
+
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # State management (dedup daily)
 # ---------------------------------------------------------------------------
 
@@ -672,6 +855,8 @@ def main() -> None:
             _section_derivatives_quality(),
             _SEP,
             _section_paper_traders(),
+            _SEP,
+            _section_paper_trade_history(since),
         ]
     finally:
         conn.close()
