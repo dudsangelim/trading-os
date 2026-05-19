@@ -93,13 +93,8 @@ PAPER_TRADER_ENDPOINTS = [
 
 # Engine configs (mirrored from settings.py for cost calculations)
 ENGINE_META = {
-    "m3_sol":    {"symbol": "SOLUSDT", "fee_bps": 10, "slip_bps": 8,  "lev": 10, "capital": 1000},
-    "m3_eth_shadow":       {"symbol": "ETHUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
-    "cn1_oi_divergence":   {"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
-    "cn2_taker_momentum":  {"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
-    "cn3_funding_reversal":{"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
-    "cn4_liquidation_cascade":{"symbol":"BTCUSDT","fee_bps":10,"slip_bps": 5, "lev": 10, "capital": 1000},
-    "cn5_squeeze_zone":    {"symbol": "BTCUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
+    "m3_sol":        {"symbol": "SOLUSDT", "fee_bps": 10, "slip_bps": 8, "lev": 10, "capital": 1000},
+    "m3_eth_shadow": {"symbol": "ETHUSDT", "fee_bps": 10, "slip_bps": 5, "lev": 10, "capital": 1000},
 }
 
 
