@@ -122,18 +122,17 @@ class RsiReversionEngine:
         Process bars newer than last_bar_ts (or all if fresh state).
         Returns list of event dicts (open/close).
         """
-        if self.last_bar_ts is not None:
-            cutoff = pd.Timestamp(self.last_bar_ts, tz="UTC")
-            df = df[df.index > cutoff]
         if df.empty:
             return []
 
         events: List[Dict[str, Any]] = []
-        df_full = df  # we need prev-bar values → work on full df passed in
 
         for idx in range(len(df)):
             ts  = df.index[idx]
             bar = df.iloc[idx]
+
+            if self.last_bar_ts is not None and ts <= pd.Timestamp(self.last_bar_ts, tz="UTC"):
+                continue
 
             rsi_i = bar.get("rsi")
             if rsi_i is None or (isinstance(rsi_i, float) and np.isnan(rsi_i)):

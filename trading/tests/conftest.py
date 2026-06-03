@@ -7,6 +7,7 @@ The schema is created via migrations.py in the session-scoped fixture.
 from __future__ import annotations
 
 import os
+import inspect
 
 import asyncpg
 import pytest
@@ -19,7 +20,14 @@ TEST_DB_URL = os.environ.get(
 )
 
 
-@pytest_asyncio.fixture(scope="session", loop_scope="session")
+def _async_fixture(**kwargs):
+    """Support pytest versions that do not accept pytest-asyncio's loop_scope."""
+    if "loop_scope" in kwargs and "loop_scope" not in inspect.signature(pytest.fixture).parameters:
+        kwargs.pop("loop_scope")
+    return pytest_asyncio.fixture(**kwargs)
+
+
+@_async_fixture(scope="session", loop_scope="session")
 async def pool():
     """Session-scoped asyncpg pool. Migrations are run once."""
     import sys
@@ -33,7 +41,7 @@ async def pool():
     await p.close()
 
 
-@pytest_asyncio.fixture(loop_scope="session")
+@_async_fixture(loop_scope="session")
 async def clean_db(pool: asyncpg.Pool):
     """
     Truncate all tr_* tables before each test so tests are independent.

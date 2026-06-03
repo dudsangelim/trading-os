@@ -6,6 +6,8 @@ Data: el_candles_1m from jarvis postgres (candle_collector).
 
 Modes:
   live (default)    — triggers at XX:02 UTC for Asian hours (00:02-07:02)
+                      and hourly while a position is open, so exits are
+                      evaluated outside the entry session.
   --once            — one tick and exit (smoke test)
   --status          — print state JSON and exit
   --replay-days N   — replay last N days of 1h bars from DB
@@ -350,6 +352,11 @@ class PaperTrader:
 
 # ── Timing helpers ─────────────────────────────────────────────────────────────
 
+def _is_hourly_bar_trigger_time(now: datetime) -> bool:
+    """Return True at HH:02 UTC, after the previous 1h bar has closed."""
+    return now.minute == 2
+
+
 def _is_asian_trigger_time(now: datetime) -> bool:
     """
     Return True if now is at minute==2 and the hour just closed is Asian (0-7).
@@ -357,6 +364,16 @@ def _is_asian_trigger_time(now: datetime) -> bool:
     The bar that just closed has open_time = HH:00, so hour=HH.
     """
     return now.minute == 2 and now.hour in ASIAN_HOURS
+
+
+def _should_run_strategy_tick(now: datetime, trader: PaperTrader) -> bool:
+    """
+    Run entries only on Asian-session triggers, but keep evaluating open
+    positions hourly so reverse-crossover exits cannot be missed.
+    """
+    if not _is_hourly_bar_trigger_time(now):
+        return False
+    return now.hour in ASIAN_HOURS or trader.engine.position is not None
 
 
 def _is_daily_status_time(now: datetime) -> bool:
@@ -384,7 +401,10 @@ def _on_signal(*_) -> None:
 def run_live(trader: PaperTrader) -> None:
     signal.signal(signal.SIGTERM, _on_signal)
     signal.signal(signal.SIGINT, _on_signal)
-    log.info("[live] started — triggers at HH:02 UTC (HH in {0..7})")
+    log.info(
+        "[live] started — entry triggers at HH:02 UTC (HH in {0..7}); "
+        "exit checks hourly while position is open"
+    )
     notifier.notify_startup(trader.engine.pnl_total, trader.engine.n_trades)
 
     _daily_status_sent_hour: int = -1
@@ -406,9 +426,12 @@ def run_live(trader: PaperTrader) -> None:
                 trader.send_daily_status()
                 _daily_status_sent_hour = now.day
 
-            # Asian session trigger
-            if _is_asian_trigger_time(now):
-                log.info("[live] trigger at %s UTC (hour=%d)", now.strftime("%H:%M"), now.hour)
+            # Strategy trigger: Asian entries, plus hourly exit checks while open.
+            if _should_run_strategy_tick(now, trader):
+                log.info(
+                    "[live] trigger at %s UTC (hour=%d, position=%s)",
+                    now.strftime("%H:%M"), now.hour, trader.engine.position,
+                )
                 trader.tick()
 
         except KeyboardInterrupt:

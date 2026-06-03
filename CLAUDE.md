@@ -15,9 +15,19 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_bw_jawcross_paper` | 8097 | BW Alligator order-flip long-only, BTCUSDT 6h | $1000 / 5x / 30% stake |
 | `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
+| `trading_ny_open_mom_paper` | 8104 | NY Open Momentum Long Phase 0, BTCUSDT 5m | $1000 / 1x |
 | `trading_worker` | — | m3_sol (SOLUSDT) + m3_eth_shadow (ETHUSDT SIGNAL_ONLY) | $200 each |
 
 Health check: `GET /health` or `/healthz` on each container's port.
+
+### ny_open_mom_paper specifics (Phase 0)
+- Signal: upside break of 30m NY range where break candle closes ≥ 0.10% above the range high.
+- Entry: LIMIT LONG at range high on retest (within 15 min of break).
+- Exit: TP1 = entry + range/2 → partial fill + BE stop; TP2 = entry + range.
+- Stop: entry × (1 − clamp(0.4 × range_pct, 0.3%, 0.8%) × 1.5) — wider than fade stop.
+- Phase 0 gate: halts if WR < 40% after 50 trades; Telegram alert on halt.
+- Status: `docker exec trading_ny_open_mom_paper python -m trading.ny_open_mom_paper.main --status`
+- Replay: `docker exec trading_ny_open_mom_paper python -m trading.ny_open_mom_paper.main --replay-days 30`
 
 ## Standalone paper traders (`trading/ny_open_paper/`, `trading/dow_3legs_paper/`, `trading/bw_jawcross_paper/`, `trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`)
 
@@ -105,6 +115,7 @@ curl localhost:8093/healthz
 curl localhost:8095/healthz
 curl localhost:8096/health
 curl localhost:8101/healthz
+curl localhost:8104/healthz
 
 # Smoke test (one tick)
 docker exec trading_dow_3legs_paper python -m trading.dow_3legs_paper.main --once

@@ -363,6 +363,7 @@ class PaperTrader:
         })
         save_state({
             "equity": self.equity,
+            "peak_equity": self.peak_equity,
             "last_ctx_date": str(self.last_ctx_date) if self.last_ctx_date else None,
             "processed_trades": self.processed_trades,
             "engine_state": engine_state,

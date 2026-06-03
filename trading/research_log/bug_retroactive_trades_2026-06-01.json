@@ -1,0 +1,13 @@
+{
+  "applied_at": "2026-06-01T11:08:18.365157+00:00",
+  "rsi_reversion_paper": {
+    "added": 0,
+    "n_trades": 2,
+    "pnl_total": 7.0649
+  },
+  "asian_dema_paper": {
+    "added": 1,
+    "n_trades": 1,
+    "pnl_total": -7.6983
+  }
+}

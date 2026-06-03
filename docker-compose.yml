@@ -358,6 +358,52 @@ services:
       retries: 3
       start_period: 20s
 
+  # ny_open_mom_paper: NY Open Momentum Long Phase 0 (BTCUSDT, $1000/1x)
+  # Signal: upside break with os_close >= 0.10%. Entry LONG at range high on retest.
+  # Phase 0 gate: WR < 40% after 50 trades → HALT.
+  # Stop with: docker compose stop trading-ny-open-mom-paper
+  trading-ny-open-mom-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.ny_open_mom_paper
+    container_name: trading_ny_open_mom_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8104:8104"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TELEGRAM_TAG=NYOM
+      - NYOM_SYMBOL=BTCUSDT
+      - NYOM_STRATEGY_ID=ny_open_mom_btc_long_v1
+      - NYOM_CAPITAL=1000.0
+      - NYOM_LEVERAGE=4.0
+      - NYOM_OS_THR_PCT=0.10
+      - NYOM_SL_MULT=1.5
+      - NYOM_TP_MULT=1.0
+      - NYOM_STOP_ALPHA=0.40
+      - NYOM_STOP_MIN_PCT=0.003
+      - NYOM_STOP_MAX_PCT=0.008
+      - NYOM_BREAK_BUFFER=0.0005
+      - NYOM_MAX_RETEST_MIN=15
+      - NYOM_PHASE0_MIN_TRADES=50
+      - NYOM_PHASE0_WR_FLOOR=0.40
+      - NYOM_HEALTH_PORT=8104
+      - NYOM_DATA_DIR=/data
+      - NYOM_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/ny_open_mom_paper/data:/data
+      - ./trading/ny_open_mom_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8104/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   trading-api:
     build:
       context: .

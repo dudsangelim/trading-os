@@ -3,6 +3,7 @@ __pycache__/
 *.pyo
 .env
 .env.local
+.claude/
 *.egg-info/
 dist/
 build/
@@ -24,4 +25,5 @@ scripts/*.log
 # Paper trader runtime state (volume-mounted, never versioned)
 trading/*/data/*.json
 trading/*/data/*.csv
+trading/*/data/*.bak_*
 trading/*/logs/

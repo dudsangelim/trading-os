@@ -21,7 +21,7 @@ TIMEFRAME   = "1h"
 DEMA_FAST   = int(os.environ.get("ADEMA_FAST",  "13"))
 DEMA_SLOW   = int(os.environ.get("ADEMA_SLOW",  "34"))
 SLOPE_BARS  = int(os.environ.get("ADEMA_SLOPE_BARS", "3"))   # bars back for slope
-LOOKBACK_1M = int(os.environ.get("ADEMA_LOOKBACK_1M", "200"))  # 1m candles to fetch
+LOOKBACK_1M = int(os.environ.get("ADEMA_LOOKBACK_1M", "6000"))  # ~100h; enough DEMA(34) warm-up
 
 # Asian session hours (UTC, inclusive)
 ASIAN_HOURS = set(range(0, 8))  # 00:00–07:59 UTC
