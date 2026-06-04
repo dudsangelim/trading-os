@@ -164,6 +164,9 @@ class _Handler(BaseHTTPRequestHandler):
                 "position":     _engine_ref.position if _engine_ref else None,
                 "n_trades":     _engine_ref.n_trades if _engine_ref else 0,
                 "pnl_total_bps": _engine_ref.pnl_total_bps if _engine_ref else 0.0,
+                "notional":     NOTIONAL,
+                "equity_usd":   round(NOTIONAL * (1 + (_engine_ref.pnl_total_bps if _engine_ref else 0.0) / 10_000.0), 2),
+                "pnl_usd":      round(NOTIONAL * (_engine_ref.pnl_total_bps if _engine_ref else 0.0) / 10_000.0, 2),
                 "halted":       _engine_ref.halted if _engine_ref else False,
             }, default=str).encode()
             code = 200
@@ -174,6 +177,8 @@ class _Handler(BaseHTTPRequestHandler):
                 "symbol":      SYMBOL,
                 "tf":          "5m",
                 "notional":    NOTIONAL,
+                "equity_usd":  round(NOTIONAL * (1 + (_engine_ref.pnl_total_bps if _engine_ref else 0.0) / 10_000.0), 2),
+                "pnl_usd":     round(NOTIONAL * (_engine_ref.pnl_total_bps if _engine_ref else 0.0) / 10_000.0, 2),
                 "uptime_sec":  int((datetime.now(timezone.utc) - _startup_ts).total_seconds()),
                 **(_engine_ref.to_state_dict() if _engine_ref else {}),
             }, default=str).encode()
@@ -245,7 +250,7 @@ class PaperTrader:
                 notifier.close_position(
                     ev["direction"], ev["entry_price"], ev["exit_price"],
                     ev["outcome"], ev["pnl_bps"], ev["pnl_total_bps"],
-                    ev["ts_close"])
+                    ev["ts_close"], NOTIONAL)
                 if ev.get("phase0_halted") and not self._halt_sent:
                     self._halt_sent = True
                     notifier.phase0_halt(ev["n_trades"], self.engine.win_rate or 0)
@@ -263,7 +268,7 @@ class PaperTrader:
                 wr = self.engine.win_rate or 0.0
                 notifier.daily_status(
                     self.engine.n_trades, self.engine.pnl_total_bps,
-                    wr, self.engine.state_str)
+                    wr, self.engine.state_str, NOTIONAL)
                 self._last_daily_status = today
 
 

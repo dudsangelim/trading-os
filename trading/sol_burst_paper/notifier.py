@@ -46,7 +46,7 @@ def startup(symbol: str, notional: float) -> None:
 def signal_detected(direction: str, ret_pct: float, anchor: float, bar_ts: str) -> None:
     _send(
         f"🔔 <b>[{_TAG}] Sinal detectado</b> {direction}\n"
-        f"ret_5m: {ret_pct:+.2f}% | anchor: ${anchor:.4f}\n"
+        f"ret_5m: {ret_pct:+.2f}% | anchor: ${anchor:.2f}\n"
         f"Bar: {bar_ts[:16]} — aguardando entry no próximo bar"
     )
 
@@ -55,26 +55,33 @@ def open_position(direction: str, entry_px: float, slippage_bps: float, ts_entry
     icon = "🟢" if direction == "LONG" else "🔴"
     _send(
         f"{icon} <b>[{_TAG}] {direction} aberto</b>\n"
-        f"Entry: ${entry_px:.4f} | Slippage: {slippage_bps:+.1f} bps\n"
+        f"Entry: ${entry_px:.2f} | Slippage: {slippage_bps:+.1f} bps\n"
         f"Time: {ts_entry[:16]}"
     )
 
 
 def close_position(direction: str, entry_px: float, exit_px: float,
                    outcome: str, pnl_bps: float, pnl_total_bps: float,
-                   ts_close: str) -> None:
+                   ts_close: str, notional: float = 1000.0) -> None:
     icon = "✅" if pnl_bps >= 0 else "❌"
+    pnl_usd   = notional * pnl_bps / 10_000.0
+    equity    = notional * (1 + pnl_total_bps / 10_000.0)
     _send(
         f"{icon} <b>[{_TAG}] {direction} fechado</b> ({outcome})\n"
-        f"Entry: ${entry_px:.4f} → Exit: ${exit_px:.4f}\n"
-        f"PnL: {pnl_bps:+.1f} bps | Total: {pnl_total_bps:+.1f} bps\n"
+        f"Entry: ${entry_px:.2f} → Exit: ${exit_px:.2f}\n"
+        f"PnL: {pnl_usd:+.2f} USD ({pnl_bps:+.1f} bps)\n"
+        f"Equity: ${equity:,.2f} (Total: {pnl_total_bps:+.1f} bps)\n"
         f"Time: {ts_close[:16]}"
     )
 
 
-def daily_status(n_trades: int, pnl_total_bps: float, wr: float, position: str) -> None:
+def daily_status(n_trades: int, pnl_total_bps: float, wr: float, position: str,
+                 notional: float = 1000.0) -> None:
+    equity  = notional * (1 + pnl_total_bps / 10_000.0)
+    pnl_pct = pnl_total_bps / 100.0
     _send(
         f"📊 <b>[{_TAG}] Status diário</b>\n"
+        f"Equity: ${equity:,.2f} ({pnl_pct:+.2f}%) | base ${notional:.0f}\n"
         f"Trades: {n_trades} | WR: {wr*100:.1f}%\n"
         f"PnL total: {pnl_total_bps:+.1f} bps\n"
         f"Posição: {position}"
