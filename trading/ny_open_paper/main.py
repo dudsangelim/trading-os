@@ -473,7 +473,10 @@ def run_live(trader: PaperTrader) -> None:
             # sleep in 1s chunks to remain responsive to shutdown signal
             deadline = time_mod.time() + wait
             while time_mod.time() < deadline and not _shutdown:
-                time_mod.sleep(min(1.0, deadline - time_mod.time()))
+                sleep_for = deadline - time_mod.time()
+                if sleep_for <= 0:
+                    break
+                time_mod.sleep(min(1.0, sleep_for))
 
             if _shutdown:
                 break

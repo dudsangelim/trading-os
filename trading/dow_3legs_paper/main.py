@@ -115,6 +115,7 @@ class PaperTrader:
         self.equity = INITIAL_CAPITAL
         init_csvs()
         self._load_state()
+        self._update_health_state()
 
     def _load_state(self) -> None:
         st = load_state()
@@ -142,6 +143,16 @@ class PaperTrader:
             "equity": self.equity,
             "engine": self.engine.to_state_dict(),
             "gate": self.gate.to_dict(),
+        })
+
+    def _update_health_state(self, ts: pd.Timestamp | None = None,
+                             gate_info: dict | None = None) -> None:
+        _health_state.update({
+            "state": self.engine.state,
+            "equity": round(self.equity, 4),
+            "n_trades": len(self.engine.trades),
+            "gate": gate_info if gate_info is not None else self.gate.to_dict(),
+            "ts": ts.isoformat() if ts is not None else None,
         })
 
     def on_tick(self, ts: pd.Timestamp, price: float) -> None:
@@ -219,13 +230,7 @@ class PaperTrader:
         })
         self._save_state()
 
-        _health_state.update({
-            "state": self.engine.state,
-            "equity": round(self.equity, 4),
-            "n_trades": len(self.engine.trades),
-            "gate": gate_info,
-            "ts": ts.isoformat(),
-        })
+        self._update_health_state(ts, gate_info)
 
         log.info(
             "[tick] state=%s equity=$%.4f gate=%s",
@@ -269,7 +274,10 @@ def run_live(trader: PaperTrader) -> None:
             wait = _seconds_until_next_minute()
             deadline = time_mod.time() + wait
             while time_mod.time() < deadline and not _shutdown:
-                time_mod.sleep(min(1.0, deadline - time_mod.time()))
+                sleep_for = deadline - time_mod.time()
+                if sleep_for <= 0:
+                    break
+                time_mod.sleep(min(1.0, sleep_for))
 
             if _shutdown:
                 break

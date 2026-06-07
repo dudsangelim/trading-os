@@ -12,7 +12,6 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_ny_open_paper` | 8094 | NY Open 2C fade, BTCUSDT 5m | $100 / 1x |
 | `trading_asian_dema_paper` | 8095 | R021-B Asian DEMA 1h (DEMA 13/34), SOLUSDT 1h | $1000 / 1x |
 | `trading_dow_3legs_paper` | 8096 | DOW 3-legs skip_low, BTCUSDT perp | $50 / 1.0x |
-| `trading_bw_jawcross_paper` | 8097 | BW Alligator order-flip long-only, BTCUSDT 6h | $1000 / 5x / 30% stake |
 | `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
 | `trading_ny_open_mom_paper` | 8104 | NY Open Momentum Long Phase 0, BTCUSDT 5m | $1000 / 1x |
@@ -29,7 +28,7 @@ Health check: `GET /health` or `/healthz` on each container's port.
 - Status: `docker exec trading_ny_open_mom_paper python -m trading.ny_open_mom_paper.main --status`
 - Replay: `docker exec trading_ny_open_mom_paper python -m trading.ny_open_mom_paper.main --replay-days 30`
 
-## Standalone paper traders (`trading/ny_open_paper/`, `trading/dow_3legs_paper/`, `trading/bw_jawcross_paper/`, `trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`)
+## Standalone paper traders (`trading/ny_open_paper/`, `trading/dow_3legs_paper/`, `trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`)
 
 - No auth, no DB. REST feed from Binance public endpoints.
 - State persisted to `/data/state.json` (volume-mounted).
@@ -46,18 +45,6 @@ Health check: `GET /health` or `/healthz` on each container's port.
 ### ny_open_paper specifics
 - Session: 13:30–20:00 UTC weekdays. Decision bar at 14:00 UTC.
 - Frozen model in `assets/2C_v1_frozen.json` — do NOT retrain without full validation.
-
-### bw_jawcross_paper specifics
-- Symbol: BTCUSDT, timeframe: 6h (switched from SOL/1h on 2026-05-11 — see DECISIONS.md).
-- Trigger: XX:02 UTC every hour; engine drops bars already processed (only 4 ticks/day actually fire signals).
-- Entry: **order-flip long** — Alligator just turned bull-ordered (`lips > teeth > jaw` now, was NOT on previous closed bar). Long-only.
-- Exit: first closed bar with `close < lips`. No hard SL.
-- Indicators: canonical Alligator SMMA(13)+8 / SMMA(8)+5 / SMMA(5)+3.
-- Position sizing: equity × 30% × 5x = 1.5× effective leverage per trade.
-- Fee: 0.08% RT (Binance Futures VIP0 taker). Slippage: 2 bps/side adverse (entry+exit).
-- Status: `docker exec trading_bw_jawcross_paper python3 -m trading.bw_jawcross_paper.main --status`
-- Replay: `docker exec trading_bw_jawcross_paper python3 -m trading.bw_jawcross_paper.main --replay-days 30`
-- Audit (current config, BTC 6h): `/home/agent/backtests/audit_bw_btc6h_engine_logic.py` — realistic-fill backtest yields +157% over 2021–2026 / 200 trades / WR 38% / max DD -49% / PF 1.38. Signal-comparison matrix in `audit_bw_signal_compare.py` confirms BTC 6h order-flip is the only profitable cell across {1h, 6h} × {order_flip, jaw_cross} × {close_lips, lo_touch_lips}.
 
 ### asian_dema_paper specifics (R021-B Phase 0)
 - Trigger: polls every minute, processes new closed 1h bars.

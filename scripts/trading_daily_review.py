@@ -69,14 +69,8 @@ PAPER_TRADER_CSV = [
      "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  None),
     ("Asian DEMA",    "trading/asian_dema_paper/data/trades.csv",
      "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  "pnl_total_after"),
-    ("BW Jawcross",   "trading/bw_jawcross_paper/data/alligator_btc6h_order_flip_lips_long_v1_trades.csv",
-     "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  "equity_after"),
     ("SOL Burst",     "trading/sol_burst_paper/data/trades.csv",
      "ts_close", "direction", {},                        "pnl_bps",     "bps",  None),
-    ("EF3 FA1-M",     "trading/ef3_fa1mf_paper/data/ef3_fa1mf_30h4_sma200_atr14x2_trailing_v1_trades.csv",
-     "exit_ts",  None,        {},                        "pnl_usd",     "usd",  "equity_after"),
-    ("EF3 FB2-A",     "trading/ef3_fb2af_paper/data/ef3_fb2af_20h4_compress12_sma200_sl1_tp8_v1_trades.csv",
-     "exit_ts",  None,        {},                        "pnl_usd",     "usd",  "equity_after"),
 ]
 
 # Standalone paper traders polled via HTTP (not in Postgres)

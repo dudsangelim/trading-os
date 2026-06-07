@@ -1,16 +1,10 @@
-"""
-EF3 F-B.2.A.f paper trader — main entry point.
+"""EF3 R004 / F-B.2.A.f paper trader — main entry point.
 
-Strategy: 20-bar H4 breakout + range compression <12% + SMA200 Daily
-          + SL 1×ATR14 + TP 8:1 fixed.
+Polls Binance Futures every minute; on each newly-closed H4 bar it runs the
+R004 logic (20-bar HIGH breakout + range-compression <12% + SMA200 Daily +
+SL 1×ATR14 + TP 8:1).
 
-Modes:
-  live (default)   — wakes up at XX:02 UTC every 4 hours (H4 close trigger)
-  --once           — one tick and exit (smoke test)
-  --replay-days N  — replay last N days (resets state, stale entries enabled)
-  --status         — print current state and exit
-
-Health endpoint: GET /healthz on FB2_HEALTH_PORT (default 8099)
+Health endpoint: GET /healthz on FB2AF_HEALTH_PORT (default 8103).
 """
 from __future__ import annotations
 
@@ -22,23 +16,19 @@ import sys
 import threading
 import time as time_mod
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pandas as pd
 
 from trading.ef3_fb2af_paper.config import (
-    DATA_DIR, HEALTH_PORT, INITIAL_CAPITAL, LOG_DIR,
-    STRATEGY_ID, SYMBOL,
+    HEALTH_PORT, INITIAL_CAPITAL, LOG_DIR, STRATEGY_ID, WORKER,
 )
-from trading.ef3_fb2af_paper.engine import Fb2afEngine
-from trading.ef3_fb2af_paper.feed import fetch_bars, get_current_price
-from trading.ef3_fb2af_paper import notifier
+from trading.ef3_fb2af_paper.engine import FB2AfEngine
+from trading.ef3_fb2af_paper.feed import Feed
 from trading.ef3_fb2af_paper.persistence import (
-    append_equity, append_trade, init_csvs, load_state, save_state,
+    append_row, init_csvs, load_state, save_state,
 )
-
-# ── logging ────────────────────────────────────────────────────────────────────
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
@@ -50,34 +40,31 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout),
     ],
 )
-log = logging.getLogger("ef3_fb2af_paper")
+log = logging.getLogger("ef3_fb2af")
 
 _startup_ts = datetime.now(timezone.utc)
 
-# ── health server ──────────────────────────────────────────────────────────────
-
-_health: dict = {
-    "state":       "init",
-    "equity":      INITIAL_CAPITAL,
-    "n_trades":    0,
+_health_state: dict = {
+    "worker": WORKER,
+    "strategy_id": STRATEGY_ID,
+    "state": "starting",
+    "equity": INITIAL_CAPITAL,
+    "n_trades": 0,
     "last_bar_ts": None,
-    "price":       None,
+    "price": None,
 }
 
 
-class _H(BaseHTTPRequestHandler):
+class _HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):  # noqa: N802
-        if self.path not in ("/healthz", "/health"):
+        if self.path not in ("/health", "/healthz"):
             self.send_response(404)
             self.end_headers()
             return
         body = json.dumps({
-            "status":      "ok",
-            "worker":      "ef3_fb2af_paper",
-            "strategy_id": STRATEGY_ID,
-            "symbol":      SYMBOL,
-            "uptime_sec":  int((datetime.now(timezone.utc) - _startup_ts).total_seconds()),
-            **_health,
+            "status": "ok",
+            "uptime_sec": int((datetime.now(timezone.utc) - _startup_ts).total_seconds()),
+            **_health_state,
         }, default=str).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -85,132 +72,95 @@ class _H(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, *_):
+    def log_message(self, fmt, *args):
         pass
 
 
-def _start_health() -> None:
+def _start_health_server() -> None:
     try:
-        srv = HTTPServer(("0.0.0.0", HEALTH_PORT), _H)
+        srv = HTTPServer(("0.0.0.0", HEALTH_PORT), _HealthHandler)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         log.info("[health] listening on port %d", HEALTH_PORT)
-    except Exception as e:
-        log.warning("[health] could not start: %s", e)
+    except Exception as exc:
+        log.warning("[health] could not start server: %s", exc)
 
 
-# ── PaperTrader ────────────────────────────────────────────────────────────────
+def _to_frame(bars: list[dict]) -> pd.DataFrame:
+    df = pd.DataFrame(bars)
+    df["ts"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
+    df = df.set_index("ts").sort_index()
+    return df[["open", "high", "low", "close"]]
+
 
 class PaperTrader:
     def __init__(self) -> None:
-        self.engine = Fb2afEngine(initial_equity=INITIAL_CAPITAL)
+        self.engine = FB2AfEngine()
+        self.equity = INITIAL_CAPITAL
         init_csvs()
-        self._load()
-        _health.update({
-            "state":       self.engine.state_str,
-            "equity":      round(self.engine.equity, 4),
-            "n_trades":    self.engine.n_trades,
-            "last_bar_ts": str(self.engine.last_bar_ts) if self.engine.last_bar_ts else None,
-        })
+        self._load_state()
+        self._update_health(self.engine.last_price)
 
-    def _load(self) -> None:
+    def _load_state(self) -> None:
         st = load_state()
         if not st:
-            log.info("[state] no existing state — starting fresh (capital=$%.2f)", INITIAL_CAPITAL)
-            return
-        if st.get("strategy_id") != STRATEGY_ID or st.get("symbol") != SYMBOL:
-            log.warning(
-                "[state] ignoring incompatible state — found strategy=%s symbol=%s; expected %s %s",
-                st.get("strategy_id"), st.get("symbol"), STRATEGY_ID, SYMBOL,
-            )
             return
         try:
             self.engine.load_state_dict(st.get("engine", {}))
-            log.info(
-                "[state] loaded — state=%s equity=$%.2f n_trades=%d last_bar=%s",
-                self.engine.state_str, self.engine.equity,
-                self.engine.n_trades, self.engine.last_bar_ts,
-            )
+            self.equity = st.get("equity", INITIAL_CAPITAL)
+            log.info("[state loaded] state=%s equity=$%.4f n_trades=%d",
+                     self.engine.state, self.equity, len(self.engine.trades))
         except Exception:
             log.error("[state] load error:\n%s", traceback.format_exc())
 
-    def _save(self) -> None:
-        if self.engine.last_bar_ts is None:
-            return
-        save_state({
-            "strategy_id": STRATEGY_ID,
-            "symbol":      SYMBOL,
-            "engine":      self.engine.to_state_dict(),
+    def _save_state(self) -> None:
+        save_state({"equity": self.equity, "engine": self.engine.to_state_dict()})
+
+    def _update_health(self, price) -> None:
+        _health_state.update({
+            "state": self.engine.state,
+            "equity": round(self.equity, 4),
+            "n_trades": len(self.engine.trades),
+            "last_bar_ts": self.engine.last_bar_ts,
+            "price": price,
         })
 
-    def tick(self, trade_stale_entries: bool = False) -> None:
-        try:
-            df = fetch_bars()
-        except Exception as e:
-            log.error("[tick] feed error: %s", e)
-            notifier.notify_error("feed", str(e))
-            return
+    def tick(self) -> None:
+        h4 = _to_frame(Feed.h4(limit=60))
+        daily = _to_frame(Feed.daily(limit=300))
+        n_before = len(self.engine.trades)
 
-        try:
-            price = get_current_price()
-        except Exception as e:
-            log.error("[tick] price error: %s", e)
-            price = None
+        decisions = self.engine.process_bar(h4, daily)
+        price = Feed.get_price()
+        self.engine.last_price = price
 
-        events = self.engine.replay_bars(df, trade_stale_entries=trade_stale_entries)
-        ts_str = df.index[-1].isoformat()
+        for d in decisions:
+            append_row("decisions.csv", {
+                "ts": d["ts"], "action": d["action"], "price": d["price"],
+                "state_after": d["state_after"],
+                "extra_json": json.dumps(
+                    {k: v for k, v in d.items()
+                     if k not in ("ts", "action", "price", "state_after")},
+                    default=str),
+            })
+            log.info("[DECISION %s] ts=%s price=%.2f state->%s",
+                     d["action"], d["ts"], d["price"], d["state_after"])
 
-        for ev in events:
-            action = ev["action"]
-            if action == "signal":
-                notifier.notify_signal(
-                    str(ev["ts"])[:19],
-                    ev["pending_atr"],
-                    self.engine.equity,
-                )
-            elif action == "open_long":
-                notifier.notify_open(
-                    str(ev["ts"])[:19],
-                    ev["entry_px"],
-                    ev["sl_price"],
-                    ev["tp_price"],
-                    ev["atr_signal"],
-                    ev["equity"],
-                )
-            elif action == "close_long":
-                tr = ev["trade"]
-                append_trade(tr)
-                notifier.notify_close(tr)
+        for tr in self.engine.trades[n_before:]:
+            self.equity *= (1 + tr["ret_pct_net"] / 100.0)
+            append_row("trades.csv", {**tr, "equity_after": round(self.equity, 6)})
+            log.info("[TRADE CLOSED] %s %.2f->%.2f ret_net=%+.3f%% equity=$%.4f",
+                     tr["exit_type"], tr["entry_price"], tr["exit_price"],
+                     tr["ret_pct_net"], self.equity)
 
-        append_equity(ts_str, self.engine.equity, self.engine.state_str, self.engine.n_trades)
-        self._save()
-
-        _health.update({
-            "state":       self.engine.state_str,
-            "equity":      round(self.engine.equity, 4),
-            "n_trades":    self.engine.n_trades,
-            "last_bar_ts": ts_str,
-            "price":       price,
+        append_row("equity_curve.csv", {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "equity": round(self.equity, 6), "state": self.engine.state,
         })
+        self._save_state()
+        self._update_health(price)
+        log.info("[tick] state=%s equity=$%.4f last_bar=%s price=%.2f",
+                 self.engine.state, self.equity, self.engine.last_bar_ts, price)
 
-        log.info(
-            "[tick] bar=%s state=%s equity=$%.2f n_trades=%d",
-            ts_str[:19], self.engine.state_str, self.engine.equity, self.engine.n_trades,
-        )
-
-
-# ── timing helpers ─────────────────────────────────────────────────────────────
-
-def _seconds_until_next_h4_trigger() -> float:
-    now = datetime.now(timezone.utc)
-    h4_hours = {0, 4, 8, 12, 16, 20}
-    next_close = now.replace(minute=2, second=0, microsecond=0)
-    while next_close.hour not in h4_hours or next_close <= now:
-        next_close += timedelta(hours=1)
-        next_close = next_close.replace(minute=2, second=0, microsecond=0)
-    return max(1.0, (next_close - now).total_seconds())
-
-
-# ── live loop ──────────────────────────────────────────────────────────────────
 
 _shutdown = False
 
@@ -221,110 +171,53 @@ def _on_signal(*_) -> None:
     log.info("[shutdown] signal received")
 
 
+def _seconds_until_next_minute() -> float:
+    now = datetime.now(timezone.utc)
+    nxt = (now + timedelta(seconds=60 - now.second + 1)).replace(microsecond=0)
+    return max(1.0, (nxt - now).total_seconds())
+
+
 def run_live(trader: PaperTrader) -> None:
     signal.signal(signal.SIGTERM, _on_signal)
     signal.signal(signal.SIGINT, _on_signal)
-    log.info("[live] started — triggers at XX:02 UTC on H4 closes (00/04/08/12/16/20 UTC)")
-    notifier.notify_startup(trader.engine.equity)
+    log.info("live mode started (%s / %s)", WORKER, STRATEGY_ID)
+
+    try:
+        trader.tick()
+    except Exception:
+        log.error("[boot tick error]\n%s", traceback.format_exc())
 
     while not _shutdown:
         try:
-            wait = _seconds_until_next_h4_trigger()
-            log.info("[live] sleeping %.0fs until next H4 trigger", wait)
+            wait = _seconds_until_next_minute()
             deadline = time_mod.time() + wait
             while time_mod.time() < deadline and not _shutdown:
-                time_mod.sleep(min(5.0, deadline - time_mod.time()))
+                time_mod.sleep(min(1.0, max(0.0, deadline - time_mod.time())))
             if _shutdown:
                 break
             trader.tick()
-        except KeyboardInterrupt:
-            break
         except Exception:
-            err = traceback.format_exc()
-            log.error("[loop error]\n%s", err)
-            notifier.notify_error("run_live", err)
-            time_mod.sleep(60)
+            log.error("[loop error]\n%s", traceback.format_exc())
+            time_mod.sleep(30)
 
-    trader._save()
-    log.info("[shutdown] state saved")
+    trader._save_state()
+    log.info("[shutdown] state saved, exiting")
 
-
-# ── replay mode ────────────────────────────────────────────────────────────────
-
-def run_replay(trader: PaperTrader, days: int) -> None:
-    log.info("[replay] fetching bars for last %d days...", days)
-    try:
-        df = fetch_bars()
-    except Exception as e:
-        log.error("[replay] feed error: %s", e)
-        return
-
-    trader.engine = Fb2afEngine(initial_equity=INITIAL_CAPITAL)
-
-    cutoff = df.index[-1] - pd.Timedelta(days=days)
-    df_replay = df[df.index >= cutoff]
-
-    events = trader.engine.replay_bars(df_replay, trade_stale_entries=True)
-
-    wins  = sum(1 for ev in events if ev["action"] == "close_long" and ev["trade"]["pnl_usd"] > 0)
-    total = sum(1 for ev in events if ev["action"] == "close_long")
-    pnl   = trader.engine.equity - INITIAL_CAPITAL
-    log.info(
-        "[replay] done — %d trades | WR=%d/%d | equity=$%.2f (PnL=$%+.2f)",
-        total, wins, total, trader.engine.equity, pnl,
-    )
-    for ev in events:
-        if ev["action"] == "open_long":
-            log.info("  OPEN  long | %s | entry=%.4f sl=%.4f tp=%.4f",
-                     str(ev["ts"])[:19], ev["entry_px"], ev["sl_price"], ev["tp_price"])
-        elif ev["action"] == "close_long":
-            tr = ev["trade"]
-            log.info("  CLOSE long | entry=%.4f exit=%.4f | type=%s | net=%+.2fbps | pnl=$%+.2f",
-                     tr["entry_px"], tr["exit_px"], tr["exit_type"],
-                     tr["net_ret_bps"], tr["pnl_usd"])
-
-
-# ── entry point ────────────────────────────────────────────────────────────────
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="EF3 F-B.2.A.f paper trader")
-    ap.add_argument("--once",        action="store_true", help="one tick and exit")
-    ap.add_argument("--replay-days", type=int, default=0, metavar="N",
-                    help="replay last N days (resets state)")
-    ap.add_argument("--status",      action="store_true", help="print state and exit")
+    ap = argparse.ArgumentParser(description="EF3 FB2Af paper trader")
+    ap.add_argument("--once", action="store_true", help="one tick and exit")
     args = ap.parse_args()
 
-    log.info(
-        "EF3 FB2Af v%s | strategy=%s symbol=%s capital=$%.0f",
-        Fb2afEngine.VERSION, STRATEGY_ID, SYMBOL, INITIAL_CAPITAL,
-    )
-
-    _start_health()
+    log.info("engine=%s capital=$%.2f", FB2AfEngine.VERSION, INITIAL_CAPITAL)
+    _start_health_server()
     trader = PaperTrader()
-
-    if args.status:
-        e = trader.engine
-        print(f"state:    {e.state_str}")
-        print(f"equity:   ${e.equity:.2f}  (start ${INITIAL_CAPITAL:.2f})")
-        print(f"n_trades: {e.n_trades}")
-        print(f"last_bar: {e.last_bar_ts}")
-        if e.position_side == 1 and e.position_entry_px:
-            try:
-                px = get_current_price()
-                gross = (px - e.position_entry_px) / e.position_entry_px
-                print(f"unrealised: {gross*100:+.3f}%  (mark={px:.4f})")
-            except Exception:
-                pass
-        return 0
-
-    if args.replay_days > 0:
-        run_replay(trader, args.replay_days)
-        return 0
+    log.info("state=%s equity=$%.4f n_trades=%d",
+             trader.engine.state, trader.equity, len(trader.engine.trades))
 
     if args.once:
         trader.tick()
         return 0
-
     run_live(trader)
     return 0
 

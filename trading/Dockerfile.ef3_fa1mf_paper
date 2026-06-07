@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY trading/ef3_fa1mf_paper/assets/requirements.txt /app/requirements.txt
+COPY trading/ef3_fa1mf_paper/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY trading/ /app/trading/

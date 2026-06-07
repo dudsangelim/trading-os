@@ -35,10 +35,7 @@ DOW_3LEGS_API   = "http://127.0.0.1:8096"
 PAPER_TRADERS = [
     ("rsi_reversion_paper",  8093, "/healthz", "RSI Reversion"),
     ("asian_dema_paper",     8095, "/healthz", "Asian DEMA"),
-    ("bw_jawcross_paper",    8097, "/healthz", "BW Jawcross"),
     ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
-    ("ef3_fa1mf_paper",      8102, "/healthz", "EF3 FA1-M"),
-    ("ef3_fb2af_paper",      8103, "/healthz", "EF3 FB2-A"),
 ]
 BOT_TOKEN       = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not BOT_TOKEN:
