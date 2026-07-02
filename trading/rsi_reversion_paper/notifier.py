@@ -93,3 +93,39 @@ def consec_loss_alert(count: int, pnl_total: float) -> None:
 
 def error_alert(msg: str) -> None:
     _send(f"🚨 <b>[{_TAG}] Erro</b>\n<code>{msg[:300]}</code>")
+
+
+def tier1_alert(reason: str, snap: dict) -> None:
+    _send(
+        f"📊 <b>[{_TAG}] T1 ALERT</b>\n"
+        f"{reason}\n"
+        f"N_cum={snap.get('N_cum')} | "
+        f"WR_roll={snap.get('WR_roll'):.2f} | "
+        f"PF_roll={snap.get('PF_roll'):.2f} | "
+        f"mean_bps_roll={snap.get('mean_bps_roll'):.1f}\n"
+        f"PF_cum={snap.get('PF_cum'):.2f} | dd=${snap.get('dd_usd'):.2f}"
+    )
+
+
+def tier2_review(reason: str, snap: dict) -> None:
+    _send(
+        f"🟠 <b>[{_TAG}] T2 REVIEW REQUIRED</b>\n"
+        f"{reason}\n"
+        f"N_cum={snap.get('N_cum')} | "
+        f"WR_cum={snap.get('WR_cum'):.2f} | "
+        f"PF_cum={snap.get('PF_cum'):.2f}\n"
+        f"mean_bps_cum={snap.get('mean_bps_cum'):.1f} | dd=${snap.get('dd_usd'):.2f}\n"
+        f"<i>Revisar manualmente — sem pausa automática.</i>"
+    )
+
+
+def tier3_halt(reason: str, snap: dict) -> None:
+    _send(
+        f"⛔ <b>[{_TAG}] T3 AUTO-HALT</b>\n"
+        f"{reason}\n"
+        f"N_cum={snap.get('N_cum')} | "
+        f"WR_cum={snap.get('WR_cum'):.2f} | "
+        f"PF_cum={snap.get('PF_cum'):.2f}\n"
+        f"mean_bps_cum={snap.get('mean_bps_cum'):.1f} | dd=${snap.get('dd_usd'):.2f}\n"
+        f"<b>Novas entradas suspensas.</b> Unhalt manual: edit state.json"
+    )

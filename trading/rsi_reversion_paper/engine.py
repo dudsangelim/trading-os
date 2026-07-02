@@ -12,6 +12,7 @@ from trading.rsi_reversion_paper.config import (
     EXIT_LEVEL, FEE_RT, NOTIONAL, OVERBOUGHT, OVERSOLD,
     PHASE0_MIN_TRADES, PHASE0_MIN_WR, RSI_PERIOD,
 )
+from trading.rsi_reversion_paper.gates import TradeRecord, evaluate as evaluate_gates
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +85,8 @@ class RsiReversionEngine:
         self.last_bar_ts:  Optional[str] = None
 
         self._trade_results: List[bool] = []  # True=win, False=loss
+        self._trade_records: List[TradeRecord] = []   # (won, net_ret) per closed trade
+        self._last_alerted_tier: int = 0              # to deduplicate alerts
 
     # ── State persistence ────────────────────────────────────────────────────
 
@@ -100,6 +103,10 @@ class RsiReversionEngine:
             "halted":       self.halted,
             "last_bar_ts":  self.last_bar_ts,
             "trade_results": self._trade_results,
+            "trade_records": [
+                {"won": r.won, "net_ret": r.net_ret} for r in self._trade_records
+            ],
+            "last_alerted_tier": self._last_alerted_tier,
         }
 
     def load_state_dict(self, d: Dict[str, Any]) -> None:
@@ -114,6 +121,11 @@ class RsiReversionEngine:
         self.halted       = bool(d.get("halted", False))
         self.last_bar_ts  = d.get("last_bar_ts")
         self._trade_results = list(d.get("trade_results", []))
+        self._trade_records = [
+            TradeRecord(won=bool(x.get("won")), net_ret=float(x.get("net_ret", 0)))
+            for x in d.get("trade_records", [])
+        ]
+        self._last_alerted_tier = int(d.get("last_alerted_tier", 0))
 
     # ── Main processing loop ─────────────────────────────────────────────────
 
@@ -222,6 +234,7 @@ class RsiReversionEngine:
         if won:
             self.n_wins += 1
         self._trade_results.append(won)
+        self._trade_records.append(TradeRecord(won=won, net_ret=net_ret))
 
         log.info(
             "[CLOSE %s] entry=%.4f exit=%.4f net=%+.3f%% pnl=$%+.2f total=$%+.2f rsi=%.1f",
@@ -245,6 +258,14 @@ class RsiReversionEngine:
             self.halted = True
             log.warning("[phase0] HALTED — WR=%.1f%% after %d trades", wr * 100, self.n_trades)
 
+        # Tiered PAUSE_CRITERIA evaluation
+        tier_result = evaluate_gates(self._trade_records, NOTIONAL)
+        new_alert = (tier_result.tier > 0 and tier_result.tier != self._last_alerted_tier)
+        self._last_alerted_tier = tier_result.tier
+        if tier_result.tier == 3 and not self.halted:
+            self.halted = True
+            log.warning("[gates] AUTO-HALT Tier 3 — %s", tier_result.reason)
+
         consec = self._count_consec_losses()
 
         return {
@@ -255,6 +276,10 @@ class RsiReversionEngine:
             "n_trades": self.n_trades, "n_wins": self.n_wins,
             "phase0_halted": self.halted,
             "consec_losses": consec,
+            "tier": tier_result.tier,
+            "tier_reason": tier_result.reason,
+            "tier_snapshot": tier_result.snapshot,
+            "tier_new_alert": new_alert,
         }
 
     def _count_consec_losses(self) -> int:

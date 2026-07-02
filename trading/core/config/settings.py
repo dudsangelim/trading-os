@@ -48,19 +48,8 @@ class EngineRiskConfig:
 
 ENGINE_CONFIGS: Dict[str, EngineRiskConfig] = {
     # ── Classic engines ──────────────────────────────────────────────
-    "m3_sol": EngineRiskConfig(
-        engine_id="m3_sol",
-        symbol="SOLUSDT",
-        initial_capital_usd=1000.0,
-        risk_per_trade_pct=0.03,
-        max_daily_dd_pct=0.05,
-        min_bankroll_usd=200.0,
-        slippage_bps=8,
-        leverage=10,
-        signal_only=False,
-        timeout_bars=64,
-        timeframe_minutes=15,
-    ),
+    # m3_sol APOSENTADO em 2026-06-14 (audit): negativo (-$5,43 / 5 trades em 3 meses),
+    # frequência baixíssima. Removido do registry e marcado em tr_runtime_pauses.
     "m3_eth_shadow": EngineRiskConfig(
         engine_id="m3_eth_shadow",
         symbol="ETHUSDT",

@@ -32,8 +32,9 @@ from typing import Optional
 import pandas as pd
 
 from trading.ny_open_paper.config import (
-    FALLBACK_MODEL_PATH, HEALTH_PORT, INITIAL_CAPITAL,
-    LEGACY_MODEL_PATH, LOG_DIR, MODEL_PATH, POLL_OFFSET_SEC,
+    EXECUTION_MODE, FALLBACK_MODEL_PATH, HEALTH_PORT, INITIAL_CAPITAL,
+    LEGACY_MODEL_PATH, LIVE_ACCOUNT, LIVE_LEVERAGE, LIVE_NOTIONAL_USD,
+    LOG_DIR, MODEL_PATH, POLL_OFFSET_SEC, SYMBOL,
     TRADING_ALLOWED_USERS, TRADING_BOT_TOKEN,
 )
 from trading.ny_open_paper.engine import StrategyEngine
@@ -151,6 +152,8 @@ class PaperTrader:
         self.last_ctx_date = None
         self.processed_trades = 0
         self._lock = threading.Lock()
+        self.broker = None          # set to a LiveBroker when EXECUTION_MODE == "live"
+        self._seq = 0               # monotonic step counter for live reconcile ordering
         # DD thresholds from model execution_notes (defaults: alert 15%, kill 25%)
         _notes = model.d.get("execution_notes", {})
         self._dd_alert_pct = float(_notes.get("max_dd_alert_pct", 15))
@@ -299,6 +302,14 @@ class PaperTrader:
             tp1_entry = self.engine.pos.entry_price if self.engine.pos else None
             engine_state = self.engine.state
 
+            # snapshot for the live reconciler (captured atomically under the lock)
+            self._seq += 1
+            seq = self._seq
+            if engine_state == "IN_POSITION" and self.engine.pos is not None:
+                live_snap = (True, self.engine.pos.direction, float(self.engine.pos.stop_price))
+            else:
+                live_snap = (False, 0, 0.0)
+
         # --- notifications and I/O outside lock ---
 
         for d in new_decisions:
@@ -370,6 +381,10 @@ class PaperTrader:
             "engine_current_date": str(self.engine.current_date) if self.engine.current_date else None,
         })
 
+        # mirror the engine's position/stop onto the real account (no-op in shadow)
+        if self.broker is not None:
+            self.broker.reconcile(seq, live_snap[0], live_snap[1], live_snap[2], c)
+
     # ------------------------------------------------------------------
     # Tick handler (position management only)
     # ------------------------------------------------------------------
@@ -390,6 +405,14 @@ class PaperTrader:
             tp1_entry = self.engine.pos.entry_price if self.engine.pos else None
             new_trades = list(self.engine.trades[trades_before:])
 
+            engine_state = self.engine.state
+            self._seq += 1
+            seq = self._seq
+            if engine_state == "IN_POSITION" and self.engine.pos is not None:
+                live_snap = (True, self.engine.pos.direction, float(self.engine.pos.stop_price))
+            else:
+                live_snap = (False, 0, 0.0)
+
         if not tp1_before and tp1_now and tp1_partial is not None:
             msg = f"[2C TP1/BE] parcial em {tp1_partial:.2f} | stop→BE {tp1_entry:.2f}"
             log.info(msg)
@@ -397,6 +420,10 @@ class PaperTrader:
 
         for tr in new_trades:
             self._persist_trade(tr, ts)
+
+        # mirror onto the real account (updates stop to BE / closes on exit)
+        if self.broker is not None:
+            self.broker.reconcile(seq, live_snap[0], live_snap[1], live_snap[2], price)
 
 
 # ---------------------------------------------------------------------------
@@ -549,6 +576,34 @@ def run_replay(trader: PaperTrader, days: int) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Live broker wiring
+# ---------------------------------------------------------------------------
+
+def _attach_live_broker(trader: PaperTrader) -> None:
+    """Build a LiveBroker and attach it. On any failure, fall back to SHADOW loudly
+    (never silently pretend to be live, never crash-loop the whole bot)."""
+    from trading.ny_open_paper.live_broker import LiveBroker
+    try:
+        trader.broker = LiveBroker(
+            account=LIVE_ACCOUNT, notional_usd=LIVE_NOTIONAL_USD,
+            symbol=SYMBOL, leverage=LIVE_LEVERAGE, notify=_telegram_send,
+        )
+        log.warning(
+            "[LIVE] EXECUTION_MODE=live — REAL orders on account=%s notional=$%.0f lev=%.0fx",
+            LIVE_ACCOUNT, LIVE_NOTIONAL_USD, LIVE_LEVERAGE,
+        )
+        _telegram_send(
+            f"🟢 <b>NY Open 2C — MODO LIVE</b>\n"
+            f"conta={LIVE_ACCOUNT}  notional=${LIVE_NOTIONAL_USD:.0f}  lev={LIVE_LEVERAGE:.0f}x\n"
+            f"Ordens REAIS. O shadow (paper) segue em paralelo."
+        )
+    except Exception:
+        log.critical("[LIVE] LiveBroker init FAILED — falling back to SHADOW:\n%s", traceback.format_exc())
+        trader.broker = None
+        _telegram_send("🚨 <b>NY Open 2C — falha ao iniciar LIVE; rodando SHADOW</b>\nVer logs.")
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -627,8 +682,11 @@ def main() -> int:
     trader = PaperTrader(model, thr, leverage)
 
     if args.dry_run_replay > 0:
-        run_replay(trader, args.dry_run_replay)
+        run_replay(trader, args.dry_run_replay)   # OFFLINE — never touches real orders
     else:
+        log.info("execution_mode=%s", EXECUTION_MODE)
+        if EXECUTION_MODE == "live":
+            _attach_live_broker(trader)
         run_live(trader)
 
     return 0

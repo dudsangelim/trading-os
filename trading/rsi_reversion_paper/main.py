@@ -255,6 +255,18 @@ class PaperTrader:
                 if consec >= CONSEC_LOSS_ALERT:
                     notifier.consec_loss_alert(consec, ev["pnl_total"])
 
+                # Tiered gate notifications (only on transitions)
+                tier = ev.get("tier", 0)
+                if tier > 0 and ev.get("tier_new_alert"):
+                    reason = ev.get("tier_reason", "")
+                    snap   = ev.get("tier_snapshot", {})
+                    if tier == 1:
+                        notifier.tier1_alert(reason, snap)
+                    elif tier == 2:
+                        notifier.tier2_review(reason, snap)
+                    elif tier == 3:
+                        notifier.tier3_halt(reason, snap)
+
         _save_state(self.engine)
 
     def _maybe_daily_status(self) -> None:

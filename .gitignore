@@ -27,3 +27,11 @@ trading/*/data/*.json
 trading/*/data/*.csv
 trading/*/data/*.bak_*
 trading/*/logs/
+
+# Archived paper traders: keep code, never runtime artifacts
+trading/_archived/*/data/*.json
+trading/_archived/*/data/*.csv
+trading/_archived/*/logs/
+
+# Ad-hoc backup copies of config files
+*.bak-*
