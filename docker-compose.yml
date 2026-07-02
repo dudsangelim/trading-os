@@ -142,6 +142,14 @@ services:
       - NY_OPEN_DATA_DIR=/data
       - NY_OPEN_LOG_DIR=/logs
       - NY_OPEN_HEALTH_PORT=8094
+      - NY_OPEN_EXECUTION_MODE=${NY_OPEN_EXECUTION_MODE:-shadow}
+      # live execution (only used when NY_OPEN_EXECUTION_MODE=live) — values from .env
+      - BINANCE_NY_OPEN_API_KEY=${BINANCE_NY_OPEN_API_KEY:-}
+      - BINANCE_NY_OPEN_API_SECRET=${BINANCE_NY_OPEN_API_SECRET:-}
+      - BINANCE_NY_OPEN_MAX_NOTIONAL_USD=${BINANCE_NY_OPEN_MAX_NOTIONAL_USD:-}
+      - NY_OPEN_LIVE_ACCOUNT=${NY_OPEN_LIVE_ACCOUNT:-NY_OPEN}
+      - NY_OPEN_LIVE_NOTIONAL_USD=${NY_OPEN_LIVE_NOTIONAL_USD:-240}
+      - NY_OPEN_LIVE_LEVERAGE=${NY_OPEN_LIVE_LEVERAGE:-10}
     volumes:
       - ./trading/ny_open_paper/data:/data
       - ./trading/ny_open_paper/logs:/logs
@@ -154,39 +162,39 @@ services:
       retries: 3
       start_period: 15s
 
-  # dow_3legs_paper: standalone DOW 3-legs skip_low paper trader (BTCUSDT, $50/1.0x)
-  # Fully isolated: no postgres, no redis, no registry entry.
-  # Stop with: docker compose stop trading-dow-3legs-paper
-  trading-dow-3legs-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.dow_3legs_paper
-    container_name: trading_dow_3legs_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8096:8096"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
-      - TELEGRAM_TAG=DOW3L
-      - DOW_OUTDIR=/data
-      - DOW_LOG_DIR=/logs
-      - DOW_CAPITAL=50.0
-      - DOW_LEVERAGE=1.0
-      - DOW_HEALTH_PORT=8096
-      - DOW_DISABLE_GATE=false
-      - TZ=UTC
-    volumes:
-      - ./trading/dow_3legs_paper/data:/data
-      - ./trading/dow_3legs_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # dow_3legs_paper: APOSENTADO em 2026-06-14 — sangria consistente (-8,8%, $50→$45,6).
+  # Container removido, código movido para trading/_archived/dow_3legs_paper_archived_20260614.
+  # Para reativar: restaurar do _archived e descomentar este bloco.
+  # trading-dow-3legs-paper:
+  #   build:
+  #     context: .
+  #     dockerfile: trading/Dockerfile.dow_3legs_paper
+  #   container_name: trading_dow_3legs_paper
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:8096:8096"
+  #   environment:
+  #     - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+  #     - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+  #     - TELEGRAM_TAG=DOW3L
+  #     - DOW_OUTDIR=/data
+  #     - DOW_LOG_DIR=/logs
+  #     - DOW_CAPITAL=50.0
+  #     - DOW_LEVERAGE=1.0
+  #     - DOW_HEALTH_PORT=8096
+  #     - DOW_DISABLE_GATE=false
+  #     - TZ=UTC
+  #   volumes:
+  #     - ./trading/dow_3legs_paper/data:/data
+  #     - ./trading/dow_3legs_paper/logs:/logs
+  #   networks:
+  #     - trading_net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
 
   # ef3_fa1mf_paper: Edge Factory v3 R003 / F-A.1.M.f paper trader (BTCUSDT, $1000 / 1x)
   # 30-bar H4 CLOSE breakout + SMA200 Daily regime filter + ATR14x2.0 trailing stop.
@@ -381,51 +389,6 @@ services:
       retries: 3
       start_period: 20s
 
-  # ny_open_mom_paper: NY Open Momentum Long Phase 0 (BTCUSDT, $1000/1x)
-  # Signal: upside break with os_close >= 0.10%. Entry LONG at range high on retest.
-  # Phase 0 gate: WR < 40% after 50 trades → HALT.
-  # Stop with: docker compose stop trading-ny-open-mom-paper
-  trading-ny-open-mom-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.ny_open_mom_paper
-    container_name: trading_ny_open_mom_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8104:8104"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
-      - TELEGRAM_TAG=NYOM
-      - NYOM_SYMBOL=BTCUSDT
-      - NYOM_STRATEGY_ID=ny_open_mom_btc_long_v1
-      - NYOM_CAPITAL=1000.0
-      - NYOM_LEVERAGE=4.0
-      - NYOM_OS_THR_PCT=0.10
-      - NYOM_SL_MULT=1.5
-      - NYOM_TP_MULT=1.0
-      - NYOM_STOP_ALPHA=0.40
-      - NYOM_STOP_MIN_PCT=0.003
-      - NYOM_STOP_MAX_PCT=0.008
-      - NYOM_BREAK_BUFFER=0.0005
-      - NYOM_MAX_RETEST_MIN=15
-      - NYOM_PHASE0_MIN_TRADES=50
-      - NYOM_PHASE0_WR_FLOOR=0.40
-      - NYOM_HEALTH_PORT=8104
-      - NYOM_DATA_DIR=/data
-      - NYOM_LOG_DIR=/logs
-      - TZ=UTC
-    volumes:
-      - ./trading/ny_open_mom_paper/data:/data
-      - ./trading/ny_open_mom_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8104/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
   trading-api:
     build:
@@ -458,6 +421,89 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  # swing_wf_paper: validated 4h walk-forward portfolio (BTC/ETH/SOL), $1000 / 1x.
+  # Re-selects config per sleeve every ~90d (REOPT_BARS); signal-exit configs only
+  # (live state machine proven identical to the research backtest — verify_fidelity.py).
+  # Data via Binance REST (no DB). Stop with: docker compose stop trading-swing-wf-paper
+  trading-swing-wf-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.swing_wf_paper
+    container_name: trading_swing_wf_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8105:8105"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - SWF_TELEGRAM_TAG=SWF4H
+      - SWF_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT
+      - SWF_CAPITAL=1000.0
+      - SWF_LEVERAGE=1.0
+      - SWF_FEE_BPS=4.0
+      - SWF_SLIP_BPS=2.0
+      - SWF_FUNDING=true
+      - SWF_ORDER_TYPE=MARKET
+      - SWF_TRAIN_BARS=2160
+      - SWF_REOPT_BARS=540
+      - SWF_HEALTH_PORT=8105
+      - SWF_DATA_DIR=/data
+      - SWF_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/swing_wf_paper/data:/data
+      - ./trading/swing_wf_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8105/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # btc_lead_paper: SIGNAL_ONLY paper da vencedora rodada-2 do estudo single-asset
+  # (02/07/2026): ETHUSDT 4h na direção do momentum do BTC (roc40 + ema100 do BTC),
+  # L+S, config fixa, $1000 / 1x. Validado: PF 1.53, 4,9%/mês, DD -33%, MC p=0.013.
+  # Data via Binance REST (no DB). Stop with: docker compose stop btc-lead-paper
+  btc-lead-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.btc_lead_paper
+    container_name: trading_btc_lead_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8106:8106"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - BLP_TELEGRAM_TAG=BTCLEAD
+      - BLP_TRADE_SYMBOL=ETHUSDT
+      - BLP_SIGNAL_SYMBOL=BTCUSDT
+      - BLP_ROC_N=40
+      - BLP_EMA_N=100
+      - BLP_ALLOW_SHORT=true
+      - BLP_CAPITAL=1000.0
+      - BLP_LEVERAGE=1.0
+      - BLP_FEE_BPS=4.0
+      - BLP_SLIP_BPS=2.0
+      - BLP_FUNDING=true
+      - BLP_HEALTH_PORT=8106
+      - BLP_DATA_DIR=/data
+      - BLP_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/btc_lead_paper/data:/data
+      - ./trading/btc_lead_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8106/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 
 volumes:
