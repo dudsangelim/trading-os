@@ -506,6 +506,48 @@ services:
       start_period: 30s
 
 
+  # taker_cap_paper: SIGNAL_ONLY paper do H3 da fase 2 do liqflow study
+  # (03/07/2026): LONG 4h após capitulação de taker (z(taker LSR 24h, 7d) < -2),
+  # BTC/ETH/SOL 1h, long-only, hold fixo 4 barras, $1000 (3×$333) / 1x.
+  # Validado 3,5 anos: +17,6bps/trade t=2,8, 4/4 anos+, corr 0 c/ ensemble.
+  # Data via Binance REST (no DB). Stop with: docker compose stop taker-cap-paper
+  taker-cap-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.taker_cap_paper
+    container_name: trading_taker_cap_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8107:8107"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - TCP_TELEGRAM_TAG=TAKERCAP
+      - TCP_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT
+      - TCP_Z_TH=-2.0
+      - TCP_HOLD_BARS=4
+      - TCP_CAPITAL=1000.0
+      - TCP_LEVERAGE=1.0
+      - TCP_FEE_BPS=4.0
+      - TCP_SLIP_BPS=2.0
+      - TCP_FUNDING=true
+      - TCP_HEALTH_PORT=8107
+      - TCP_DATA_DIR=/data
+      - TCP_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/taker_cap_paper/data:/data
+      - ./trading/taker_cap_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8107/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
 volumes:
   pgdata:
 

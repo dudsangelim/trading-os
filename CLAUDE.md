@@ -15,6 +15,7 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
 | `trading_swing_wf_paper` | 8105 | Swing 4h walk-forward portfolio, BTC/ETH/SOL | $1000 / 1x (3×$333) |
 | `trading_btc_lead_paper` | 8106 | BTC→ETH lead-lag 4h (btc_lead roc40/ema100), ETHUSDT | $1000 / 1x |
+| `trading_taker_cap_paper` | 8107 | Taker-capitulation LONG 4h (z(taker LSR)<-2), BTC/ETH/SOL 1h | $1000 / 1x (3×$333) |
 | `trading_worker` | — | m3_eth_shadow (ETHUSDT SIGNAL_ONLY) | $200 |
 
 Health check: `GET /health` or `/healthz` on each container's port.
@@ -87,6 +88,15 @@ Container removido, código em `trading/_archived/dow_3legs_paper_archived_20260
 - Structural clone of swing_wf_paper (same execution state machine, fidelity-proven); data via Binance REST (klines spot, funding fapi), no DB. Cycle ~2 min after each 4h UTC close.
 - Telegram tag `BTCLEAD` (startup/open/close/daily 08:00 UTC/DD>20%/5 losses). Monitored by `trading_watcher.py`.
 - Status: `docker exec trading_btc_lead_paper python -m trading.btc_lead_paper.main --status` | health `curl localhost:8106/healthz` (`/status` shows the current BTC roc/ema signal).
+
+### taker_cap_paper specifics (H3 liqflow phase-2)
+- **LONG-only, hold fixo de 4 barras 1h** após capitulação de taker: z do rolling-24h de log(taker buy/sell volume ratio) vs norma de 7 dias < -2. BTC/ETH/SOL, $1000 total = 3×$333.33 sleeves, 1x, config fixa (sem reopt).
+- Validado 3,5 anos pré-registrado (fase 2 liqflow, 03/07/2026): +17,6bps bruto/trade, t=2,8, n=801, hit 58%, excesso sobre drift positivo nos 4 anos, 3/3 símbolos, dose-resposta monotônica. Standalone: CAGR 7-10%, maxDD -12%, Sharpe 0,9-1,25. Corr ≈ 0 com todos os sleeves do stable5. Ver `/home/agent/research/liqflow_study/REPORT.md`.
+- Estrutura: clone do btc_lead_paper (mesmo Sleeve state machine); engine usa só o branch max_hold. Não-sobreposição fiel à pesquisa: sinal mascarado no bar em que havia posição no início (main.py `was_holding`).
+- Dados via Binance REST fapi (klines 1h + `/futures/data/takerlongshortRatio` 5m paginado, ~30d de histórico — warm-up de 192h necessário). **Gotcha de timestamp**: o endpoint REST rotula buckets 5m pelo INÍCIO; a Binance Vision (fonte da pesquisa) pelo FIM — `exchange.fetch_taker_5m` soma +5min p/ replicar a convenção da pesquisa (corr 1.0 verificada no overlap jun/2026).
+- Ciclo ~3 min após cada fechamento 1h UTC (buffer p/ o bucket 5m publicar). Custos 4+2bps/lado + funding real.
+- Telegram tag `TAKERCAP` (startup/open/close/daily 08:00 UTC/DD>10%/6 losses). Monitorado por `trading_watcher.py`.
+- Status: `docker exec trading_taker_cap_paper python -m trading.taker_cap_paper.main --status` | health `curl localhost:8107/healthz` (`/status` mostra o z atual por símbolo).
 
 ### rsi_reversion_paper specifics (R021-A C1 Phase 0)
 - Trigger: polls every minute, processes new closed 5m bars (30s grace after bar close).
