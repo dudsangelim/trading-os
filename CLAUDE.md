@@ -15,6 +15,7 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
 | `trading_btc_lead_paper` | 8106 | BTC→ETH lead-lag 4h (btc_lead roc40/ema100), ETHUSDT | $1000 / 1x |
 | `trading_taker_cap_paper` | 8107 | Taker-capitulation LONG 4h (z(taker LSR)<-2), BTC/ETH/SOL 1h | $1000 / 1x (3×$333) |
+| `trading_vrp_paper` | 8108 | VRP: short straddle ATM semanal Deribit BTC, delta-hedged diário | $1000 / 1x vol-scaled |
 | `trading_worker` | — | m3_eth_shadow (ETHUSDT SIGNAL_ONLY) | $200 |
 
 Health check: `GET /health` or `/healthz` on each container's port.
@@ -103,6 +104,21 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 - Ciclo ~3 min após cada fechamento 1h UTC (buffer p/ o bucket 5m publicar). Custos 4+2bps/lado + funding real.
 - Telegram tag `TAKERCAP` (startup/open/close/daily 08:00 UTC/DD>10%/6 losses). Monitorado por `trading_watcher.py`.
 - Status: `docker exec trading_taker_cap_paper python -m trading.taker_cap_paper.main --status` | health `curl localhost:8107/healthz` (`/status` mostra o z atual por símbolo).
+
+### vrp_paper specifics (short-vol Deribit — options study 04/07/2026)
+- **Vende straddle ATM BTC toda sexta ~08:05 UTC** (vencimento sexta seguinte 08:00) no best
+  bid REAL via API pública Deribit (sem chave); **hedge de delta diário** (ciclo 08:05) via perp
+  paper ao index price, 6bps/ajuste; settle no delivery price oficial (fallback index após 3h).
+  MtM horário com tickers reais. Sizing vol-scaled: `capital/S × min(0.55/DVOL, 2)`.
+- Validado em `/home/agent/research/options_study/` (23,7M candles de opções 2022→2026-05,
+  **pós-fix de look-ahead de DVOL/spot**, 2 trades verificados contra dados crus):
+  2,56%/mês, PF trade 1,80, Sharpe 1,73, maxDD -17,9% @1x; OOS 2025-26 3,38%/mês; custo 2x → 1,9%/mês.
+  Strangles OTM/condor/put-write = NEGATIVOS (custos comem prêmio OTM) — não "melhorar" pra OTM.
+- Papel: perna de 60% do portfólio-alvo 60/30/10 (c/ btc_lead 8106 e taker_cap 8107):
+  3,40%/mês, PFmo 5,79, Sharpe 2,07, maxDD -10,7% (2023→2026-05).
+- Paper usa contratos fracionários; real exige mín. Deribit 0,1 contrato (~US$13k+ na perna).
+- Status: `docker exec trading_vrp_paper python -m trading.vrp_paper.main --status` | health
+  `curl localhost:8108/healthz` | Telegram tag `VRP`. Monitorado pelo `trading_watcher.py`.
 
 ### rsi_reversion_paper specifics (R021-A C1 Phase 0)
 - Trigger: polls every minute, processes new closed 5m bars (30s grace after bar close).

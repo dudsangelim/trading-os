@@ -38,6 +38,7 @@ PAPER_TRADERS = [
     ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
     ("btc_lead_paper",       8106, "/healthz", "BTC-Lead ETH 4h"),
     ("taker_cap_paper",      8107, "/healthz", "Taker-Cap H3"),
+    ("vrp_paper",            8108, "/healthz", "VRP Straddle"),
 ]
 BOT_TOKEN       = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not BOT_TOKEN:

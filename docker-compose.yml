@@ -511,6 +511,41 @@ services:
       start_period: 30s
 
 
+  # vrp_paper: short-vol semanal Deribit (paper) — vende straddle ATM sexta 08:05 UTC
+  # (vencimento sexta seguinte) no best bid real, hedge de delta diário via perp paper,
+  # settle no delivery price oficial. Validado pós-fix: 2,56%/mês, PFtrade 1.80,
+  # Sharpe 1.73, maxDD -17,9% @1x (2022-26). Ver research/options_study/REPORT.md.
+  vrp-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.vrp_paper
+    container_name: trading_vrp_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8108:8108"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - VRP_TELEGRAM_TAG=VRP
+      - VRP_CAPITAL=1000.0
+      - VRP_SIZE_MULT=1.0
+      - VRP_HEALTH_PORT=8108
+      - VRP_DATA_DIR=/data
+      - VRP_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/vrp_paper/data:/data
+      - ./trading/vrp_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8108/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
 volumes:
   pgdata:
 
