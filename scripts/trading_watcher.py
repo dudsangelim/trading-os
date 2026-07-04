@@ -36,7 +36,6 @@ PAPER_TRADERS = [
     ("rsi_reversion_paper",  8093, "/healthz", "RSI Reversion"),
     ("asian_dema_paper",     8095, "/healthz", "Asian DEMA"),
     ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
-    ("swing_wf_paper",       8105, "/healthz", "Swing WF 4h"),
     ("btc_lead_paper",       8106, "/healthz", "BTC-Lead ETH 4h"),
     ("taker_cap_paper",      8107, "/healthz", "Taker-Cap H3"),
 ]

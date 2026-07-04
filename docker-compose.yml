@@ -422,46 +422,9 @@ services:
       retries: 3
       start_period: 15s
 
-  # swing_wf_paper: validated 4h walk-forward portfolio (BTC/ETH/SOL), $1000 / 1x.
-  # Re-selects config per sleeve every ~90d (REOPT_BARS); signal-exit configs only
-  # (live state machine proven identical to the research backtest — verify_fidelity.py).
-  # Data via Binance REST (no DB). Stop with: docker compose stop trading-swing-wf-paper
-  trading-swing-wf-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.swing_wf_paper
-    container_name: trading_swing_wf_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8105:8105"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
-      - SWF_TELEGRAM_TAG=SWF4H
-      - SWF_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT
-      - SWF_CAPITAL=1000.0
-      - SWF_LEVERAGE=1.0
-      - SWF_FEE_BPS=4.0
-      - SWF_SLIP_BPS=2.0
-      - SWF_FUNDING=true
-      - SWF_ORDER_TYPE=MARKET
-      - SWF_TRAIN_BARS=2160
-      - SWF_REOPT_BARS=540
-      - SWF_HEALTH_PORT=8105
-      - SWF_DATA_DIR=/data
-      - SWF_LOG_DIR=/logs
-      - TZ=UTC
-    volumes:
-      - ./trading/swing_wf_paper/data:/data
-      - ./trading/swing_wf_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8105/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # swing_wf_paper — APOSENTADO 2026-07-04 (revalidação pós-fix do bug de shorts:
+  # 1,4%/mês / Sharpe 0,59 / DD -38%, redundante com btc_lead_paper que domina a mesma
+  # tese 4h). Código em trading/_archived/swing_wf_paper_archived_20260704/.
 
   # btc_lead_paper: SIGNAL_ONLY paper da vencedora rodada-2 do estudo single-asset
   # (02/07/2026): ETHUSDT 4h na direção do momentum do BTC (roc40 + ema100 do BTC),

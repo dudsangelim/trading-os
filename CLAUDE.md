@@ -13,7 +13,6 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_asian_dema_paper` | 8095 | R021-B Asian DEMA 1h (DEMA 13/34), SOLUSDT 1h | $1000 / 1x |
 | `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
-| `trading_swing_wf_paper` | 8105 | Swing 4h walk-forward portfolio, BTC/ETH/SOL | $1000 / 1x (3×$333) |
 | `trading_btc_lead_paper` | 8106 | BTC→ETH lead-lag 4h (btc_lead roc40/ema100), ETHUSDT | $1000 / 1x |
 | `trading_taker_cap_paper` | 8107 | Taker-capitulation LONG 4h (z(taker LSR)<-2), BTC/ETH/SOL 1h | $1000 / 1x (3×$333) |
 | `trading_worker` | — | m3_eth_shadow (ETHUSDT SIGNAL_ONLY) | $200 |
@@ -73,12 +72,19 @@ Container removido, código em `trading/_archived/dow_3legs_paper_archived_20260
 - Replay: `docker exec trading_sol_burst_paper python -m trading.sol_burst_paper.main --replay-days 30`
 - Migrado em 2026-05-12 do processo nu em `/home/agent/backtests/edge_factory/sol_extreme_burst_reversal_5m/phase0/` (PID 2773418). Zero trades disparados nos 7 dias anteriores.
 
+### swing_wf_paper — APOSENTADO 2026-07-04 (Eduardo, pós-auditoria)
+Revalidação com engine corrigido derrubou a expectativa p/ ~1,4%/mês / Sharpe 0,59 / maxDD -38%
+(números do deploy estavam inflados pelo bug de shorts) e a tese 4h é redundante com o
+btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,74 (-2,1% em 15d,
+5 trades). Container/compose/watcher removidos; código + data em
+`trading/_archived/swing_wf_paper_archived_20260704/`. Não reviver sem edge novo. Detalhes históricos abaixo.
+
 ### swing_wf_paper specifics (4h walk-forward portfolio)
 - Universe: BTC/ETH/SOL, 4h closed candles via Binance REST (no DB). $1000 total = 3×$333.33 sleeves, 1x.
 - Walk-forward: every REOPT_BARS (540 ≈ 90d) closed bars each sleeve re-selects the best config (by train Sharpe, ≥10 trades, PF≥1.05) over the trailing TRAIN_BARS (2160 ≈ 360d) window.
 - Config space: **signal-exit configs only** — the live state machine reproduces the research `run_backtest` EXACTLY for these (proven in `verify_fidelity.py`: 100% side-match, corr 1.0000). Stop-based exits excluded (unavoidable 1-bar live offset).
 - Execution: signal on just-closed bar → fill at the **next bar's real open**, tick-rounded with adverse slippage. Costs 4+2 bps/side + real Binance funding per holding window (long pays positive).
-- Researched in `/home/agent/research/swing_study/`. ⚠️ 2026-07-02: bug no P&L de shorts do backtest.py corrigido (era `entry/exit-1`, inflava shorts; agora `1-exit/entry`, USDT-M qty fixa). As expectativas antigas (~2.7%/mo, PF ~2.2) foram calculadas com o engine bugado e estão INFLADAS — re-derivar após próxima reopt. Engine ao vivo (engine.py) sempre esteve correto.
+- Researched in `/home/agent/research/swing_study/`. ⚠️ 2026-07-02: bug no P&L de shorts do backtest.py corrigido (era `entry/exit-1`, inflava shorts; agora `1-exit/entry`, USDT-M qty fixa). Engine ao vivo (engine.py) sempre esteve correto. **Revalidação 2026-07-04 (engine corrigido, dados até 04/07)**: expectativa real do portfólio só-sinal = **~1,4%/mês, PF mensal 1,57, Sharpe 0,59, maxDD -38%** (pior caso custos 2x+funding: 1,27-1,47%/mês). Metas antigas (2,7%/mo, PF 2,2) eram infladas pelo bug; mensal >2% NÃO se sustenta. Picks do otimizador corrigido = idênticos aos vivos (6/6 janelas testadas) — reopt forçada desnecessária. Ver adendo em `research/swing_study/REPORT.md`. Não alocar capital com base nos números pré-fix.
 - Status: `docker exec trading_swing_wf_paper python -m trading.swing_wf_paper.main --status`
 - Smoke / force reopt: `... main --once` / `... main --once --reopt` (only when the live container is stopped — health-port clash otherwise).
 
