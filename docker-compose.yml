@@ -546,6 +546,40 @@ services:
       start_period: 30s
 
 
+
+  # expiry-short-paper: short BTC+ETH perp (paper) qui 08:00 → sex 08:00 UTC
+  # (drift pré-vencimento Deribit; research/options_edge3 2026-07-05: -38/-45bps
+  # vs +17/+22 base, t=-2.7/-2.1, BTC 6/6 anos; 1,64%/mês PFmo 1.90 DD -18.3%).
+  expiry-short-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.expiry_short_paper
+    container_name: trading_expiry_short_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8109:8109"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - EXPSHORT_TELEGRAM_TAG=EXPSHORT
+      - EXPSHORT_CAPITAL=1000.0
+      - EXPSHORT_HEALTH_PORT=8109
+      - EXPSHORT_DATA_DIR=/data
+      - EXPSHORT_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/expiry_short_paper/data:/data
+      - ./trading/expiry_short_paper/logs:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8109/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
 volumes:
   pgdata:
 

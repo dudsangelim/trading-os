@@ -16,6 +16,7 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | `trading_btc_lead_paper` | 8106 | BTC→ETH lead-lag 4h (btc_lead roc40/ema100), ETHUSDT | $1000 / 1x |
 | `trading_taker_cap_paper` | 8107 | Taker-capitulation LONG 4h (z(taker LSR)<-2), BTC/ETH/SOL 1h | $1000 / 1x (3×$333) |
 | `trading_vrp_paper` | 8108 | VRP: short straddle ATM semanal Deribit BTC, delta-hedged diário | $1000 / 1x vol-scaled |
+| `trading_expiry_short_paper` | 8109 | Expiry-short: SHORT BTC+ETH perp qui 08:00→sex 08:00 UTC (drift pré-vencimento Deribit) | $1000 / 1x (2×$500) |
 | `trading_worker` | — | m3_eth_shadow (ETHUSDT SIGNAL_ONLY) | $200 |
 
 Health check: `GET /health` or `/healthz` on each container's port.
@@ -129,6 +130,19 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
   **LOG-ONLY por default** (`VRP_SLOPE_SIZING=0`): sizing segue 1x; track condicionado = mult × retorno
   semanal (linear). Ligar de verdade = `VRP_SLOPE_SIZING=1` no compose após validação em paper. O z fica
   NaN (mult 1,0) até acumular ~45 amostras diárias pós-gap de coleta; o fallback iv7−dvol loga desde o dia 1.
+
+### expiry_short_paper specifics (options_edge3 família D, 05/07/2026)
+- **SHORT BTCUSDT + ETHUSDT perp (paper, 50/50) toda quinta 08:10 UTC; fecha sexta 08:10** (settle
+  semanal das opções Deribit é sexta 08:00). Fill a last price fapi ± 2bps slip, fees 4bps/lado,
+  funding realizado creditado (short recebe funding positivo). Stale-guard força fechamento >30h.
+- Validado em `research/options_edge3/` (2021→2026-06): drift pré-expiry -38,5bps BTC (t=-2,74,
+  6/6 anos) / -44,9bps ETH (t=-2,14, 4/4); **placebo: shortar qualquer outra janela 24h PERDE**.
+  Líquido BTC+ETH 50/50: 1,64%/mês, PFmo 1,90, maxDD -18,3%; custo 2x → 1,13%/mês. SOL reprovou
+  no gate (t=-0,96) — não adicionar sem revalidação.
+- **Papel: overlay de portfólio** (corr ≈ 0 a negativa com todos os sleeves; 60/30/10 + 15%
+  expiry-short = 4,19%/mês, PFmo 7,15, DD -13,3%). Standalone fica abaixo da meta de 2%/mês.
+- Status: `docker exec trading_expiry_short_paper python -m trading.expiry_short_paper.main --status`
+  | health `curl localhost:8109/healthz` | Telegram tag `EXPSHORT`. Monitorado pelo `trading_watcher.py`.
 
 ### rsi_reversion_paper specifics (R021-A C1 Phase 0)
 - Trigger: polls every minute, processes new closed 5m bars (30s grace after bar close).
