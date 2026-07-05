@@ -11,8 +11,8 @@ from pathlib import Path
 
 # --- paths ---
 ASSETS_DIR = Path(__file__).parent / "assets"
-MODEL_PATH = ASSETS_DIR / "2C_v3_frozen.json"
-FALLBACK_MODEL_PATH = ASSETS_DIR / "2C_v2_frozen.json"
+MODEL_PATH = ASSETS_DIR / "2C_v4_frozen.json"
+FALLBACK_MODEL_PATH = ASSETS_DIR / "2C_v3_frozen.json"
 LEGACY_MODEL_PATH = ASSETS_DIR / "2C_v1_frozen.json"
 
 DATA_DIR = Path(os.environ.get("NY_OPEN_DATA_DIR", "/data"))

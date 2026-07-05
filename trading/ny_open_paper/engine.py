@@ -277,14 +277,10 @@ class StrategyEngine:
             a.break_bar_idx = len(self.post_bars) - 1
             a.bars_since_break = 0
             self.state = "WAITING_RETEST"
-
-            # same bar can also be a retest
-            retested = (
-                (a.direction == -1 and l <= a.entry_price) or
-                (a.direction == 1 and h >= a.entry_price)
-            )
-            if retested:
-                self._fill(ts)
+            # The break bar itself can NOT be the retest: the model gate uses this
+            # bar's close, so the entry limit only exists after it closes.
+            # (Same-bar fill removed 2026-07-05 — it was a look-ahead; 99.6% of
+            # setups touch the extreme within the break bar by construction.)
             return
 
         # already broke, waiting for retest

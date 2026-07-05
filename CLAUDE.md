@@ -9,7 +9,7 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 
 | Container | Port | Strategy | Capital |
 |---|---|---|---|
-| `trading_ny_open_paper` | 8094 | NY Open 2C fade, BTCUSDT 5m | $100 / 1x |
+| `trading_ny_open_paper` | 8094 | NY Open 2C fade, BTCUSDT 5m | $100 / 6x |
 | `trading_asian_dema_paper` | 8095 | R021-B Asian DEMA 1h (DEMA 13/34), SOLUSDT 1h | $1000 / 1x |
 | `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
@@ -40,7 +40,12 @@ Container removido, código em `trading/_archived/dow_3legs_paper_archived_20260
 
 ### ny_open_paper specifics
 - Session: 13:30–20:00 UTC weekdays. Decision bar at 14:00 UTC.
-- Frozen model in `assets/2C_v1_frozen.json` — do NOT retrain without full validation.
+- Frozen model in `assets/2C_v4_frozen.json` (2026-07-05) — do NOT retrain without full validation.
+- **2026-07-05 look-ahead fix**: the break bar can no longer fill the entry (engine.py) — the
+  model gate uses that bar's close, so the limit only exists after it closes. Model v4 refrozen
+  with corrected labels (`assets/freeze_2C_v4_model.py`); leverage target 6x. Corrected OOS
+  walk-forward: +0.087%/trade, PF 1.67, p=0.004 (`backtests/ny_open_2c_corrected_oos.py`).
+  Paper equity history before this date was recorded under the optimistic same-bar fill rule.
 - **Live execution (`EXECUTION_MODE`)**: default `shadow` (fills simulated only — safe).
   Set `NY_OPEN_EXECUTION_MODE=live` in `.env` to mirror the engine's position + native
   protective stop onto a REAL Binance (sub)account via `LiveBroker` (`live_broker.py`)
@@ -145,7 +150,7 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 - Closes always execute regardless of ATR gate — gate only blocks new opens.
 - `FEE_RT_PCT = 0.10` is the roundtrip fee constant; defined in `config.py`, imported by engine.
 - Never mock the DB in core worker tests — use real asyncpg connections.
-- Don't touch `assets/2C_v1_frozen.json` — it's the production-frozen NY Open model.
+- Don't touch `assets/2C_v4_frozen.json` — it's the production-frozen NY Open model (v1-v3 kept as history).
 
 ## Common commands
 

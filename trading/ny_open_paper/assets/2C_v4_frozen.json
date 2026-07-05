@@ -1,0 +1,76 @@
+{
+  "model_version": "2C_v4",
+  "model_type": "logistic_regression_l2",
+  "train_date_utc": "2026-07-05T00:34:34.116370+00:00",
+  "train_data_range": {
+    "start": "2021-01-01",
+    "end": "2026-07-03",
+    "n_trades_unfiltered": 903,
+    "win_rate_unfiltered": 0.5581395348837209
+  },
+  "hyperparams": {
+    "lr": 0.05,
+    "iters": 5000,
+    "l2": 0.01
+  },
+  "fee_schedule": {
+    "name": "binance_vip0",
+    "maker": 0.0002,
+    "taker": 0.0005
+  },
+  "strategy_params": {
+    "window_min": 30,
+    "break_buffer": 0.0005,
+    "stop_kind": "alpha",
+    "stop_alpha": 0.4,
+    "stop_min_pct": 0.003,
+    "stop_max_pct": 0.008,
+    "max_wait_retest_min": 15,
+    "session_open_utc": "13:30",
+    "session_close_utc": "20:00"
+  },
+  "feature_names": [
+    "range_first_30m_pct",
+    "overshoot_close_pct",
+    "vol_20d_pct",
+    "btc_vs_sma200_pct",
+    "direction_first_30m",
+    "time_to_break_min"
+  ],
+  "feature_mean": [
+    0.9118835172033213,
+    0.006268736178882774,
+    0.5829964860222928,
+    3.8799175220644084,
+    -0.11406423034330011,
+    37.04872646733112
+  ],
+  "feature_std": [
+    0.6603458083633841,
+    0.22930460997664606,
+    0.23547362507298927,
+    23.546590290774443,
+    0.9934733772760046,
+    63.253518419996134
+  ],
+  "weights": {
+    "bias": 0.2419456219968179,
+    "coef": [
+      -0.3044953919437397,
+      -0.6347582035903286,
+      0.036766187893906455,
+      -0.12129970581187267,
+      -0.015448644155416092,
+      -0.013093983359045708
+    ]
+  },
+  "recommended_threshold": 0.6,
+  "estimated_pct_filtered_in": 0.38981173864894797,
+  "execution_notes": {
+    "leverage_target": 6,
+    "rationale": "v4 retrained after the same-bar-retest look-ahead fix: the break bar can no longer fill the entry (the gate uses its close). Corrected OOS walk-forward 2023-2026: +0.087%/trade, PF 1.67, p_boot=0.004, every year positive. Leverage target 6x: ~2.1%/mo backtest, hist MaxDD -16%, still positive if edge halves.",
+    "max_dd_alert_pct": 10,
+    "max_dd_kill_pct": 18,
+    "paper_only": true
+  }
+}
