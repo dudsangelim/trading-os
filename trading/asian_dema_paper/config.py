@@ -21,7 +21,9 @@ TIMEFRAME   = "1h"
 DEMA_FAST   = int(os.environ.get("ADEMA_FAST",  "13"))
 DEMA_SLOW   = int(os.environ.get("ADEMA_SLOW",  "34"))
 SLOPE_BARS  = int(os.environ.get("ADEMA_SLOPE_BARS", "3"))   # bars back for slope
-LOOKBACK_1M = int(os.environ.get("ADEMA_LOOKBACK_1M", "6000"))  # ~100h; enough DEMA(34) warm-up
+# ~500 1h bars (~21 days). 6000 (~100 bars) left ~15% seed weight in the EMA-of-EMA(34),
+# diverging 32% of 2026 signals vs the full-history indicator (revalidation 2026-07-05).
+LOOKBACK_1M = int(os.environ.get("ADEMA_LOOKBACK_1M", "30000"))
 
 # Asian session hours (UTC, inclusive)
 ASIAN_HOURS = set(range(0, 8))  # 00:00–07:59 UTC
