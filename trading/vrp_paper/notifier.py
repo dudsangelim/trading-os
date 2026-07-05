@@ -46,10 +46,16 @@ def notify_startup(equity: float) -> None:
 
 def notify_open(ev: dict) -> None:
     legs = " + ".join(l["instrument"] for l in ev["legs"])
-    _send(f"[{C.TELEGRAM_TAG}] \U0001f7e0 SHORT STRADDLE `{legs}`\n"
-          f"S: `${ev['S']:,.0f}` | DVOL: `{ev['dvol']:.0%}` | contratos: `{ev['contracts']:.4f}`\n"
-          f"prêmio: `${ev['prem_usd']:.2f}` (`{ev['prem_pct']:.1f}%` do capital) | "
-          f"vence: `{ev['expiry']} UTC`")
+    txt = (f"[{C.TELEGRAM_TAG}] \U0001f7e0 SHORT STRADDLE `{legs}`\n"
+           f"S: `${ev['S']:,.0f}` | DVOL: `{ev['dvol']:.0%}` | contratos: `{ev['contracts']:.4f}`\n"
+           f"prêmio: `${ev['prem_usd']:.2f}` (`{ev['prem_pct']:.1f}%` do capital) | "
+           f"vence: `{ev['expiry']} UTC`")
+    vs = ev.get("vol_signal")
+    if vs:
+        mode = "APLICADO" if vs.get("applied") else "log"
+        txt += (f"\nslope: `{vs['slope']*100:+.1f}vp` z `{vs['z_slope']}` → "
+                f"mult `{vs['mult_slope']:g}x` ({mode}) | iv7-dvol mult `{vs['mult_dvol_iv7']:g}x`")
+    _send(txt)
 
 
 def notify_close(ev: dict, book) -> None:

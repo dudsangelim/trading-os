@@ -122,8 +122,13 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 - Papel: perna de 60% do portfólio-alvo 60/30/10 (c/ btc_lead 8106 e taker_cap 8107):
   3,40%/mês, PFmo 5,79, Sharpe 2,07, maxDD -10,7% (2023→2026-05).
 - Paper usa contratos fracionários; real exige mín. Deribit 0,1 contrato (~US$13k+ na perna).
-- Status: `docker exec trading_vrp_paper python -m trading.vrp_paper.main --status` | health
-  `curl localhost:8108/healthz` | Telegram tag `VRP`. Monitorado pelo `trading_watcher.py`.
+- **Slope conditioning (2026-07-05, research/options_edge2)**: `volsurface.py` amostra ATM IV7/IV30/DVOL
+  diariamente às 08:05 (history em `data/slope_history.csv`, seedado da pesquisa) e loga por entrada o
+  multiplicador de sizing por tercil de −z90(slope) em `data/vol_signal.csv` + Telegram. Backtest:
+  3,27%/mês / Sharpe 1,93 vs 2,56 / 1,73 do incondicional; melhor em todos os anos; custo 2x → 2,03%/mês.
+  **LOG-ONLY por default** (`VRP_SLOPE_SIZING=0`): sizing segue 1x; track condicionado = mult × retorno
+  semanal (linear). Ligar de verdade = `VRP_SLOPE_SIZING=1` no compose após validação em paper. O z fica
+  NaN (mult 1,0) até acumular ~45 amostras diárias pós-gap de coleta; o fallback iv7−dvol loga desde o dia 1.
 
 ### rsi_reversion_paper specifics (R021-A C1 Phase 0)
 - Trigger: polls every minute, processes new closed 5m bars (30s grace after bar close).

@@ -38,6 +38,14 @@ HEDGE_COST = float(os.environ.get("VRP_HEDGE_COST", "0.0006"))  # 6bps per adjus
 # entry uses the real best bid — no extra haircut (the research haircut modeled
 # exactly this: crossing from last trade to the bid).
 
+# ── vol-surface conditioning (research/options_edge2, 2026-07-05) ───────────
+# Tercile sizing on signed = -z90(slope), slope = ATM IV30 - IV7. LOG-ONLY by
+# default: multiplier recorded per entry, sizing unchanged (linear => the
+# conditioned track is mult × weekly return). Set VRP_SLOPE_SIZING=1 to apply.
+SLOPE_SIZING = os.environ.get("VRP_SLOPE_SIZING", "0").strip() in ("1", "true")
+SLOPE_STEPS = (0.5, 1.0, 1.5)
+SLOPE_TER_MIN = 180        # min obs before tercile thresholds are trusted
+
 # ── risk alerts ──────────────────────────────────────────────────────────────
 DD_ALERT_PCT = float(os.environ.get("VRP_DD_ALERT_PCT", "0.15"))
 CONSEC_LOSS_ALERT = int(os.environ.get("VRP_CONSEC_LOSS_ALERT", "4"))

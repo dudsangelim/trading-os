@@ -90,7 +90,7 @@ class Book:
     position: Optional[Position] = None
 
     # ── entry ────────────────────────────────────────────────────────────────
-    def open_straddle(self, now: datetime) -> Optional[dict]:
+    def open_straddle(self, now: datetime, vol_signal: Optional[dict] = None) -> Optional[dict]:
         sel = select_straddle(now)
         if sel is None:
             log.warning("no tradable ATM straddle found")
@@ -100,7 +100,10 @@ class Book:
             dv = D.dvol_now()
         except Exception:
             dv = C.DVOL_REF
-        contracts = (C.SIZE_MULT * self.equity / S
+        mult = 1.0
+        if vol_signal and C.SLOPE_SIZING:
+            mult = float(vol_signal.get("mult_slope") or 1.0)
+        contracts = (mult * C.SIZE_MULT * self.equity / S
                      * min(C.DVOL_REF / max(dv, 0.05), C.VOL_SCALE_CAP))
         legs = []
         for lg in sel["legs"]:
@@ -116,7 +119,7 @@ class Book:
         return {"type": "open", "S": S, "dvol": dv, "contracts": contracts,
                 "legs": legs, "prem_usd": prem_total,
                 "prem_pct": prem_total / self.equity * 100,
-                "expiry": self.position.expiry_ts}
+                "expiry": self.position.expiry_ts, "vol_signal": vol_signal}
 
     # ── daily hedge + mark (real tickers) ────────────────────────────────────
     def hedge_and_mark(self, do_hedge: bool) -> dict:

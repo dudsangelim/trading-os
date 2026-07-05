@@ -24,3 +24,13 @@ docker logs trading_vrp_paper --tail=30
 
 Estado em `data/state.json`; `trades.csv` (open/settle) e `equity.csv` (MtM horário).
 Telegram tag `VRP` (startup/open/settle/daily 08:05/DD>15%/4 losses).
+
+## Slope conditioning (2026-07-05 — research/options_edge2)
+
+`volsurface.py`: amostra diária (08:05) de ATM IV 7d/30d + DVOL via mark-IV;
+history em `data/slope_history.csv` (seed = série da pesquisa até 2026-05-15).
+A cada entrada de sexta loga em `data/vol_signal.csv` o multiplicador de sizing
+0.5/1/1.5 por tercil expanding de −z90(slope) e o fallback z-free (iv7−dvol).
+Backtest (2022→2026-05): 3,27%/mês, Sharpe 1,93, maxDD -18,4% vs baseline
+2,56%/1,73/-17,9%; melhor em todos os anos; custo 2x → 2,03%/mês.
+LOG-ONLY por default; `VRP_SLOPE_SIZING=1` aplica o mult no sizing real.

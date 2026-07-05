@@ -25,6 +25,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from trading.vrp_paper import config as C
 from trading.vrp_paper import engine as E
 from trading.vrp_paper import notifier as N
+from trading.vrp_paper import volsurface as VS
 
 C.LOG_DIR.mkdir(parents=True, exist_ok=True)
 C.DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -92,11 +93,34 @@ def run_cycle(book: E.Book, first_run: bool = False) -> None:
                 if book.consec_losses >= C.CONSEC_LOSS_ALERT:
                     N.notify_consec_losses(book.consec_losses, book.equity)
 
+    # 1b. daily vol-surface sample (slope conditioning research, options_edge2)
+    if is_action_hour:
+        try:
+            VS.record_daily(now)
+        except Exception:
+            log.warning("volsurface sample failed:\n%s", traceback.format_exc())
+
     # 2. entry — Fridays on the action cycle, when flat, once per week
     week = now.strftime("%G-W%V")
     if (book.position is None and now.weekday() == C.ENTRY_DOW and is_action_hour
             and book.last_entry_week != week):
-        ev = book.open_straddle(now)
+        vol_sig = None
+        try:
+            vol_sig = VS.signal_now()
+            if vol_sig is not None:
+                _append_csv(C.DATA_DIR / "vol_signal.csv",
+                            ["date", "iv7", "iv30", "slope", "dvol", "z_slope",
+                             "mult_slope", "mult_dvol_iv7", "applied"],
+                            [vol_sig["date"], vol_sig["iv7"], vol_sig["iv30"],
+                             vol_sig["slope"], vol_sig["dvol"], vol_sig["z_slope"],
+                             vol_sig["mult_slope"], vol_sig["mult_dvol_iv7"],
+                             vol_sig["applied"]])
+                log.info("vol signal: slope=%+.3f z=%s mult=%.1fx (dvol_iv7 %.1fx) applied=%s",
+                         vol_sig["slope"], vol_sig["z_slope"], vol_sig["mult_slope"],
+                         vol_sig["mult_dvol_iv7"], vol_sig["applied"])
+        except Exception:
+            log.warning("vol signal failed:\n%s", traceback.format_exc())
+        ev = book.open_straddle(now, vol_signal=vol_sig)
         book.last_entry_week = week      # one attempt per week, found or not
         if ev is not None:
             log.info("opened: %.4f contratos, prêmio $%.2f (%.1f%%)",
