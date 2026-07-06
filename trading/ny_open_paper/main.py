@@ -38,6 +38,7 @@ from trading.ny_open_paper.config import (
     TRADING_ALLOWED_USERS, TRADING_BOT_TOKEN,
 )
 from trading.ny_open_paper.engine import StrategyEngine
+from trading.ny_open_paper.live_broker import EngineSnapshot
 from trading.ny_open_paper.features import compute_context_live
 from trading.ny_open_paper.feed import BinanceFeed
 from trading.ny_open_paper.model import FrozenModel
@@ -271,6 +272,29 @@ class PaperTrader:
     # 5-minute candle handler (signal detection + position management)
     # ------------------------------------------------------------------
 
+    def _live_snapshot(self, ref_price: float) -> EngineSnapshot:
+        """Map the engine's current intent to an EngineSnapshot for the live broker.
+        MUST be called while holding self._lock (reads engine.armed / engine.pos)."""
+        eng = self.engine
+        if eng.state == "WAITING_RETEST" and eng.armed is not None:
+            return EngineSnapshot(
+                phase="pending",
+                direction=eng.armed.direction,
+                limit_price=float(eng.armed.entry_price),
+                stop_price=float(eng.armed.stop_price),
+                ref_price=float(ref_price),
+            )
+        if eng.state == "IN_POSITION" and eng.pos is not None:
+            return EngineSnapshot(
+                phase="in_position",
+                direction=eng.pos.direction,
+                limit_price=0.0,
+                stop_price=float(eng.pos.stop_price),
+                ref_price=float(ref_price),
+            )
+        return EngineSnapshot(phase="flat", direction=0, limit_price=0.0,
+                              stop_price=0.0, ref_price=float(ref_price))
+
     def on_new_candle(self, ts: pd.Timestamp, o: float, h: float, l: float, c: float) -> None:
         session_date = ts.date()
         t = ts.time()
@@ -305,10 +329,7 @@ class PaperTrader:
             # snapshot for the live reconciler (captured atomically under the lock)
             self._seq += 1
             seq = self._seq
-            if engine_state == "IN_POSITION" and self.engine.pos is not None:
-                live_snap = (True, self.engine.pos.direction, float(self.engine.pos.stop_price))
-            else:
-                live_snap = (False, 0, 0.0)
+            live_snap = self._live_snapshot(c)
 
         # --- notifications and I/O outside lock ---
 
@@ -383,7 +404,7 @@ class PaperTrader:
 
         # mirror the engine's position/stop onto the real account (no-op in shadow)
         if self.broker is not None:
-            self.broker.reconcile(seq, live_snap[0], live_snap[1], live_snap[2], c)
+            self.broker.reconcile(seq, live_snap)
 
     # ------------------------------------------------------------------
     # Tick handler (position management only)
@@ -406,12 +427,9 @@ class PaperTrader:
             new_trades = list(self.engine.trades[trades_before:])
 
             engine_state = self.engine.state
+            # bump seq so any later candle reconcile stays monotonic; no live reconcile
+            # happens on the tick path (see note below).
             self._seq += 1
-            seq = self._seq
-            if engine_state == "IN_POSITION" and self.engine.pos is not None:
-                live_snap = (True, self.engine.pos.direction, float(self.engine.pos.stop_price))
-            else:
-                live_snap = (False, 0, 0.0)
 
         if not tp1_before and tp1_now and tp1_partial is not None:
             msg = f"[2C TP1/BE] parcial em {tp1_partial:.2f} | stop→BE {tp1_entry:.2f}"
@@ -421,9 +439,12 @@ class PaperTrader:
         for tr in new_trades:
             self._persist_trade(tr, ts)
 
-        # mirror onto the real account (updates stop to BE / closes on exit)
-        if self.broker is not None:
-            self.broker.reconcile(seq, live_snap[0], live_snap[1], live_snap[2], price)
+        # NOTE: no live reconcile on the ~250ms tick path. In v2 the real protective
+        # stop rests natively on the exchange, so intra-candle protection needs no
+        # polling; hammering the REST API 4x/sec would only invite rate limits. The
+        # engine's BE stop-move is mirrored on the next candle reconcile (the exchange
+        # still holds the wider original stop meanwhile — risk stays bounded). seq is
+        # still bumped above so candle reconciles keep their monotonic ordering.
 
 
 # ---------------------------------------------------------------------------

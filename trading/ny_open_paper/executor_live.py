@@ -283,6 +283,36 @@ class BinanceLiveExecutor:
         log.warning("[executor-live] STOP_MARKET %s %s stop=%s id=%s", close_side, amount, sp, order.get("id"))
         return order
 
+    def place_stop_entry(self, side: str, trigger_price: float, amount: float) -> dict:
+        """Resting STOP_MARKET *entry* (reduceOnly=False). Triggers when price crosses
+        trigger_price, then market-fills — the real-time equivalent of the engine's
+        'retest of the extreme'. A SELL STOP rests above? no: it triggers when price
+        *reaches* trigger_price from the current side. For the 2C fade the price has
+        already broken PAST the extreme, so a SELL entry-stop at the extreme (below the
+        broken-out price) triggers as price retests DOWN to it; a BUY entry-stop at the
+        extreme (above the broken-out price) triggers as price retests UP to it."""
+        tp = float(self.x.price_to_precision(self.symbol, trigger_price))
+        self._assert_within_cap(amount, tp)  # re-check at the placement boundary
+        order = self.x.create_order(
+            self.symbol, "STOP_MARKET", side, amount, None,
+            params={"stopPrice": tp, "reduceOnly": False},
+        )
+        log.warning("[executor-live] STOP entry %s %s trigger=%s id=%s", side, amount, tp, order.get("id"))
+        return order
+
+    def place_stop_close_position(self, close_side: str, stop_price: float) -> dict:
+        """Protective STOP_MARKET with closePosition=true. Rests WITHOUT requiring an
+        open position (so it can be armed alongside a pending entry-stop, closing no
+        unprotected window). When triggered it flattens whatever position exists; if
+        none exists it is a harmless no-op that the exchange then cancels."""
+        sp = float(self.x.price_to_precision(self.symbol, stop_price))
+        order = self.x.create_order(
+            self.symbol, "STOP_MARKET", close_side, None, None,
+            params={"stopPrice": sp, "closePosition": True},
+        )
+        log.warning("[executor-live] STOP closePosition %s stop=%s id=%s", close_side, sp, order.get("id"))
+        return order
+
     def place_take_profit_limit(self, close_side: str, tp_price: float, amount: float) -> dict:
         tp = float(self.x.price_to_precision(self.symbol, tp_price))
         order = self.x.create_order(
