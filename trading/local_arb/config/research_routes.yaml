@@ -1,0 +1,207 @@
+# local_arb — research routes (MONITOR-ONLY, apenas APIs PÚBLICAS)
+#
+# Trilhas paralelas de pesquisa: corretoras locais (order book público) +
+# Binance spot pública + BCB/PTAX como referência USD/BRL. Sem credenciais,
+# sem execução, sem persistência obrigatória. Endpoints e taxas são MANUAIS
+# e editáveis — conferir antes de confiar. Rotas descentralizadas (DEX) estão
+# explicitamente fora do escopo deste subsistema.
+
+version: 1
+
+# Referências públicas usadas pelas rotas. URLs com {placeholders} são
+# formatadas em runtime. O bloco `synthetic:` alimenta o modo offline
+# (--synthetic) com preços determinísticos.
+references:
+  binance:
+    price_url: "https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+    book_url: "https://api.binance.com/api/v3/ticker/bookTicker?symbol={symbol}"
+    timeout_s: 5
+  ptax:
+    # Olinda/PTAX: janela de dias recente, pega a cotação de venda mais nova.
+    olinda_url: "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicialCotacao=@dataInicialCotacao,dataFinalCotacao=@dataFinalCotacao)?@dataInicialCotacao='{start}'&@dataFinalCotacao='{end}'&$top=200&$format=json"
+    # Fallback controlado: série SGS 1 (dólar comercial venda), último valor.
+    sgs_fallback_url: "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json"
+    lookback_days: 7
+    timeout_s: 8
+  synthetic:
+    ptax_usd_brl: 5.50
+    binance:
+      BTCUSDT: 100000.0
+      ETHUSDT: 3500.0
+      USDCUSDT: 1.0005     # USDT por 1 USDC
+
+# Thresholds default (bps) quando a rota não define os próprios.
+defaults:
+  thresholds:
+    weak_bps: 10.0         # |sinal| >= isto -> WEAK_SIGNAL
+    promising_bps: 30.0    # |sinal| >= isto -> PROMISING
+
+routes:
+  # ── USDC/BRL cross-exchange local (monitor-only) ─────────────────────────
+  usdc_brl:
+    enabled: true
+    kind: local_pair_monitor
+    symbol: USDC/BRL
+    cost_bps: 120.0        # taker+taker+slippage estimado (manual, editável)
+    thresholds:
+      weak_bps: 10.0
+      promising_bps: 30.0
+    exchanges:
+      mercadobitcoin:
+        enabled: true
+        api:
+          url: "https://api.mercadobitcoin.net/api/v4/USDC-BRL/orderbook"
+          data_path: []
+          bids_key: bids
+          asks_key: asks
+          level_format: pair
+          timeout_s: 5
+        synthetic: {bid: 5.640, ask: 5.646, latency_ms: 200.0}
+      novadax:
+        enabled: true
+        api:
+          url: "https://api.novadax.com/v1/market/depth?symbol=USDC_BRL&limit=20"
+          data_path: [data]
+          bids_key: bids
+          asks_key: asks
+          level_format: pair
+          timeout_s: 5
+        synthetic: {bid: 5.552, ask: 5.556, latency_ms: 120.0}
+
+  # ── Prêmio de stablecoin BRL vs PTAX ──────────────────────────────────────
+  # local USDT/BRL e USDC/BRL vs USD/BRL (PTAX) ajustado por Binance USDC/USDT.
+  stablecoin_premium_brl:
+    enabled: true
+    kind: stablecoin_premium
+    thresholds:
+      weak_bps: 50.0
+      promising_bps: 150.0
+    stables:
+      USDT:
+        binance_usd_symbol: USDCUSDT   # USDT por USDC
+        binance_usd_invert: true       # USD/USDT ~= 1/preço (assume USDC ~ USD)
+        exchanges:
+          mercadobitcoin:
+            enabled: true
+            api:
+              url: "https://api.mercadobitcoin.net/api/v4/USDT-BRL/orderbook"
+              data_path: []
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.650, ask: 5.656, latency_ms: 200.0}
+          novadax:
+            enabled: true
+            api:
+              url: "https://api.novadax.com/v1/market/depth?symbol=USDT_BRL&limit=20"
+              data_path: [data]
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
+      USDC:
+        binance_usd_symbol: null       # assume USDC ~ USD (sem ajuste)
+        binance_usd_invert: false
+        exchanges:
+          mercadobitcoin:
+            enabled: true
+            api:
+              url: "https://api.mercadobitcoin.net/api/v4/USDC-BRL/orderbook"
+              data_path: []
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.640, ask: 5.646, latency_ms: 200.0}
+          novadax:
+            enabled: true
+            api:
+              url: "https://api.novadax.com/v1/market/depth?symbol=USDC_BRL&limit=20"
+              data_path: [data]
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.552, ask: 5.556, latency_ms: 120.0}
+
+  # ── Proxy BTC/ETH em BRL ──────────────────────────────────────────────────
+  # local BTC/BRL e ETH/BRL vs (Binance BTCUSDT|ETHUSDT × USDT/BRL local).
+  btc_eth_brl_proxy:
+    enabled: true
+    kind: cross_proxy
+    thresholds:
+      weak_bps: 30.0
+      promising_bps: 80.0
+    usdt_brl:
+      exchanges:
+        mercadobitcoin:
+          enabled: true
+          api:
+            url: "https://api.mercadobitcoin.net/api/v4/USDT-BRL/orderbook"
+            data_path: []
+            bids_key: bids
+            asks_key: asks
+            level_format: pair
+            timeout_s: 5
+          synthetic: {bid: 5.650, ask: 5.656, latency_ms: 200.0}
+        novadax:
+          enabled: true
+          api:
+            url: "https://api.novadax.com/v1/market/depth?symbol=USDT_BRL&limit=20"
+            data_path: [data]
+            bids_key: bids
+            asks_key: asks
+            level_format: pair
+            timeout_s: 5
+          synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
+    legs:
+      BTC:
+        binance_symbol: BTCUSDT
+        exchanges:
+          mercadobitcoin:
+            enabled: true
+            api:
+              url: "https://api.mercadobitcoin.net/api/v4/BTC-BRL/orderbook"
+              data_path: []
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 561000.0, ask: 561400.0, latency_ms: 200.0}
+      ETH:
+        binance_symbol: ETHUSDT
+        exchanges:
+          mercadobitcoin:
+            enabled: true
+            api:
+              url: "https://api.mercadobitcoin.net/api/v4/ETH-BRL/orderbook"
+              data_path: []
+              bids_key: bids
+              asks_key: asks
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 19650.0, ask: 19670.0, latency_ms: 200.0}
+
+  # ── MBRL recon (monitor/recon) ────────────────────────────────────────────
+  # Endpoints de MBRL/USDT e MBRL/USDC ainda INCERTOS — desligado por default.
+  # Ligar (enabled: true) só depois de confirmar os endpoints públicos reais.
+  mbrl_recon:
+    enabled: false
+    kind: recon
+    symbols: ["MBRL/USDT", "MBRL/USDC"]
+    exchanges:
+      mercadobitcoin:
+        enabled: true
+        api_by_symbol:
+          "MBRL/USDT":
+            url: "https://api.mercadobitcoin.net/api/v4/MBRL-USDT/orderbook"
+            data_path: []
+            bids_key: bids
+            asks_key: asks
+            level_format: pair
+            timeout_s: 5
+          "MBRL/USDC": null   # endpoint não confirmado
+        synthetic_by_symbol:
+          "MBRL/USDT": {bid: 0.998, ask: 1.002, latency_ms: 200.0}

@@ -1,0 +1,5 @@
+# Dados/artefatos gerados pelo local_arb
+/data/
+*.pyc
+__pycache__/
+.pytest_cache/

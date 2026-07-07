@@ -49,20 +49,10 @@ class EngineRiskConfig:
 ENGINE_CONFIGS: Dict[str, EngineRiskConfig] = {
     # ── Classic engines ──────────────────────────────────────────────
     # m3_sol APOSENTADO em 2026-06-14 (audit): negativo (-$5,43 / 5 trades em 3 meses),
-    # frequência baixíssima. Removido do registry e marcado em tr_runtime_pauses.
-    "m3_eth_shadow": EngineRiskConfig(
-        engine_id="m3_eth_shadow",
-        symbol="ETHUSDT",
-        initial_capital_usd=1000.0,
-        risk_per_trade_pct=0.015,  # 50% of standard — cauteloso até N>=30 trades reais validarem WR backtest
-        max_daily_dd_pct=0.05,
-        min_bankroll_usd=200.0,
-        slippage_bps=5,
-        leverage=10,
-        signal_only=False,
-        timeout_bars=96,
-        timeframe_minutes=15,
-    ),
+    # frequência baixíssima. Removido do registry e do banco.
+    # m3_eth_shadow APOSENTADO em 2026-07-05 por ordem do operador — era shadow/paper,
+    # sem dinheiro real; removido do registry, do ENGINE_CONFIGS e do banco.
+    # Sem engines clássicos ativos: worker roda o loop sem engine no registry principal.
 }
 
 SLIPPAGE_BPS: Dict[str, int] = {
@@ -193,7 +183,7 @@ CARRY_WORKER_LOOP_INTERVAL_SECONDS: int = int(
 # EXPERIMENTAL: engine is disabled, registered but not called by worker
 # ARCHIVED: engine confirmed structurally unprofitable, registered but never called; see research_log/
 ENGINE_ROLES: Dict[str, str] = {
-    "m3_sol": "ACTIVE",
-    "m3_eth_shadow": "ACTIVE",  # promoted 2026-04-17 — see trading/docs/engine_specs/m3_eth_shadow_SPEC.md
+    # m3_sol APOSENTADO 2026-06-14; m3_eth_shadow APOSENTADO 2026-07-05 (ordem do operador).
+    # Ambos removidos do registry, ENGINE_CONFIGS, ENGINE_ROLES e do banco.
     "carry_neutral_btc": "ACTIVE",
 }

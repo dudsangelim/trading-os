@@ -32,6 +32,37 @@ services:
       timeout: 5s
       retries: 5
 
+  # local_arb: research-only scanner de arbitragem USDT/BRL (SIGNAL_ONLY)
+  # Default seguro: LOCAL_ARB_ENABLED=false => container apenas imprime status e fica ocioso.
+  local-arb-worker:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.local_arb
+    container_name: local_arb_worker
+    restart: unless-stopped
+    user: "1000:1000"  # agent:agent; evita arquivos root-owned no volume ./trading/local_arb/data
+    command: ["sh", "-c", "python -m trading.local_arb.main --status && if [ \"${LOCAL_ARB_ENABLED:-false}\" = \"true\" ]; then python -m trading.local_arb.main --init-db && while true; do python -m trading.local_arb.main --once; sleep ${LOCAL_ARB_POLL_SECONDS:-2}; done; else sleep infinity; fi"]
+    environment:
+      - ENGINE_ROLE=local_arb_research
+      - LOCAL_ARB_ENABLED=${LOCAL_ARB_ENABLED:-false}
+      - LOCAL_ARB_POLL_SECONDS=${LOCAL_ARB_POLL_SECONDS:-2}
+      - LOCAL_ARB_DATA_DIR=/data
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@postgres:5432/${POSTGRES_DB:-jarvis}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./trading/local_arb/data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD-SHELL", "python -m trading.local_arb.main --status >/dev/null"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   trading-worker:
     build:
       context: .
@@ -200,63 +231,65 @@ services:
   # 30-bar H4 CLOSE breakout + SMA200 Daily regime filter + ATR14x2.0 trailing stop.
   # Data via Binance Futures public REST klines (H4 + Daily). Long-only, isolated.
   # Stop with: docker compose stop trading-ef3-fa1mf-paper
-  trading-ef3-fa1mf-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.ef3_fa1mf_paper
-    container_name: trading_ef3_fa1mf_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8102:8102"
-    environment:
-      - FA1MF_DATA_DIR=/data
-      - FA1MF_LOG_DIR=/logs
-      - FA1MF_CAPITAL=1000.0
-      - FA1MF_LEVERAGE=1.0
-      - FA1MF_HEALTH_PORT=8102
-      - TZ=UTC
-    volumes:
-      - ./trading/ef3_fa1mf_paper/data:/data
-      - ./trading/ef3_fa1mf_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8102/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # RETIRED 2026-07-05: aposentado após revalidação holdout (PF 1.55, edge degradado, falhou 6 gates). Ver HOLDOUT_REVAL_2026-07.md
+  # trading-ef3-fa1mf-paper:
+  #   build:
+  #     context: .
+  #     dockerfile: trading/Dockerfile.ef3_fa1mf_paper
+  #   container_name: trading_ef3_fa1mf_paper
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:8102:8102"
+  #   environment:
+  #     - FA1MF_DATA_DIR=/data
+  #     - FA1MF_LOG_DIR=/logs
+  #     - FA1MF_CAPITAL=1000.0
+  #     - FA1MF_LEVERAGE=1.0
+  #     - FA1MF_HEALTH_PORT=8102
+  #     - TZ=UTC
+  #   volumes:
+  #     - ./trading/ef3_fa1mf_paper/data:/data
+  #     - ./trading/ef3_fa1mf_paper/logs:/logs
+  #   networks:
+  #     - trading_net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8102/healthz"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
 
   # ef3_fb2af_paper: Edge Factory v3 R004 / F-B.2.A.f paper trader (BTCUSDT, $1000 / 1x)
   # 20-bar H4 HIGH breakout + range-compression <12% + SMA200 Daily + SL 1xATR14 + TP 8:1.
   # Data via Binance Futures public REST klines (H4 + Daily). Long-only, isolated.
   # Stop with: docker compose stop trading-ef3-fb2af-paper
-  trading-ef3-fb2af-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.ef3_fb2af_paper
-    container_name: trading_ef3_fb2af_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8103:8103"
-    environment:
-      - FB2AF_DATA_DIR=/data
-      - FB2AF_LOG_DIR=/logs
-      - FB2AF_CAPITAL=1000.0
-      - FB2AF_LEVERAGE=1.0
-      - FB2AF_HEALTH_PORT=8103
-      - TZ=UTC
-    volumes:
-      - ./trading/ef3_fb2af_paper/data:/data
-      - ./trading/ef3_fb2af_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8103/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # RETIRED 2026-07-05: aposentado após revalidação holdout (PF 1.18, edge quase zerado, bootstrap reprovado). Ver HOLDOUT_REVAL_2026-07.md
+  # trading-ef3-fb2af-paper:
+  #   build:
+  #     context: .
+  #     dockerfile: trading/Dockerfile.ef3_fb2af_paper
+  #   container_name: trading_ef3_fb2af_paper
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:8103:8103"
+  #   environment:
+  #     - FB2AF_DATA_DIR=/data
+  #     - FB2AF_LOG_DIR=/logs
+  #     - FB2AF_CAPITAL=1000.0
+  #     - FB2AF_LEVERAGE=1.0
+  #     - FB2AF_HEALTH_PORT=8103
+  #     - TZ=UTC
+  #   volumes:
+  #     - ./trading/ef3_fb2af_paper/data:/data
+  #     - ./trading/ef3_fb2af_paper/logs:/logs
+  #   networks:
+  #     - trading_net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8103/healthz"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
 
   # rsi_reversion_paper: R021-A C1 RSI Extreme Reversion 5m paper trader (SOLUSDT, $1000 / 1x)
   # Phase 0 watcher: RSI(14)<10 LONG / >85 SHORT, exit RSI=50. Blacklist: 13-16h UTC + Tuesdays.

@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Dependências próprias do local_arb (requests/PyYAML/psycopg2-binary/pytest).
+# psycopg2-binary já traz libpq embutida — sem apt/gcc necessários.
+COPY trading/local_arb/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY trading/__init__.py /app/trading/__init__.py
+COPY trading/local_arb/ /app/trading/local_arb/
+
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Default seguro: só imprime status e sai (sem rede de trade, sem credenciais).
+# O docker-compose sobrescreve com o modo ocioso (status + sleep infinity).
+CMD ["python", "-m", "trading.local_arb.main", "--status"]

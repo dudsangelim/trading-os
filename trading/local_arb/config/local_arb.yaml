@@ -1,0 +1,95 @@
+# local_arb — arbitragem local USDT/BRL entre exchanges brasileiras (RESEARCH / PAPER ONLY)
+# Taxas são MANUAIS e editáveis — conferir nos sites das exchanges antes de confiar.
+
+engine_role: local_arb_research
+
+pair:
+  base: USDT
+  quote: BRL
+  symbol: USDT/BRL
+
+# Blocos `api:` = endpoints REST PÚBLICOS de order book (sem credenciais, read-only).
+# Formato do bloco documentado em adapters.py (PublicRestAdapter). Fonte que falhar
+# vira erro controlado + quality flag — nunca crash. `api: null` = sem endpoint
+# (adapter falha controlado com flag no_endpoint).
+exchanges:
+  mercadobitcoin:
+    display_name: "Mercado Bitcoin"
+    enabled: true
+    # bps = basis points (1 bp = 0.01%)
+    taker_bps: 70        # 0.70% (placeholder manual — conferir)
+    maker_bps: 30        # 0.30%
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:                 # API v4 pública — conferir formato antes de confiar
+      url: "https://api.mercadobitcoin.net/api/v4/USDT-BRL/orderbook"
+      data_path: []
+      bids_key: bids
+      asks_key: asks
+      level_format: pair   # [["5.60","100"], ...]
+      timeout_s: 5
+  novadax:
+    display_name: "NovaDAX"
+    enabled: true
+    taker_bps: 50        # 0.50% (placeholder manual)
+    maker_bps: 25
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://api.novadax.com/v1/market/depth?symbol=USDT_BRL&limit=20"
+      data_path: [data]
+      bids_key: bids
+      asks_key: asks
+      level_format: pair
+      timeout_s: 5
+  bitypreco:
+    display_name: "Bitypreço"
+    enabled: true
+    taker_bps: 50        # 0.50% (placeholder manual)
+    maker_bps: 0
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://api.bitpreco.com/usdt-brl/orderbook"
+      data_path: []
+      bids_key: bids
+      asks_key: asks
+      level_format: obj    # [{"price": 5.60, "amount": 100}, ...]
+      price_key: price
+      size_key: amount
+      timeout_s: 5
+
+# Componentes extras do break-even (todos em bps, editáveis)
+break_even:
+  slippage_est_bps: 5.0          # slippage estimado além do book visível
+  latency_haircut_bps: 3.0       # book pode mover entre snapshot e "execução"
+  rebalance_amortized_bps: 8.0   # custo de rebalancear inventário, amortizado por trade
+
+thresholds:
+  min_net_bps: 20.0        # só é oportunidade se net (gross - break_even) >= isto
+  min_quality_score: 70    # score mínimo dos DOIS books para considerar
+  max_book_age_s: 10.0     # snapshot mais velho que isto é stale
+
+simulation:
+  sizes_quote_brl: [500, 1000, 2500, 5000]   # tamanhos simulados por rodada
+  level_participation: 0.5                    # assume capturar só 50% do size exibido por nível
+  min_fill_ratio: 0.95                        # fill mínimo aceito no paper (95%)
+
+paper:
+  delay_ms: 750            # atraso simulado entre sinal e "execução" paper
+  initial_balances:
+    brl_per_exchange: 10000.0
+    usdt_per_exchange: 2000.0
+
+quality:
+  min_levels: 5
+  stale_penalty: 40
+  thin_book_penalty: 20
+  crossed_penalty: 30
+  high_latency_penalty: 10
+  max_latency_ms: 1500
+
+report:
+  min_trades_for_verdict: 20   # abaixo disto -> HOLD
+  viva_min_net_bps: 10.0       # média realizada >= isto -> VIVA
+  ferida_max_decay_bps: 15.0   # decay médio acima disto fere a tese
