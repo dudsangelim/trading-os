@@ -283,6 +283,8 @@ class PaperTrader:
                 limit_price=float(eng.armed.entry_price),
                 stop_price=float(eng.armed.stop_price),
                 ref_price=float(ref_price),
+                tp1=float(eng.armed.mid),
+                tp2=float(eng.armed.opposite),
             )
         if eng.state == "IN_POSITION" and eng.pos is not None:
             return EngineSnapshot(
@@ -291,6 +293,8 @@ class PaperTrader:
                 limit_price=0.0,
                 stop_price=float(eng.pos.stop_price),
                 ref_price=float(ref_price),
+                tp1=float(eng.pos.mid),
+                tp2=float(eng.pos.opposite),
             )
         return EngineSnapshot(phase="flat", direction=0, limit_price=0.0,
                               stop_price=0.0, ref_price=float(ref_price))
@@ -439,12 +443,12 @@ class PaperTrader:
         for tr in new_trades:
             self._persist_trade(tr, ts)
 
-        # NOTE: no live reconcile on the ~250ms tick path. In v2 the real protective
-        # stop rests natively on the exchange, so intra-candle protection needs no
-        # polling; hammering the REST API 4x/sec would only invite rate limits. The
-        # engine's BE stop-move is mirrored on the next candle reconcile (the exchange
-        # still holds the wider original stop meanwhile — risk stays bounded). seq is
-        # still bumped above so candle reconciles keep their monotonic ordering.
+        # NOTE: the live broker is serviced on the tick path via broker.monitor()
+        # (called from the tick loop, see _run_tick_loop), NOT here. In v3 protection is
+        # placed only AFTER the entry fills, so the broker must poll the exchange fast to
+        # (a) arm the stop/TPs the instant the LIMIT entry fills and (b) move the stop to
+        # breakeven when TP1 fills. monitor() is idempotent and self-flattening on error.
+        # seq is still bumped above so candle reconciles keep their monotonic ordering.
 
 
 # ---------------------------------------------------------------------------
@@ -460,10 +464,23 @@ def _run_tick_loop(trader: PaperTrader, stop_event: threading.Event) -> None:
     log.info("[tick] loop started")
     while not stop_event.is_set():
         try:
+            # Service the live broker every tick (shadow mode = broker is None -> skip).
+            # This is what arms protection the instant the LIMIT entry fills and moves the
+            # stop to BE on TP1 — it must run while the broker is armed OR in position,
+            # independent of the engine's own IN_POSITION state.
+            broker = trader.broker
+            broker_active = broker is not None and (broker.armed or broker.in_position)
+            if broker is not None:
+                broker.monitor()
+
             if trader.engine.state == "IN_POSITION":
                 price = BinanceFeed.ticker_price()
                 ts = pd.Timestamp.utcnow()
                 trader.on_tick(ts, price)
+                stop_event.wait(_TICK_INTERVAL_IN_POSITION)
+            elif broker_active:
+                # broker has a resting entry / open position but the engine isn't yet
+                # IN_POSITION — poll fast to catch the real-time fill on the exchange.
                 stop_event.wait(_TICK_INTERVAL_IN_POSITION)
             else:
                 stop_event.wait(_TICK_INTERVAL_IDLE)

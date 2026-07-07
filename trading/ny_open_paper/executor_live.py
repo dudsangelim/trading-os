@@ -249,6 +249,25 @@ class BinanceLiveExecutor:
         self._assert_within_cap(amount, price)
         return amount
 
+    def round_amount(self, amount: float) -> float:
+        """Round a base qty to the market's amount precision (for the TP1/TP2 split)."""
+        return float(self.x.amount_to_precision(self.symbol, amount))
+
+    def min_tradeable(self, amount: float, price: float) -> bool:
+        """True if `amount` at `price` clears the market's min amount AND min notional.
+        Used to decide whether the 50% TP1 partial is placeable, or we must fall back to
+        a single full-size TP."""
+        if amount <= 0:
+            return False
+        m = self.x.markets[self.symbol]
+        min_amt = (m.get("limits", {}).get("amount", {}) or {}).get("min")
+        min_cost = (m.get("limits", {}).get("cost", {}) or {}).get("min")
+        if min_amt and amount < float(min_amt):
+            return False
+        if min_cost and price and amount * price < float(min_cost):
+            return False
+        return True
+
     # ------------------------------------------------------------------
     # orders
     # ------------------------------------------------------------------
@@ -330,19 +349,29 @@ class BinanceLiveExecutor:
         log.warning("[executor-live] MARKET close %s %s id=%s", close_side, amount, order.get("id"))
         return order
 
-    def cancel(self, order_id: str) -> None:
+    def cancel(self, order_id: str, conditional: bool = False) -> None:
+        # Since Binance's 2025-12-09 migration, STOP/TAKE_PROFIT (conditional) orders live
+        # on the separate ALGO endpoint. ccxt only routes cancel_order there when
+        # params={'stop': True} is passed — a plain cancel would NOT touch an algo order.
         try:
-            self.x.cancel_order(order_id, self.symbol)
-            log.info("[executor-live] cancelled order %s", order_id)
+            params = {"stop": True} if conditional else {}
+            self.x.cancel_order(order_id, self.symbol, params=params)
+            log.info("[executor-live] cancelled %s order %s",
+                     "algo" if conditional else "regular", order_id)
         except Exception as exc:
             log.warning("[executor-live] cancel %s failed (may be filled/gone): %s", order_id, exc)
 
     def cancel_all(self) -> None:
-        try:
-            self.x.cancel_all_orders(self.symbol)
-            log.info("[executor-live] cancelled all open orders for %s", self.symbol)
-        except Exception as exc:
-            log.warning("[executor-live] cancel_all failed: %s", exc)
+        # Regular (LIMIT/MARKET) and algo (STOP/TAKE_PROFIT conditional) orders live on
+        # SEPARATE Binance endpoints since 2025-12-09. cancel_all_orders() hits only ONE
+        # list per call (plain -> fapiPrivateDeleteAllOpenOrders; stop=True ->
+        # fapiPrivateDeleteAlgoOpenOrders), so we MUST cancel both or leave zombies.
+        for label, params in (("regular", {}), ("algo", {"stop": True})):
+            try:
+                self.x.cancel_all_orders(self.symbol, params=params)
+            except Exception as exc:
+                log.warning("[executor-live] cancel_all (%s) failed: %s", label, exc)
+        log.info("[executor-live] cancelled all open orders (regular+algo) for %s", self.symbol)
 
     # ------------------------------------------------------------------
     # reads / reconciliation
@@ -365,7 +394,16 @@ class BinanceLiveExecutor:
         return PositionView(side=None, amount=0.0, entry_price=0.0, unrealized_pnl=0.0)
 
     def open_orders(self) -> OpenOrdersView:
-        orders = self.x.fetch_open_orders(self.symbol)
+        # Fetch BOTH lists: regular orders (fapiPrivateGetOpenOrders) and algo/conditional
+        # orders (fapiPrivateGetOpenAlgoOrders, via params={'stop': True}). Since the
+        # 2025-12-09 migration the resting STOP/TAKE_PROFIT protections are ONLY in the
+        # algo list — a plain fetch would miss them (blind startup/teardown residual check).
+        orders = []
+        for params in ({}, {"stop": True}):
+            try:
+                orders.extend(self.x.fetch_open_orders(self.symbol, params=params) or [])
+            except Exception as exc:
+                log.warning("[executor-live] fetch_open_orders(%s) failed: %s", params, exc)
         view = OpenOrdersView(entry=None, stops=[], take_profits=[], other=[])
         for o in orders:
             otype = (o.get("type") or "").upper()
