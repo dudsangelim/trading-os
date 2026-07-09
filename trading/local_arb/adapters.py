@@ -119,6 +119,10 @@ class PublicRestAdapter(BaseAdapter):
         except Exception as exc:  # noqa: BLE001 — qualquer falha de rede vira erro controlado
             return self._fail(f"{type(exc).__name__}: {exc}", "fetch_error")
         latency_ms = (time.monotonic() - t0) * 1000.0
+        # ts = instante REAL em que a resposta chegou, por book — NÃO o ts único
+        # do ciclo (now_ts). Coleta é sequencial: books do mesmo ciclo podem estar
+        # segundos afastados entre si, e o scanner mede esse skew por janela.
+        fetch_ts = time.time()
 
         try:
             bids, asks = self._parse(payload)
@@ -131,7 +135,7 @@ class PublicRestAdapter(BaseAdapter):
         book = OrderBookSnapshot(
             exchange=self.exchange,
             symbol=self.symbol,
-            ts=now_ts if now_ts is not None else time.time(),
+            ts=fetch_ts,
             bids=bids,
             asks=asks,
             latency_ms=latency_ms,

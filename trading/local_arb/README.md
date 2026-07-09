@@ -34,23 +34,41 @@ Sem `DATABASE_URL`, o sistema roda em modo `no-db/dry-run` e sai com código 0.
 # Validar serviço no compose
 docker compose config --services | grep local-arb-worker
 
-# Build do worker local_arb
-docker compose build local-arb-worker
+# Build do worker local_arb com proveniência do commit
+LOCAL_ARB_GIT_SHA=$(git rev-parse --short HEAD) docker compose build local-arb-worker
 
-# Subir em modo seguro/ocioso: imprime status e dorme
-docker compose up -d local-arb-worker
+# Subir em modo seguro/observer-only
+LOCAL_ARB_GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d local-arb-worker
 
 # Ver status/log
 docker logs local_arb_worker --tail=50
 ```
 
-Para ativar polling REST research-only:
+Por padrão o compose mantém `LOCAL_ARB_ENABLED=false` e roda apenas o Continuous
+Observer público (`LOCAL_ARB_OBSERVER_ENABLED=true`), sem paper contínuo e sem
+execução real.
+
+Para ativar polling REST research-only com paper/DB:
 
 ```bash
 LOCAL_ARB_ENABLED=true LOCAL_ARB_POLL_SECONDS=2 docker compose up -d local-arb-worker
 ```
 
 Isso roda somente `python -m trading.local_arb.main --once` em loop, com endpoints públicos e persistência no schema `local_arb`. Continua sem execução real.
+
+## Continuous Observer
+
+```bash
+# 1 ciclo sintético: grava separado em observer_synthetic/, nunca no observer/ vivo
+python -m trading.local_arb.main --observer-once --synthetic --data-dir /tmp/local_arb_observer_test
+
+# relatório agregado do dia; lê arquivos diários e monólitos legados via streaming
+python -m trading.local_arb.main --observer-report --data-dir trading/local_arb/data
+```
+
+O observer grava arquivos diários (`observer_spread_windows_YYYY-MM-DD.csv`) e
+inclui `source`, `skew_ms` e `max_skew_ms`. Janelas com skew entre books acima de
+`observer.max_skew_ms` são rejeitadas antes de virar candidate/watch.
 
 ## Configuração
 
@@ -72,7 +90,9 @@ Contém:
 - saldos iniciais do inventário paper;
 - regras do veredito `VIVA | FERIDA | MORTA | HOLD`.
 
-As taxas são placeholders operacionais. Conferir e atualizar antes de confiar nos números.
+As taxas são placeholders operacionais. Enquanto não houver auditoria manual por
+exchange/tier/conta, o break-even aplica `fee_uncertainty_bps` como buffer
+conservador para evitar falso positivo de edge.
 
 ## Módulos
 

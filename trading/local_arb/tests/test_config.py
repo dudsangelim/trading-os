@@ -6,7 +6,9 @@ from trading.local_arb.config import DEFAULT_CONFIG_PATH, config_hash, git_sha, 
 def test_load_default_config():
     cfg = load_config(DEFAULT_CONFIG_PATH)
     assert cfg["engine_role"] == "local_arb_research"
-    assert set(cfg["exchanges"]) == {"mercadobitcoin", "novadax", "bitypreco"}
+    assert {"mercadobitcoin", "novadax", "bitypreco"}.issubset(set(cfg["exchanges"]))
+    assert {"binance", "bybit", "foxbit", "bitso", "brasilbitcoin", "okx"}.issubset(set(cfg["exchanges"]))
+    assert cfg["exchanges"]["novadax"]["enabled"] is False
     assert cfg["pair"]["symbol"] == "USDT/BRL"
 
 

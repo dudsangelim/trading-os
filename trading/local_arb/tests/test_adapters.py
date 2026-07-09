@@ -53,7 +53,7 @@ class TestPublicRestAdapter:
         assert res.ok
         assert res.book.best_bid == pytest.approx(5.60)
         assert res.book.best_ask == pytest.approx(5.62)
-        assert res.book.ts == NOW
+        assert res.book.ts >= NOW
 
     def test_parses_obj_payload_and_sorts(self):
         payload = {"bids": [{"price": 5.59, "amount": 50}, {"price": 5.60, "amount": 100}],
@@ -98,9 +98,9 @@ class TestBuildAdapters:
         enabled = [k for k, v in cfg["exchanges"].items() if v.get("enabled")]
         assert sorted(a.exchange for a in adapters) == sorted(enabled)
         assert all(isinstance(a, SyntheticAdapter) for a in adapters)
-        # cenário padrão tem arb: novadax barata, mercadobitcoin cara
+        # cenário padrão tem arb: binance barata, mercadobitcoin cara
         books = {a.exchange: a.fetch_order_book(now_ts=NOW).book for a in adapters}
-        assert books["mercadobitcoin"].best_bid > books["novadax"].best_ask
+        assert books["mercadobitcoin"].best_bid > books["binance"].best_ask
 
     def test_rest_mode_builds_rest_adapters(self, cfg):
         adapters = build_adapters(cfg, synthetic=False, http_get=lambda url, t: {})

@@ -28,3 +28,15 @@ def test_break_even_from_config():
     fee = FeeSchedule(exchange="x", taker_bps=10.0, maker_bps=5.0)
     be = break_even_from_config(fee, fee, cfg)
     assert be.total_bps == 10 + 10 + 1 + 2 + 3
+
+
+def test_break_even_adds_fee_uncertainty_buffer():
+    cfg = {"break_even": {
+        "slippage_est_bps": 1,
+        "latency_haircut_bps": 2,
+        "rebalance_amortized_bps": 3,
+        "fee_uncertainty_bps": 10,
+    }}
+    fee = FeeSchedule(exchange="x", taker_bps=10.0, maker_bps=5.0)
+    be = break_even_from_config(fee, fee, cfg)
+    assert be.total_bps == 10 + 10 + 1 + 2 + 3 + 10

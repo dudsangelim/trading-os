@@ -30,12 +30,12 @@ def _synthetic_scan(cfg):
 
 
 class TestScanSynthetic:
-    def test_scan_finds_novadax_to_mb_opportunity(self, cfg):
+    def test_scan_finds_binance_to_mb_opportunity(self, cfg):
         scan = _synthetic_scan(cfg)
         assert all(b.ok for b in scan.books)
-        assert scan.spread_windows, "com 3 books saudáveis tem de haver janelas"
+        assert scan.spread_windows, "com books saudáveis tem de haver janelas"
         routes = {(o.buy_exchange, o.sell_exchange) for o in scan.opportunities}
-        assert ("novadax", "mercadobitcoin") in routes
+        assert ("binance", "mercadobitcoin") in routes
         for opp in scan.opportunities:
             assert opp.net_bps >= scan.min_net_bps
         assert scan.paper_trades and any(t.status == "filled" for t in scan.paper_trades)

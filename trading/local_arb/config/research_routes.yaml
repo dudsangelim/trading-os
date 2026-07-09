@@ -58,7 +58,7 @@ routes:
           timeout_s: 5
         synthetic: {bid: 5.640, ask: 5.646, latency_ms: 200.0}
       novadax:
-        enabled: true
+        enabled: false
         api:
           url: "https://api.novadax.com/v1/market/depth?symbol=USDC_BRL&limit=20"
           data_path: [data]
@@ -67,6 +67,16 @@ routes:
           level_format: pair
           timeout_s: 5
         synthetic: {bid: 5.552, ask: 5.556, latency_ms: 120.0}
+      bybit:
+        enabled: true
+        api:
+          url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=USDCBRL&limit=20"
+          data_path: [result]
+          bids_key: b
+          asks_key: a
+          level_format: pair
+          timeout_s: 5
+        synthetic: {bid: 5.552, ask: 5.556, latency_ms: 140.0}
 
   # ── Prêmio de stablecoin BRL vs PTAX ──────────────────────────────────────
   # local USDT/BRL e USDC/BRL vs USD/BRL (PTAX) ajustado por Binance USDC/USDT.
@@ -92,7 +102,7 @@ routes:
               timeout_s: 5
             synthetic: {bid: 5.650, ask: 5.656, latency_ms: 200.0}
           novadax:
-            enabled: true
+            enabled: false
             api:
               url: "https://api.novadax.com/v1/market/depth?symbol=USDT_BRL&limit=20"
               data_path: [data]
@@ -101,6 +111,16 @@ routes:
               level_format: pair
               timeout_s: 5
             synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
+          bybit:
+            enabled: true
+            api:
+              url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=USDTBRL&limit=20"
+              data_path: [result]
+              bids_key: b
+              asks_key: a
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.560, ask: 5.565, latency_ms: 140.0}
       USDC:
         binance_usd_symbol: null       # assume USDC ~ USD (sem ajuste)
         binance_usd_invert: false
@@ -116,7 +136,7 @@ routes:
               timeout_s: 5
             synthetic: {bid: 5.640, ask: 5.646, latency_ms: 200.0}
           novadax:
-            enabled: true
+            enabled: false
             api:
               url: "https://api.novadax.com/v1/market/depth?symbol=USDC_BRL&limit=20"
               data_path: [data]
@@ -125,6 +145,16 @@ routes:
               level_format: pair
               timeout_s: 5
             synthetic: {bid: 5.552, ask: 5.556, latency_ms: 120.0}
+          bybit:
+            enabled: true
+            api:
+              url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=USDCBRL&limit=20"
+              data_path: [result]
+              bids_key: b
+              asks_key: a
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 5.552, ask: 5.556, latency_ms: 140.0}
 
   # ── Proxy BTC/ETH em BRL ──────────────────────────────────────────────────
   # local BTC/BRL e ETH/BRL vs (Binance BTCUSDT|ETHUSDT × USDT/BRL local).
@@ -147,7 +177,7 @@ routes:
             timeout_s: 5
           synthetic: {bid: 5.650, ask: 5.656, latency_ms: 200.0}
         novadax:
-          enabled: true
+          enabled: false
           api:
             url: "https://api.novadax.com/v1/market/depth?symbol=USDT_BRL&limit=20"
             data_path: [data]
@@ -156,6 +186,16 @@ routes:
             level_format: pair
             timeout_s: 5
           synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
+        bybit:
+          enabled: true
+          api:
+            url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=USDTBRL&limit=20"
+            data_path: [result]
+            bids_key: b
+            asks_key: a
+            level_format: pair
+            timeout_s: 5
+          synthetic: {bid: 5.560, ask: 5.565, latency_ms: 140.0}
     legs:
       BTC:
         binance_symbol: BTCUSDT
@@ -170,6 +210,16 @@ routes:
               level_format: pair
               timeout_s: 5
             synthetic: {bid: 561000.0, ask: 561400.0, latency_ms: 200.0}
+          bybit:
+            enabled: true
+            api:
+              url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=BTCBRL&limit=20"
+              data_path: [result]
+              bids_key: b
+              asks_key: a
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 560800.0, ask: 561500.0, latency_ms: 140.0}
       ETH:
         binance_symbol: ETHUSDT
         exchanges:
@@ -183,6 +233,16 @@ routes:
               level_format: pair
               timeout_s: 5
             synthetic: {bid: 19650.0, ask: 19670.0, latency_ms: 200.0}
+          bybit:
+            enabled: true
+            api:
+              url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=ETHBRL&limit=20"
+              data_path: [result]
+              bids_key: b
+              asks_key: a
+              level_format: pair
+              timeout_s: 5
+            synthetic: {bid: 19640.0, ask: 19680.0, latency_ms: 140.0}
 
   # ── MBRL recon (monitor/recon) ────────────────────────────────────────────
   # Endpoints de MBRL/USDT e MBRL/USDC ainda INCERTOS — desligado por default.

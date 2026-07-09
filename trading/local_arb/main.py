@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import sys
 import time
 from datetime import datetime, timezone
@@ -31,6 +32,7 @@ from .daily_report import DEFAULT_DATA_DIR, generate_daily_report
 from .db import DbUnavailable, connect, get_dsn, init_db, persist_scan
 from .inventory import Ledger
 from .models import OrderBookLevel, OrderBookSnapshot, Opportunity
+from .observer import generate_observer_report, observer_summary, persist_observer_scan
 from .paper import simulate_arb
 from .quality import quality_score
 from .report import thesis_status
@@ -184,12 +186,12 @@ def cmd_init_db() -> int:
     return 0
 
 
-def _run_scan(cfg: dict, synthetic: bool) -> tuple[ScanResult, str]:
+def _run_scan(cfg: dict, synthetic: bool, paper_enabled: bool = True) -> tuple[ScanResult, str]:
     mode = "synthetic" if synthetic else "rest"
     now_ts = SYNTHETIC_TS if synthetic else time.time()
     adapters = build_adapters(cfg, synthetic=synthetic)
     books = collect_once(adapters, cfg, now_ts)
-    return scan_books(books, cfg, now_ts), mode
+    return scan_books(books, cfg, now_ts, paper_enabled=paper_enabled), mode
 
 
 def _maybe_persist(scan: ScanResult, cfg: dict, synthetic: bool = False) -> tuple[dict | None, str]:
@@ -256,6 +258,47 @@ def cmd_research_report(rcfg: dict, synthetic: bool, data_dir: Path) -> int:
     return 0
 
 
+def cmd_observer_once(cfg: dict, synthetic: bool, data_dir: Path) -> int:
+    """Um ciclo do Continuous Observer: persiste CSV, sem paper e sem execução."""
+    scan, mode = _run_scan(cfg, synthetic, paper_enabled=False)
+    persisted = persist_observer_scan(scan, cfg, data_dir, config_hash=config_hash(cfg), mode=mode)
+    summary = observer_summary(scan, persisted, mode=f"observer_{mode}")
+    summary["config_hash"] = config_hash(cfg)
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_observer_report(data_dir: Path) -> int:
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    md_path = generate_observer_report(data_dir, date_str)
+    print(f"[observer-report] gerado: {md_path}")
+    return 0
+
+
+def cmd_observer_loop(cfg: dict, synthetic: bool, data_dir: Path,
+                      poll_seconds: float | None, max_cycles: int | None) -> int:
+    """Loop observacional contínuo. Sem paper e sem execução real."""
+    interval = float(poll_seconds if poll_seconds is not None
+                     else cfg.get("observer", {}).get("poll_seconds", 10))
+    cycle = 0
+    while True:
+        cycle += 1
+        scan, mode = _run_scan(cfg, synthetic, paper_enabled=False)
+        persisted = persist_observer_scan(scan, cfg, data_dir, config_hash=config_hash(cfg), mode=mode)
+        summary = observer_summary(scan, persisted, mode=f"observer_{mode}")
+        print(
+            f"[observer-loop] cycle={cycle} books_ok={summary['n_books_ok']}/{summary['n_books']} "
+            f"windows={summary['n_spread_windows']} candidates={summary['n_candidate_windows']} "
+            f"watch={summary['n_watch_windows']} best_net={summary['best_net_bps']}",
+            flush=True,
+        )
+        if max_cycles is not None and cycle >= max_cycles:
+            return 0
+        jitter = float(cfg.get("observer", {}).get("jitter_seconds", 0) or 0)
+        sleep_s = interval + (random.uniform(0, jitter) if jitter > 0 else 0.0)
+        time.sleep(max(0.0, sleep_s))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="local_arb", description=__doc__)
     parser.add_argument("--status", action="store_true", help="imprime config_hash/git_sha/role")
@@ -272,6 +315,16 @@ def main(argv: list[str] | None = None) -> int:
                         help="1 coleta monitor-only das research routes; JSON no stdout")
     parser.add_argument("--research-report", action="store_true",
                         help="gera research_report_<data>.md (+csv) em <data-dir>/reports/")
+    parser.add_argument("--observer-once", action="store_true",
+                        help="1 ciclo Continuous Observer; persiste CSV sem paper/execução")
+    parser.add_argument("--observer-report", action="store_true",
+                        help="gera observer_report_<data>.md a partir dos CSVs do observer")
+    parser.add_argument("--observer-loop", action="store_true",
+                        help="loop Continuous Observer; persiste CSV sem paper/execução")
+    parser.add_argument("--poll-seconds", type=float, default=None,
+                        help="intervalo do --observer-loop; default vem do YAML")
+    parser.add_argument("--max-cycles", type=int, default=None,
+                        help="limite opcional de ciclos do --observer-loop para smoke/teste")
     parser.add_argument("--research-config", default=None,
                         help="caminho alternativo do research_routes.yaml")
     parser.add_argument("--data-dir", default=None,
@@ -295,6 +348,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.report:
         ran = True
         rc = max(rc, cmd_report(cfg, args.synthetic, data_dir))
+    if args.observer_once:
+        ran = True
+        rc = max(rc, cmd_observer_once(cfg, args.synthetic, data_dir))
+    if args.observer_report:
+        ran = True
+        rc = max(rc, cmd_observer_report(data_dir))
+    if args.observer_loop:
+        ran = True
+        rc = max(rc, cmd_observer_loop(cfg, args.synthetic, data_dir,
+                                      args.poll_seconds, args.max_cycles))
     if args.research_routes or args.research_report:
         rcfg = load_research_config(args.research_config or DEFAULT_RESEARCH_CONFIG_PATH)
         if args.research_routes:

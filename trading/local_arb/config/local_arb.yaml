@@ -21,16 +21,21 @@ exchanges:
     maker_bps: 30        # 0.30%
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
-    api:                 # API v4 pública — conferir formato antes de confiar
+    synthetic: {bid: 5.655, ask: 5.660, latency_ms: 200.0}
+    api:                 # API v4 pública
       url: "https://api.mercadobitcoin.net/api/v4/USDT-BRL/orderbook"
       data_path: []
       bids_key: bids
       asks_key: asks
       level_format: pair   # [["5.60","100"], ...]
       timeout_s: 5
+
+  # NovaDAX: docs ainda apontam para api.novadax.com, mas DNS do host público
+  # não resolve em 2026-07-08. Mantida como candidato, desabilitada para não
+  # contaminar coleta real até aparecer endpoint público funcional.
   novadax:
     display_name: "NovaDAX"
-    enabled: true
+    enabled: false
     taker_bps: 50        # 0.50% (placeholder manual)
     maker_bps: 25
     withdrawal_brl_fixed: 0.0
@@ -42,6 +47,7 @@ exchanges:
       asks_key: asks
       level_format: pair
       timeout_s: 5
+
   bitypreco:
     display_name: "Bitypreço"
     enabled: true
@@ -59,16 +65,125 @@ exchanges:
       size_key: amount
       timeout_s: 5
 
+  binance:
+    display_name: "Binance"
+    enabled: true
+    taker_bps: 10        # conferir tier/conta
+    maker_bps: 10
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
+    api:
+      url: "https://api.binance.com/api/v3/depth?symbol=USDTBRL&limit=20"
+      data_path: []
+      bids_key: bids
+      asks_key: asks
+      level_format: pair
+      timeout_s: 5
+
+  bybit:
+    display_name: "Bybit"
+    enabled: true
+    taker_bps: 10        # placeholder manual — conferir tier/conta BRL spot
+    maker_bps: 10
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    synthetic: {bid: 5.561, ask: 5.566, latency_ms: 140.0}
+    api:
+      url: "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=USDTBRL&limit=20"
+      data_path: [result]
+      bids_key: b
+      asks_key: a
+      level_format: pair
+      timeout_s: 5
+
+  foxbit:
+    display_name: "Foxbit"
+    enabled: true
+    taker_bps: 50        # default público retornado no market metadata: 0.50%
+    maker_bps: 25
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://api.foxbit.com.br/rest/v3/markets/USDTBRL/orderbook?depth=20"
+      data_path: []
+      bids_key: bids
+      asks_key: asks
+      level_format: pair
+      timeout_s: 5
+
+  bitso:
+    display_name: "Bitso"
+    enabled: true
+    taker_bps: 78        # flat_rate público para usdt_brl no tier inicial: 0.78%
+    maker_bps: 60
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://api.bitso.com/v3/order_book/?book=usdt_brl&aggregate=true"
+      data_path: [payload]
+      bids_key: bids
+      asks_key: asks
+      level_format: obj
+      price_key: price
+      size_key: amount
+      timeout_s: 5
+
+  brasilbitcoin:
+    display_name: "Brasil Bitcoin"
+    enabled: true
+    taker_bps: 50        # placeholder manual — conferir
+    maker_bps: 25
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://brasilbitcoin.com.br/API/orderbook/USDT"
+      data_path: []
+      bids_key: buy
+      asks_key: sell
+      level_format: obj
+      price_key: preco
+      size_key: quantidade
+      timeout_s: 5
+
+  okx:
+    display_name: "OKX"
+    enabled: true
+    taker_bps: 10        # placeholder manual — conferir para BRL spot
+    maker_bps: 8
+    withdrawal_brl_fixed: 0.0
+    withdrawal_usdt_fixed: 1.0
+    api:
+      url: "https://www.okx.com/api/v5/market/books?instId=USDT-BRL&sz=20"
+      data_path: [data, 0]
+      bids_key: bids
+      asks_key: asks
+      level_format: pair
+      timeout_s: 5
+
 # Componentes extras do break-even (todos em bps, editáveis)
 break_even:
   slippage_est_bps: 5.0          # slippage estimado além do book visível
-  latency_haircut_bps: 3.0       # book pode mover entre snapshot e "execução"
-  rebalance_amortized_bps: 8.0   # custo de rebalancear inventário, amortizado por trade
+  latency_haircut_bps: 3.0       # decay esperado entre detecção e execução
+  rebalance_amortized_bps: 8.0   # custo médio de rebalanceamento / capital preso
+  fee_uncertainty_bps: 10.0      # buffer até auditoria manual das taxas por exchange
 
 thresholds:
   min_net_bps: 20.0        # só é oportunidade se net (gross - break_even) >= isto
   min_quality_score: 70    # score mínimo dos DOIS books para considerar
   max_book_age_s: 10.0     # snapshot mais velho que isto é stale
+
+observer:
+  enabled: true
+  poll_seconds: 10
+  jitter_seconds: 2
+  candidate_min_net_bps: -20.0
+  watch_min_net_bps: 0.0
+  execution_min_net_bps: 20.0
+  max_skew_ms: 2000
+  persist_all_snapshots: false
+  persist_candidate_windows: true
+  persist_rejections: true
 
 simulation:
   sizes_quote_brl: [500, 1000, 2500, 5000]   # tamanhos simulados por rodada

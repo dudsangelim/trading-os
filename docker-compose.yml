@@ -33,20 +33,25 @@ services:
       retries: 5
 
   # local_arb: research-only scanner de arbitragem USDT/BRL (SIGNAL_ONLY)
-  # Default seguro: LOCAL_ARB_ENABLED=false => container apenas imprime status e fica ocioso.
+  # Default seguro v3.2: execução/paper desligados; observer público contínuo ligado.
   local-arb-worker:
     build:
       context: .
       dockerfile: trading/Dockerfile.local_arb
+      args:
+        LOCAL_ARB_GIT_SHA: ${LOCAL_ARB_GIT_SHA:-unknown}
     container_name: local_arb_worker
     restart: unless-stopped
     user: "1000:1000"  # agent:agent; evita arquivos root-owned no volume ./trading/local_arb/data
-    command: ["sh", "-c", "python -m trading.local_arb.main --status && if [ \"${LOCAL_ARB_ENABLED:-false}\" = \"true\" ]; then python -m trading.local_arb.main --init-db && while true; do python -m trading.local_arb.main --once; sleep ${LOCAL_ARB_POLL_SECONDS:-2}; done; else sleep infinity; fi"]
+    command: ["sh", "-c", "python -m trading.local_arb.main --status && if [ \"${LOCAL_ARB_ENABLED:-false}\" = \"true\" ]; then python -m trading.local_arb.main --init-db && while true; do python -m trading.local_arb.main --once; sleep ${LOCAL_ARB_POLL_SECONDS:-2}; done; elif [ \"${LOCAL_ARB_OBSERVER_ENABLED:-true}\" = \"true\" ]; then python -m trading.local_arb.main --observer-loop --poll-seconds ${LOCAL_ARB_OBSERVER_POLL_SECONDS:-10}; else sleep infinity; fi"]
     environment:
       - ENGINE_ROLE=local_arb_research
       - LOCAL_ARB_ENABLED=${LOCAL_ARB_ENABLED:-false}
+      - LOCAL_ARB_OBSERVER_ENABLED=${LOCAL_ARB_OBSERVER_ENABLED:-true}
+      - LOCAL_ARB_OBSERVER_POLL_SECONDS=${LOCAL_ARB_OBSERVER_POLL_SECONDS:-10}
       - LOCAL_ARB_POLL_SECONDS=${LOCAL_ARB_POLL_SECONDS:-2}
       - LOCAL_ARB_DATA_DIR=/data
+      - LOCAL_ARB_GIT_SHA=${LOCAL_ARB_GIT_SHA:-unknown}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-jarvis}:${POSTGRES_PASSWORD:-CHANGE_ME}@postgres:5432/${POSTGRES_DB:-jarvis}
       - PYTHONUNBUFFERED=1
     volumes:

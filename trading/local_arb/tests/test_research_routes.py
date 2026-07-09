@@ -68,9 +68,9 @@ class TestSyntheticOffline:
     def test_usdc_brl_promising_with_default_scenario(self, rcfg):
         scan = run_research_routes(rcfg, synthetic=True)
         r = _result(scan, "usdc_brl")
-        # novadax ask 5.556 -> MB bid 5.640: gross ~151bps, custo 120 -> net ~31bps
+        # bybit ask 5.556 -> MB bid 5.640: gross ~151bps, custo 120 -> net ~31bps
         assert r.status == STATUS_PROMISING
-        assert r.metrics["best_route"] == "novadax->mercadobitcoin"
+        assert r.metrics["best_route"] == "bybit->mercadobitcoin"
         gross = (5.640 / 5.556 - 1.0) * 10_000.0
         assert r.metrics["gross_bps"] == pytest.approx(gross, abs=0.01)
         assert r.signal_bps == pytest.approx(gross - 120.0, abs=0.01)
@@ -84,7 +84,7 @@ class TestSyntheticOffline:
         assert r.signal_bps < 0  # spread cruzado negativo após custos
 
     def test_usdc_brl_single_source_is_ok_monitor(self, rcfg):
-        rcfg["routes"]["usdc_brl"]["exchanges"]["novadax"]["enabled"] = False
+        rcfg["routes"]["usdc_brl"]["exchanges"]["bybit"]["enabled"] = False
         scan = run_research_routes(rcfg, synthetic=True)
         r = _result(scan, "usdc_brl")
         assert r.status == STATUS_OK
@@ -96,7 +96,7 @@ class TestStablecoinPremium:
         scan = run_research_routes(rcfg, synthetic=True)
         r = _result(scan, "stablecoin_premium_brl")
         usdt = r.metrics["stables"]["USDT"]
-        # mids: MB (5.650+5.656)/2=5.653, novadax (5.560+5.565)/2=5.5625 -> mediana 5.60775
+        # mids: MB (5.650+5.656)/2=5.653, bybit (5.560+5.565)/2=5.5625 -> mediana 5.60775
         local_mid = (5.653 + 5.5625) / 2.0
         fair = 5.50 * (1.0 / 1.0005)  # PTAX × USD/USDT via USDCUSDT invertido
         expected_bps = (local_mid / fair - 1.0) * 10_000.0
@@ -146,7 +146,7 @@ class TestBtcEthProxy:
         assert r.metrics["usdt_brl_local_mid"] == pytest.approx(usdt_brl, abs=1e-6)
         btc = r.metrics["legs"]["BTC"]
         implied = 100_000.0 * usdt_brl
-        local_mid = (561_000.0 + 561_400.0) / 2.0
+        local_mid = ((561_000.0 + 561_400.0) / 2.0 + (560_800.0 + 561_500.0) / 2.0) / 2.0
         assert btc["implied_brl"] == pytest.approx(implied, abs=1e-3)
         assert btc["deviation_bps"] == pytest.approx(
             (local_mid / implied - 1.0) * 10_000.0, abs=0.01)
@@ -195,22 +195,22 @@ class TestFailureModes:
     def test_malformed_synthetic_config_is_per_source_not_route_crash(self, rcfg):
         # synthetic sem "ask" (KeyError na construção do adapter) só derruba
         # ESTA fonte; a outra segue viva e a rota vira OK (1 fonte), não BAD_DATA
-        rcfg["routes"]["usdc_brl"]["exchanges"]["novadax"]["synthetic"] = {"bid": 5.55}
+        rcfg["routes"]["usdc_brl"]["exchanges"]["bybit"]["synthetic"] = {"bid": 5.55}
         scan = run_research_routes(rcfg, synthetic=True)
         r = _result(scan, "usdc_brl")
         assert r.status == STATUS_OK
-        assert "config inválida" in r.sources["novadax"]
+        assert "config inválida" in r.sources["bybit"]
         assert r.sources["mercadobitcoin"] == "ok"
         assert not any("exceção inesperada" in n for n in r.notes)
 
     def test_malformed_api_config_is_per_source_not_route_crash(self, rcfg):
         # api de tipo errado (string) em modo REST: erro controlado da fonte
-        rcfg["routes"]["usdc_brl"]["exchanges"]["novadax"]["api"] = "https://errado"
+        rcfg["routes"]["usdc_brl"]["exchanges"]["bybit"]["api"] = "https://errado"
         scan = run_research_routes(rcfg, synthetic=False, now_ts=SYNTHETIC_TS,
                                    http_get=lambda url, t: {"bids": [["5.64", "10"]],
                                                             "asks": [["5.65", "10"]]})
         r = _result(scan, "usdc_brl")
-        assert "config inválida" in r.sources["novadax"]
+        assert "config inválida" in r.sources["bybit"]
         assert r.sources["mercadobitcoin"] == "ok"
 
 

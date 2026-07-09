@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -28,7 +29,10 @@ def config_hash(cfg: dict) -> str:
 
 
 def git_sha(repo_root: str | Path = REPO_ROOT, short: bool = True) -> str:
-    """SHA do HEAD do repo; 'unknown' se git indisponível."""
+    """SHA do HEAD do repo; usa env do container se .git não estiver disponível."""
+    env_sha = os.environ.get("LOCAL_ARB_GIT_SHA") or os.environ.get("GIT_SHA")
+    if env_sha:
+        return env_sha[:7] if short else env_sha
     cmd = ["git", "rev-parse", "--short" if short else "HEAD"]
     if short:
         cmd.append("HEAD")

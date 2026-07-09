@@ -101,6 +101,10 @@ def generate_daily_report(
     csv_written = [p.name for p in csv_paths if p is not None]
 
     n_ok = sum(1 for b in scan.books if b.ok)
+    if scan.opportunities:
+        paper_line = f"- Paper simulations: {len(scan.paper_trades)} ({n} filled)"
+    else:
+        paper_line = "- Paper simulations: não aplicável (sem oportunidade acima do gate)"
     lines = [
         f"# local_arb — relatório diário {date_str}",
         "",
@@ -111,7 +115,7 @@ def generate_daily_report(
         f"- Books coletados: {n_ok}/{len(scan.books)} ok",
         f"- Janelas de spread: {len(scan.spread_windows)}",
         f"- Oportunidades (net ≥ {scan.min_net_bps:.1f} bps): {len(scan.opportunities)}",
-        f"- Paper trades: {len(scan.paper_trades)} ({n} filled)",
+        paper_line,
         "",
         "## Fontes",
         "",
@@ -147,7 +151,7 @@ def generate_daily_report(
             f"| decay médio **{avg_decay:.1f} bps**"
         )
     else:
-        lines.append("Nenhum paper trade filled no período.")
+        lines.append("Sem oportunidade aceita no período; nenhuma simulação de paper era esperada.")
 
     lines += [
         "",

@@ -32,6 +32,17 @@ class SpreadWindow:
     depth_ok: bool
     quality_buy: int
     quality_sell: int
+    candidate_gate_pass: bool = False
+    watch_gate_pass: bool = False
+    execution_gate_theoretical_pass: bool = False
+    reason_rejected: str = ""
+    reject_reasons: list[str] = field(default_factory=list)
+    # skew entre os instantes reais de coleta dos dois books: spread calculado
+    # com books afastados no tempo é candidato/watch FALSO por construção
+    skew_ms: float = 0.0
+    max_skew_ms: float = 0.0
+    skew_ok: bool = True
+    source: str = "unknown"  # rest | synthetic | mixed — origem dos dois books
 
 
 @dataclass
@@ -56,10 +67,77 @@ def fee_schedule_from_config(cfg: dict, exchange: str) -> FeeSchedule:
     )
 
 
-def scan_books(books: list[CollectedBook], cfg: dict, now_ts: float) -> ScanResult:
+def _observer_thresholds(cfg: dict) -> tuple[float, float, float]:
+    obs = cfg.get("observer", {})
+    thresholds = cfg.get("thresholds", {})
+    return (
+        float(obs.get("candidate_min_net_bps", -20.0)),
+        float(obs.get("watch_min_net_bps", 0.0)),
+        float(obs.get("execution_min_net_bps", thresholds.get("min_net_bps", 20.0))),
+    )
+
+
+DEFAULT_MAX_SKEW_MS = 2000.0
+
+
+def max_skew_ms_from_config(cfg: dict) -> float:
+    return float(cfg.get("observer", {}).get("max_skew_ms", DEFAULT_MAX_SKEW_MS))
+
+
+def _reject_reasons(window: SpreadWindow, buy: CollectedBook, sell: CollectedBook,
+                    min_quality: int, execution_min_net_bps: float) -> list[str]:
+    reasons: list[str] = []
+    if "crossed" in buy.flags or "crossed" in sell.flags:
+        reasons.append("rejected_by_crossed_book")
+    if not window.skew_ok:
+        reasons.append("rejected_by_skew")
+    if buy.quality < min_quality or sell.quality < min_quality:
+        reasons.append("rejected_by_quality")
+    if not window.depth_ok:
+        reasons.append("rejected_by_depth")
+    if any(flag in (*buy.flags, *sell.flags) for flag in ("stale", "stale_book")):
+        reasons.append("rejected_by_stale_book")
+    if any(flag == "high_latency" for flag in (*buy.flags, *sell.flags)):
+        reasons.append("rejected_by_latency")
+    if window.net_bps < 0:
+        reasons.append("rejected_by_negative_net")
+    if window.gross_spread_bps > 0 and window.net_bps < 0:
+        reasons.append("rejected_by_fee")
+    if window.net_bps < execution_min_net_bps:
+        reasons.append("rejected_by_execution_threshold")
+    return reasons or ["accepted_execution_theoretical"]
+
+
+def _primary_reason(reasons: list[str], candidate: bool, watch: bool, execution: bool) -> str:
+    if execution:
+        return "accepted_execution_theoretical"
+    if watch:
+        return "accepted_watch"
+    if candidate:
+        return "accepted_candidate"
+    priority = [
+        "rejected_by_crossed_book",
+        "rejected_by_skew",
+        "rejected_by_quality",
+        "rejected_by_depth",
+        "rejected_by_stale_book",
+        "rejected_by_latency",
+        "rejected_by_negative_net",
+        "rejected_by_fee",
+        "rejected_by_execution_threshold",
+    ]
+    for reason in priority:
+        if reason in reasons:
+            return reason
+    return reasons[0] if reasons else "rejected_unknown"
+
+
+def scan_books(books: list[CollectedBook], cfg: dict, now_ts: float, paper_enabled: bool = True) -> ScanResult:
     thresholds = cfg["thresholds"]
     min_net_bps = float(thresholds["min_net_bps"])
+    candidate_min_net_bps, watch_min_net_bps, execution_min_net_bps = _observer_thresholds(cfg)
     min_quality = int(thresholds["min_quality_score"])
+    max_skew_ms = max_skew_ms_from_config(cfg)
     sizes = [float(s) for s in cfg["simulation"]["sizes_quote_brl"]]
     sim_cfg = cfg["simulation"]
     result = ScanResult(ts=now_ts, symbol=cfg["pair"]["symbol"], min_net_bps=min_net_bps, books=books)
@@ -72,6 +150,10 @@ def scan_books(books: list[CollectedBook], cfg: dict, now_ts: float) -> ScanResu
         fee_buy = fee_schedule_from_config(cfg, buy.exchange)
         fee_sell = fee_schedule_from_config(cfg, sell.exchange)
         break_even = break_even_from_config(fee_buy, fee_sell, cfg)
+        # coleta é sequencial: cada book carrega o ts real do próprio fetch
+        skew_ms = abs(buy.book.ts - sell.book.ts) * 1000.0
+        skew_ok = skew_ms <= max_skew_ms
+        source = buy.source if buy.source == sell.source else "mixed"
 
         for size_quote in sizes:
             depth = route_depth_ok(buy.book, sell.book, size_quote)
@@ -87,12 +169,37 @@ def scan_books(books: list[CollectedBook], cfg: dict, now_ts: float) -> ScanResu
                 depth_ok=depth,
                 quality_buy=buy.quality,
                 quality_sell=sell.quality,
+                skew_ms=skew_ms,
+                max_skew_ms=max_skew_ms,
+                skew_ok=skew_ok,
+                source=source,
             )
+            candidate = (
+                window.net_bps >= candidate_min_net_bps
+                and depth
+                and skew_ok
+                and buy.quality >= min_quality
+                and sell.quality >= min_quality
+                and "crossed" not in buy.flags
+                and "crossed" not in sell.flags
+            )
+            watch = candidate and window.net_bps >= watch_min_net_bps
+            execution = watch and window.net_bps >= execution_min_net_bps
+            reasons = _reject_reasons(window, buy, sell, min_quality, execution_min_net_bps)
+            window.candidate_gate_pass = candidate
+            window.watch_gate_pass = watch
+            window.execution_gate_theoretical_pass = execution
+            window.reject_reasons = reasons
+            window.reason_rejected = _primary_reason(reasons, candidate, watch, execution)
             result.spread_windows.append(window)
 
             is_opportunity = (
-                window.net_bps >= min_net_bps
+                paper_enabled
+                and window.net_bps >= min_net_bps
                 and depth
+                # books coletados a mais de max_skew_ms um do outro: o spread
+                # entre eles é fotografia de instantes diferentes, não arb real
+                and skew_ok
                 and buy.quality >= min_quality
                 and sell.quality >= min_quality
                 # book cruzado (bid >= ask na MESMA exchange) é dado corrompido:
