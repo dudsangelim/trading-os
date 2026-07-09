@@ -70,6 +70,26 @@ O observer grava arquivos diários (`observer_spread_windows_YYYY-MM-DD.csv`) e
 inclui `source`, `skew_ms` e `max_skew_ms`. Janelas com skew entre books acima de
 `observer.max_skew_ms` são rejeitadas antes de virar candidate/watch.
 
+## Inventory-aware (Fase 3.3)
+
+Simulador OFFLINE/read-only: reexecuta um dia UTC dos CSVs do observer contra
+cenários de inventário pré-posicionado (`inventory_aware:` no YAML) e escreve
+`reports/inventory_aware_report_YYYY-MM-DD.md` com DECISION
+`ADVANCE | HOLD | KILL | NEED_MORE_DATA`. Não coleta, não ordena, não altera CSVs.
+
+```bash
+# smoke offline com fixture sintética — SÓ em data-dir descartável (guard no CLI)
+python -m trading.local_arb.main --inventory-aware-report --inventory-fixture \
+    --data-dir /tmp/local_arb_inventory_smoke --inventory-date 2026-07-09
+
+# relatório sobre os dados reais já coletados pelo observer (default: hoje UTC)
+python -m trading.local_arb.main --inventory-aware-report \
+    --data-dir trading/local_arb/data [--inventory-date YYYY-MM-DD]
+```
+
+Cenários no YAML: `balanced_all_venues`, `top_venues`, `low_capital`,
+`brl_local_usdt_global` — `balances:` explícito vence `default_brl`/`default_usdt`.
+
 ## Configuração
 
 Arquivo principal:
@@ -105,6 +125,7 @@ buffer conservador para evitar falso positivo de edge.
 | `spreads.py` | spread bruto e profundidade por tamanho |
 | `quality.py` | quality score do snapshot |
 | `inventory.py` | ledger paper em memória, apply/revert atômico |
+| `inventory_aware.py` | Fase 3.3: simulação offline de cenários de inventário sobre CSVs do observer |
 | `paper.py` | fill pessimista multinível, taker fee, fill mínimo e `decay_bps` |
 | `collector.py` | coleta um ciclo de adapters |
 | `scanner.py` | break-even gate, opportunities e paper trades |

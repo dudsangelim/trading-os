@@ -9,6 +9,9 @@ Uso:
     python -m trading.local_arb.main --once --data-dir /tmp/x  # diretório de dados alternativo
     python -m trading.local_arb.main --research-routes [--synthetic]   # research routes; JSON no stdout
     python -m trading.local_arb.main --research-report [--synthetic]   # research_report_<data>.md + CSV
+    python -m trading.local_arb.main --inventory-aware-report [--inventory-date YYYY-MM-DD]
+        # Fase 3.3: simula cenários de inventário sobre os CSVs do observer
+        # (--inventory-fixture gera CSV sintético; só em --data-dir descartável)
 
 Sem DATABASE_URL (ou sem driver) tudo roda em modo no-db/dry-run e sai com 0.
 """
@@ -31,6 +34,7 @@ from .config import DEFAULT_CONFIG_PATH, config_hash, git_sha, load_config
 from .daily_report import DEFAULT_DATA_DIR, generate_daily_report
 from .db import DbUnavailable, connect, get_dsn, init_db, persist_scan
 from .inventory import Ledger
+from .inventory_aware import generate_inventory_report, write_fixture
 from .models import OrderBookLevel, OrderBookSnapshot, Opportunity
 from .observer import generate_observer_report, observer_summary, persist_observer_scan
 from .paper import simulate_arb
@@ -275,6 +279,35 @@ def cmd_observer_report(data_dir: Path) -> int:
     return 0
 
 
+def _is_live_data_dir(data_dir: Path) -> bool:
+    """True se data_dir é o data dir vivo (default ou qualquer trading/local_arb/data)."""
+    resolved = Path(data_dir).resolve()
+    if resolved == DEFAULT_DATA_DIR.resolve():
+        return True
+    return "trading/local_arb/data" in resolved.as_posix()
+
+
+def cmd_inventory_aware_report(cfg: dict, data_dir: Path, date_str: str | None,
+                               fixture: bool) -> int:
+    """Fase 3.3: relatório inventory-aware offline (lê CSVs do observer, só escreve o md).
+
+    --inventory-fixture gera antes um CSV diário sintético — PROIBIDO no data dir
+    vivo: só roda em --data-dir descartável (fora de trading/local_arb/data).
+    """
+    date_str = date_str or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if fixture:
+        if _is_live_data_dir(data_dir):
+            print("[inventory-aware] RECUSADO: --inventory-fixture não roda no data dir "
+                  f"vivo ({Path(data_dir).resolve()}) — use --data-dir descartável "
+                  "(ex.: /tmp/local_arb_inventory_smoke)", file=sys.stderr)
+            return 2
+        fixture_path = write_fixture(data_dir, date_str)
+        print(f"[inventory-aware] fixture sintética gravada: {fixture_path}")
+    md_path = generate_inventory_report(data_dir, date_str, cfg)
+    print(f"[inventory-aware] gerado: {md_path}")
+    return 0
+
+
 def cmd_observer_loop(cfg: dict, synthetic: bool, data_dir: Path,
                       poll_seconds: float | None, max_cycles: int | None) -> int:
     """Loop observacional contínuo. Sem paper e sem execução real."""
@@ -321,6 +354,14 @@ def main(argv: list[str] | None = None) -> int:
                         help="gera observer_report_<data>.md a partir dos CSVs do observer")
     parser.add_argument("--observer-loop", action="store_true",
                         help="loop Continuous Observer; persiste CSV sem paper/execução")
+    parser.add_argument("--inventory-aware-report", action="store_true",
+                        help="Fase 3.3: simula cenários de inventário sobre os CSVs do "
+                             "observer e gera inventory_aware_report_<data>.md")
+    parser.add_argument("--inventory-date", default=None, metavar="YYYY-MM-DD",
+                        help="data UTC do --inventory-aware-report (default: hoje UTC)")
+    parser.add_argument("--inventory-fixture", action="store_true",
+                        help="gera CSV diário sintético antes do relatório; só permitido "
+                             "em --data-dir descartável (nunca no data dir vivo)")
     parser.add_argument("--poll-seconds", type=float, default=None,
                         help="intervalo do --observer-loop; default vem do YAML")
     parser.add_argument("--max-cycles", type=int, default=None,
@@ -354,6 +395,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.observer_report:
         ran = True
         rc = max(rc, cmd_observer_report(data_dir))
+    if args.inventory_aware_report:
+        ran = True
+        rc = max(rc, cmd_inventory_aware_report(cfg, data_dir, args.inventory_date,
+                                                args.inventory_fixture))
     if args.observer_loop:
         ran = True
         rc = max(rc, cmd_observer_loop(cfg, args.synthetic, data_dir,

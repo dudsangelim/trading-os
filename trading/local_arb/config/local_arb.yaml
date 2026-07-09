@@ -208,3 +208,42 @@ report:
   min_trades_for_verdict: 20   # abaixo disto -> HOLD
   viva_min_net_bps: 10.0       # média realizada >= isto -> VIVA
   ferida_max_decay_bps: 15.0   # decay médio acima disto fere a tese
+
+# Fase 3.3 — simulador inventory-aware OFFLINE (lê CSVs do observer, só gera md).
+# Cenários de inventário pré-posicionado; balances explícito vence default_brl/usdt.
+inventory_aware:
+  min_net_bps: 0.0               # elegível se net_eff = net + crédito >= isto
+  rebalance_credit_bps: null     # null = usa break_even.rebalance_amortized_bps
+  reference_price_brl: 5.60      # só p/ conversão de inventário BRL<->USDT, não PnL
+  drain_threshold_pct: 0.10      # saldo final < 10% do inicial = venue drenada
+  decision:
+    min_valid_windows: 500       # abaixo disto no dia -> NEED_MORE_DATA
+    min_days_for_decision: 7     # PRD §18: decidir só após 7-14 dias
+    advance_min_executable: 10   # ADVANCE exige >= isto no melhor cenário
+    blocked_max_share: 0.5       # ADVANCE exige <= 50% bloqueadas por inventário
+  scenarios:
+    # capital igual em todas as venues habilitadas
+    balanced_all_venues:
+      default_brl: 2000.0
+      default_usdt: 400.0
+    # só as 4 venues com mais volume/liquidez observada
+    top_venues:
+      venues: [binance, mercadobitcoin, okx, bitso]
+      default_brl: 4000.0
+      default_usdt: 800.0
+    # capital mínimo realista de teste
+    low_capital:
+      default_brl: 500.0
+      default_usdt: 100.0
+    # tese direcional: BRL parado nas locais, USDT parado nas globais
+    # (executa só rotas local->global; global->local fica blocked_by_inventory)
+    brl_local_usdt_global:
+      balances:
+        mercadobitcoin: {BRL: 5000.0, USDT: 0.0}
+        bitypreco: {BRL: 5000.0, USDT: 0.0}
+        foxbit: {BRL: 5000.0, USDT: 0.0}
+        brasilbitcoin: {BRL: 5000.0, USDT: 0.0}
+        binance: {BRL: 0.0, USDT: 1000.0}
+        bybit: {BRL: 0.0, USDT: 1000.0}
+        okx: {BRL: 0.0, USDT: 1000.0}
+        bitso: {BRL: 0.0, USDT: 1000.0}
