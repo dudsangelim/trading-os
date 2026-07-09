@@ -17,8 +17,8 @@ exchanges:
     display_name: "Mercado Bitcoin"
     enabled: true
     # bps = basis points (1 bp = 0.01%)
-    taker_bps: 70        # 0.70% (placeholder manual — conferir)
-    maker_bps: 30        # 0.30%
+    taker_bps: 70        # 0.70% — não confirmado por API pública; manter conservador
+    maker_bps: 30        # 0.30% — não confirmado por API pública; maker não usado no gate
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
     synthetic: {bid: 5.655, ask: 5.660, latency_ms: 200.0}
@@ -51,8 +51,8 @@ exchanges:
   bitypreco:
     display_name: "Bitypreço"
     enabled: true
-    taker_bps: 50        # 0.50% (placeholder manual)
-    maker_bps: 0
+    taker_bps: 50        # 0.50% — não confirmado por API pública; manter conservador
+    maker_bps: 0         # maker não usado no gate; API pública não expôs fee schedule
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
     api:
@@ -68,7 +68,7 @@ exchanges:
   binance:
     display_name: "Binance"
     enabled: true
-    taker_bps: 10        # conferir tier/conta
+    taker_bps: 10        # 0.10% spot base; conta/tier podem reduzir
     maker_bps: 10
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
@@ -84,7 +84,7 @@ exchanges:
   bybit:
     display_name: "Bybit"
     enabled: true
-    taker_bps: 10        # placeholder manual — conferir tier/conta BRL spot
+    taker_bps: 10        # 0.10% spot base; conta/tier podem reduzir
     maker_bps: 10
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
@@ -115,8 +115,8 @@ exchanges:
   bitso:
     display_name: "Bitso"
     enabled: true
-    taker_bps: 78        # flat_rate público para usdt_brl no tier inicial: 0.78%
-    maker_bps: 60
+    taker_bps: 40        # flat_rate público API available_books para usdt_brl: 0.40%
+    maker_bps: 20        # flat_rate público API available_books para usdt_brl: 0.20%
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
     api:
@@ -132,8 +132,8 @@ exchanges:
   brasilbitcoin:
     display_name: "Brasil Bitcoin"
     enabled: true
-    taker_bps: 50        # placeholder manual — conferir
-    maker_bps: 25
+    taker_bps: 50        # página pública: ordem ativa até R$250k = 0.50%
+    maker_bps: 20        # página pública: ordem passiva até R$250k = 0.20%
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
     api:
@@ -149,8 +149,8 @@ exchanges:
   okx:
     display_name: "OKX"
     enabled: true
-    taker_bps: 10        # placeholder manual — conferir para BRL spot
-    maker_bps: 8
+    taker_bps: 10        # fee page pública regular user: spot taker 0.10%
+    maker_bps: 8         # fee page pública regular user: spot maker 0.08%
     withdrawal_brl_fixed: 0.0
     withdrawal_usdt_fixed: 1.0
     api:
@@ -166,7 +166,7 @@ break_even:
   slippage_est_bps: 5.0          # slippage estimado além do book visível
   latency_haircut_bps: 3.0       # decay esperado entre detecção e execução
   rebalance_amortized_bps: 8.0   # custo médio de rebalanceamento / capital preso
-  fee_uncertainty_bps: 10.0      # buffer até auditoria manual das taxas por exchange
+  fee_uncertainty_bps: 10.0      # buffer residual para fontes não confirmadas/tier/saques
 
 thresholds:
   min_net_bps: 20.0        # só é oportunidade se net (gross - break_even) >= isto

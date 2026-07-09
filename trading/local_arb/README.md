@@ -90,9 +90,9 @@ Contém:
 - saldos iniciais do inventário paper;
 - regras do veredito `VIVA | FERIDA | MORTA | HOLD`.
 
-As taxas são placeholders operacionais. Enquanto não houver auditoria manual por
-exchange/tier/conta, o break-even aplica `fee_uncertainty_bps` como buffer
-conservador para evitar falso positivo de edge.
+A auditoria de taxas fica em `config/fee_audit_2026-07-09.md`. Enquanto não houver
+fee tier autenticado por conta, o break-even aplica `fee_uncertainty_bps` como
+buffer conservador para evitar falso positivo de edge.
 
 ## Módulos
 
