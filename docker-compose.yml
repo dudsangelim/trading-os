@@ -318,7 +318,7 @@ services:
       - RSI_OVERSOLD=10
       - RSI_OVERBOUGHT=85
       - RSI_EXIT_LEVEL=50
-      - RSI_DB_HOST=172.18.0.2
+      - RSI_DB_HOST=jarvis_postgres
       - RSI_DB_PORT=5432
       - RSI_DB_USER=jarvis
       - RSI_DB_PASS=${DB_PASS:-CHANGE_ME}
@@ -361,7 +361,7 @@ services:
       - ADEMA_FAST=13
       - ADEMA_SLOW=34
       - ADEMA_SLOPE_BARS=3
-      - ADEMA_DB_HOST=172.18.0.2
+      - ADEMA_DB_HOST=jarvis_postgres
       - ADEMA_DB_PORT=5432
       - ADEMA_DB_USER=jarvis
       - ADEMA_DB_PASS=${DB_PASS:-CHANGE_ME}
@@ -405,7 +405,7 @@ services:
       - BURST_TP_FRAC=0.005
       - BURST_SL_FRAC=0.0025
       - BURST_TIMEOUT_BARS=6
-      - BURST_DB_HOST=172.18.0.2
+      - BURST_DB_HOST=jarvis_postgres
       - BURST_DB_PORT=5432
       - BURST_DB_USER=jarvis
       - BURST_DB_PASS=${DB_PASS:-CHANGE_ME}
