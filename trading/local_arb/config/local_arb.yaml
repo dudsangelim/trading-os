@@ -184,6 +184,15 @@ observer:
   persist_all_snapshots: false
   persist_candidate_windows: true
   persist_rejections: true
+  # PRD §18 — decisão da tese só na agregação multi-dia; dia isolado nunca mata.
+  min_valid_observations_per_day: 500   # piso p/ o dia contar na decisão terminal
+  min_days_for_decision: 7              # ADVANCE/KILL só após >= isto dias válidos
+  lifecycle_max_gap_seconds: 30.0       # gap acima disto segmenta o ciclo de vida
+  lifecycle_min_duration_seconds: 3.0   # ciclos mais curtos = ruído, descartados
+  advance_gates:                        # totais na janela de dias válidos p/ ADVANCE
+    positive: 30                        # janelas com net > 0
+    above_10: 10                        # janelas com net >= 10 bps
+    above_20: 3                         # janelas com net >= 20 bps
 
 simulation:
   sizes_quote_brl: [500, 1000, 2500, 5000]   # tamanhos simulados por rodada

@@ -1,4 +1,4 @@
-"""Continuous Observer v3.3: persistência CSV e relatórios sem paper/execução.
+"""Continuous Observer v3.4: persistência CSV e relatórios sem paper/execução.
 
 Este módulo é deliberadamente file-based: serve para pesquisa observacional com
 endpoints públicos, sem API key, sem paper contínuo e sem capital.
@@ -24,8 +24,9 @@ from __future__ import annotations
 import csv
 import heapq
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from statistics import median
 from typing import Iterable, Iterator
 
 from .report import ThesisVerdict
@@ -36,6 +37,7 @@ OBSERVER_SYNTHETIC_DIR = "observer_synthetic"
 # monólitos legados (pré-rotação): só leitura, nunca mais escritos
 SNAPSHOT_FILE = "observer_snapshots.csv"
 SPREAD_FILE = "observer_spread_windows.csv"
+LIFECYCLE_PREFIX = "observer_candidate_lifecycle_"
 
 SNAPSHOT_FIELDS = [
     "timestamp_local", "exchange", "pair", "best_bid", "best_ask", "mid",
@@ -56,9 +58,18 @@ SPREAD_FIELDS = [
     "source", "skew_ms", "max_skew_ms",
 ]
 
-# defaults conservadores do veredito agregado (sobrescritos pelo YAML observer:)
-DEFAULT_VERDICT_MIN_WINDOWS = 500
-DEFAULT_VERDICT_VIVA_MIN_EXECUTION_WINDOWS = 10
+LIFECYCLE_FIELDS = [
+    "window_id", "route", "pair", "size_brl", "first_seen_ts", "last_seen_ts",
+    "duration_seconds", "max_net_bps", "median_net_bps", "max_gross_bps",
+    "min_break_even_bps", "n_observations", "status_final",
+]
+
+# O PRD exige decisão apenas após 7–14 dias; contagem diária nunca mata a tese.
+DEFAULT_MIN_DAYS_FOR_DECISION = 7
+DEFAULT_MIN_VALID_OBSERVATIONS_PER_DAY = 500
+DEFAULT_LIFECYCLE_MAX_GAP_SECONDS = 30.0
+DEFAULT_MIN_DURATION_SECONDS = 3.0
+PRD_ADVANCE_GATES = {"positive": 30, "above_10": 10, "above_20": 3}
 
 
 def observer_dir(data_dir: Path, mode: str = "rest") -> Path:
@@ -77,6 +88,10 @@ def snapshot_daily_path(data_dir: Path, date_str: str, mode: str = "rest") -> Pa
 
 def spread_daily_path(data_dir: Path, date_str: str, mode: str = "rest") -> Path:
     return observer_dir(data_dir, mode) / f"observer_spread_windows_{date_str}.csv"
+
+
+def lifecycle_daily_path(data_dir: Path, date_str: str, mode: str = "rest") -> Path:
+    return observer_dir(data_dir, mode) / f"{LIFECYCLE_PREFIX}{date_str}.csv"
 
 
 def _append_csv(path: Path, fields: list[str], rows: Iterable[dict]) -> int:
@@ -270,32 +285,198 @@ def iter_spread_rows_for_date(data_dir: Path, date_str: str, mode: str = "rest")
 
 
 def observer_verdict(n_windows: int, n_execution: int, cfg: dict | None = None) -> ThesisVerdict:
-    """Veredito agregado do dia, por contagem de janelas — conservador:
+    """Leitura observacional do DIA — deliberadamente NÃO-LETAL (PRD §18).
 
-    HOLD   — menos janelas válidas que verdict_min_windows (amostra insuficiente).
-    MORTA  — amostra suficiente e ZERO janelas acima do gate de execução
-             (sem evidência de arb executável no dia).
-    FERIDA — alguma janela acima do gate, mas menos que o alvo VIVA.
-    VIVA   — >= verdict_viva_min_execution_windows janelas acima do gate.
+    Um único dia nunca mata nem valida a tese: a decisão VIVA/MORTA/ADVANCE só
+    acontece na agregação multi-dia (ver `multi_day_thesis_decision`). Aqui só
+    reportamos o que o dia mostrou, sem veredito terminal:
+
+    NEED_MORE_DATA — menos janelas válidas que o piso diário (amostra fraca).
+    NO_EDGE_TODAY  — amostra suficiente e ZERO janelas acima do gate de execução.
+    EDGE_TODAY     — >= 1 janela acima do gate de execução no dia.
     """
     obs = (cfg or {}).get("observer", {}) or {}
-    min_windows = int(obs.get("verdict_min_windows", DEFAULT_VERDICT_MIN_WINDOWS))
-    viva_min = int(obs.get("verdict_viva_min_execution_windows",
-                           DEFAULT_VERDICT_VIVA_MIN_EXECUTION_WINDOWS))
+    min_windows = int(obs.get("verdict_min_windows",
+                              obs.get("min_valid_observations_per_day",
+                                      DEFAULT_MIN_VALID_OBSERVATIONS_PER_DAY)))
 
     if n_windows < min_windows:
         return ThesisVerdict(
-            "HOLD", [f"amostra insuficiente: {n_windows}/{min_windows} janelas válidas no dia"])
+            "NEED_MORE_DATA",
+            [f"amostra insuficiente: {n_windows}/{min_windows} janelas válidas no dia "
+             f"(decisão só na agregação multi-dia)"])
     if n_execution == 0:
         return ThesisVerdict(
-            "MORTA", [f"sem evidência: 0 janelas com net ≥ gate de execução em {n_windows} janelas"])
-    if n_execution >= viva_min:
-        return ThesisVerdict(
-            "VIVA", [f"{n_execution} janelas acima do gate de execução em {n_windows} janelas "
-                     f"(alvo ≥ {viva_min})"])
+            "NO_EDGE_TODAY",
+            [f"0 janelas com net ≥ gate de execução em {n_windows} janelas hoje "
+             f"(dia isolado não mata a tese)"])
     return ThesisVerdict(
-        "FERIDA", [f"evidência fraca: {n_execution} janelas acima do gate de execução "
-                   f"(alvo VIVA ≥ {viva_min}) em {n_windows} janelas"])
+        "EDGE_TODAY",
+        [f"{n_execution} janelas acima do gate de execução em {n_windows} janelas hoje"])
+
+
+def build_candidate_lifecycles(rows: Iterable[dict], cfg: dict | None = None) -> list[dict]:
+    """Reconstrói o ciclo de vida de cada janela candidate a partir das linhas do dia.
+
+    Uma "janela" é a tupla (rota buy→sell, par, size_brl). Observações consecutivas
+    da mesma janela formam UM ciclo de vida; um intervalo maior que
+    lifecycle_max_gap_seconds segmenta em ciclos distintos (a oportunidade sumiu e
+    reapareceu). Só entram observações com source=rest e candidate_gate_pass=True.
+    Ciclos com duração < min_duration_seconds são descartados (ruído de 1 tick).
+
+    Retorna as linhas prontas para LIFECYCLE_FIELDS, ordenadas por início.
+    """
+    obs = (cfg or {}).get("observer", {}) or {}
+    max_gap = float(obs.get("lifecycle_max_gap_seconds", DEFAULT_LIFECYCLE_MAX_GAP_SECONDS))
+    min_duration = float(obs.get("lifecycle_min_duration_seconds", DEFAULT_MIN_DURATION_SECONDS))
+
+    # agrupa observações por janela; segmenta por gap temporal
+    by_window: dict[tuple, list[tuple]] = defaultdict(list)
+    for row in rows:
+        source = (row.get("source") or "rest").strip() or "rest"
+        if source != "rest" or row.get("candidate_gate_pass") != "True":
+            continue
+        key = (
+            row.get("route_buy_exchange"), row.get("route_sell_exchange"),
+            row.get("pair"), row.get("size_brl"),
+        )
+        by_window[key].append((
+            _float(row, "timestamp_local"),
+            _float(row, "net_bps"), _float(row, "gross_bps"),
+            _float(row, "break_even_bps"),
+            row.get("execution_gate_theoretical_pass") == "True",
+        ))
+
+    lifecycles: list[dict] = []
+    seq = 0
+    for (buy, sell, pair, size), obs_list in by_window.items():
+        obs_list.sort(key=lambda t: t[0])
+        segment: list[tuple] = []
+
+        def flush(seg: list[tuple]) -> None:
+            nonlocal seq
+            if not seg:
+                return
+            first_ts, last_ts = seg[0][0], seg[-1][0]
+            duration = last_ts - first_ts
+            if duration < min_duration:
+                return
+            nets = [o[1] for o in seg]
+            seq += 1
+            lifecycles.append({
+                "window_id": f"{pair}:{buy}->{sell}:{size}:{seq}",
+                "route": f"{buy}->{sell}",
+                "pair": pair,
+                "size_brl": size,
+                "first_seen_ts": round(first_ts, 3),
+                "last_seen_ts": round(last_ts, 3),
+                "duration_seconds": round(duration, 3),
+                "max_net_bps": round(max(nets), 4),
+                "median_net_bps": round(median(nets), 4),
+                "max_gross_bps": round(max(o[2] for o in seg), 4),
+                "min_break_even_bps": round(min(o[3] for o in seg), 4),
+                "n_observations": len(seg),
+                # reached_execution: chegou a cruzar o gate de execução em algum tick
+                "status_final": "reached_execution" if any(o[4] for o in seg) else "candidate_only",
+            })
+
+        prev_ts = None
+        for o in obs_list:
+            if prev_ts is not None and (o[0] - prev_ts) > max_gap:
+                flush(segment)
+                segment = []
+            segment.append(o)
+            prev_ts = o[0]
+        flush(segment)
+
+    lifecycles.sort(key=lambda lc: lc["first_seen_ts"])
+    return lifecycles
+
+
+def write_lifecycles(data_dir: Path, date_str: str, lifecycles: list[dict],
+                     mode: str = "rest") -> int:
+    """Grava (overwrite) o CSV diário de ciclos de vida. Idempotente por dia."""
+    path = lifecycle_daily_path(data_dir, date_str, mode)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=LIFECYCLE_FIELDS)
+        writer.writeheader()
+        for lc in lifecycles:
+            writer.writerow({field: lc.get(field) for field in LIFECYCLE_FIELDS})
+    return len(lifecycles)
+
+
+def _observed_daily_dates(data_dir: Path, mode: str = "rest") -> list[str]:
+    """Datas UTC com arquivo diário de janelas (ordenadas). Monólito legado ignorado
+    aqui de propósito: a decisão multi-dia usa a era rotacionada (v3.3+)."""
+    directory = observer_dir(data_dir, mode)
+    if not directory.exists():
+        return []
+    dates = []
+    for path in sorted(directory.glob(f"observer_spread_windows_*.csv")):
+        stem = path.name[len("observer_spread_windows_"):-len(".csv")]
+        if len(stem) == 10 and stem[4] == "-" and stem[7] == "-":
+            dates.append(stem)
+    return sorted(dates)
+
+
+def multi_day_thesis_decision(data_dir: Path, cfg: dict | None = None,
+                              mode: str = "rest") -> ThesisVerdict:
+    """Decisão terminal da tese sobre a janela de dias observados (PRD §18).
+
+    Só esta função pode ADVANCE/KILL. Regras:
+    - NEED_MORE_DATA enquanto houver menos de min_days_for_decision dias com
+      amostra válida suficiente (>= piso diário de janelas válidas).
+    - ADVANCE se, somando os dias válidos, os três gates do PRD forem batidos:
+      >= PRD_ADVANCE_GATES['positive'] janelas com net>0,
+      >= PRD_ADVANCE_GATES['above_10'] com net>=10 bps,
+      >= PRD_ADVANCE_GATES['above_20'] com net>=20 bps.
+    - KILL caso a janela mínima de dias esteja cumprida e os gates não fecharem.
+    """
+    obs = (cfg or {}).get("observer", {}) or {}
+    min_days = int(obs.get("min_days_for_decision", DEFAULT_MIN_DAYS_FOR_DECISION))
+    min_valid = int(obs.get("verdict_min_windows",
+                            obs.get("min_valid_observations_per_day",
+                                    DEFAULT_MIN_VALID_OBSERVATIONS_PER_DAY)))
+    gates = dict(PRD_ADVANCE_GATES)
+    gates.update({k: int(v) for k, v in (obs.get("advance_gates") or {}).items()})
+
+    valid_days = 0
+    tot = {"positive": 0, "above_10": 0, "above_20": 0}
+    for date_str in _observed_daily_dates(data_dir, mode):
+        n_valid = 0
+        day = {"positive": 0, "above_10": 0, "above_20": 0}
+        for row in iter_spread_rows_for_date(data_dir, date_str, mode):
+            if (row.get("source") or "rest").strip() not in ("", "rest"):
+                continue
+            n_valid += 1
+            net = _float(row, "net_bps")
+            if net > 0:
+                day["positive"] += 1
+            if net >= 10:
+                day["above_10"] += 1
+            if net >= 20:
+                day["above_20"] += 1
+        if n_valid >= min_valid:
+            valid_days += 1
+            for k in tot:
+                tot[k] += day[k]
+
+    if valid_days < min_days:
+        return ThesisVerdict(
+            "NEED_MORE_DATA",
+            [f"apenas {valid_days}/{min_days} dias com amostra válida "
+             f"(>= {min_valid} janelas/dia) — sem decisão terminal ainda"])
+
+    met = {k: tot[k] >= gates[k] for k in gates}
+    detail = (f"net>0: {tot['positive']}/{gates['positive']}, "
+              f"net>=10bps: {tot['above_10']}/{gates['above_10']}, "
+              f"net>=20bps: {tot['above_20']}/{gates['above_20']} "
+              f"({valid_days} dias válidos)")
+    if all(met.values()):
+        return ThesisVerdict("ADVANCE", [f"todos os gates do PRD batidos — {detail}"])
+    return ThesisVerdict(
+        "KILL", [f"janela de {valid_days} dias fechada e gates não batidos — {detail}"])
 
 
 def _aggregate_rows(rows: Iterator[dict]) -> dict:
@@ -350,6 +531,13 @@ def generate_observer_report(data_dir: Path, date_str: str,
     """Markdown do observer agregando SÓ as janelas do dia (diário + legado filtrado)."""
     agg = _aggregate_rows(iter_spread_rows_for_date(data_dir, date_str, mode))
     verdict = observer_verdict(agg["n_valid"], agg["n_execution"], cfg)
+    # ciclos de vida das janelas candidate do dia (segunda passada pelos CSVs do dia)
+    lifecycles = build_candidate_lifecycles(
+        iter_spread_rows_for_date(data_dir, date_str, mode), cfg)
+    write_lifecycles(data_dir, date_str, lifecycles, mode)
+    reached = sum(1 for lc in lifecycles if lc["status_final"] == "reached_execution")
+    # decisão terminal só na agregação multi-dia (PRD §18) — um dia nunca decide
+    thesis = multi_day_thesis_decision(data_dir, cfg, mode)
     reports_dir = Path(data_dir) / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if mode == "rest" else f"_{mode}"
@@ -358,18 +546,28 @@ def generate_observer_report(data_dir: Path, date_str: str,
     lines = [
         f"# local_arb — Continuous Observer {date_str}",
         "",
-        f"STATUS DA TESE: {verdict.status}",
+        f"DECISÃO DA TESE (multi-dia, PRD §18): {thesis.status}",
+        f"LEITURA DO DIA (não-letal): {verdict.status}",
         "",
         "STATUS: OBSERVER_ONLY — sem capital, sem paper contínuo, sem execução real.",
         "",
-        "## Veredito agregado do dia",
+        "## Decisão terminal da tese (agregação multi-dia)",
         "",
-        f"- Status: **{verdict.status}**",
+        f"- Decisão: **{thesis.status}**",
+        *[f"- {r}" for r in thesis.reasons],
+        "- Regra: um dia isolado nunca mata nem valida a tese; só a janela de "
+        "dias observados decide ADVANCE/KILL.",
+        "",
+        "## Leitura observacional do dia (não-letal)",
+        "",
+        f"- Status do dia: **{verdict.status}**",
         *[f"- {r}" for r in verdict.reasons],
         f"- Janelas válidas (source=rest): {agg['n_valid']}",
         f"- Candidate: {agg['n_candidate']} | Watch: {agg['n_watch']} "
         f"| Execution-theoretical: {agg['n_execution']}",
         f"- Rejeitadas por skew entre books: {agg['n_skew_rejected']}",
+        f"- Ciclos de vida de janelas candidate: {len(lifecycles)} "
+        f"(chegaram ao gate de execução: {reached})",
     ]
     if agg["n_synthetic_excluded"]:
         lines.append(
@@ -409,12 +607,25 @@ def generate_observer_report(data_dir: Path, date_str: str,
             f"| {row.get('reason_rejected')} |"
         )
 
+    lines += ["", "## Ciclos de vida das janelas candidate (top 20 por duração)", "",
+              "| Janela | Rota | Size BRL | Duração s | Obs | Max net bps | Mediana net bps | Status |",
+              "|---|---|---:|---:|---:|---:|---:|---|"]
+    for lc in sorted(lifecycles, key=lambda x: x["duration_seconds"], reverse=True)[:20]:
+        lines.append(
+            f"| {lc['window_id']} | {lc['route']} | {_float(lc, 'size_brl'):.0f} "
+            f"| {lc['duration_seconds']:.1f} | {lc['n_observations']} "
+            f"| {lc['max_net_bps']:.2f} | {lc['median_net_bps']:.2f} | {lc['status_final']} |"
+        )
+    if not lifecycles:
+        lines.append("| — | — | — | — | — | — | — | nenhum ciclo candidate no dia |")
+
     lines += [
         "",
         "## Interpretação",
         "",
-        "Este relatório não autoriza trade. Ele existe para provar ou matar a tese intraday.",
-        "O veredito agrega janelas do dia inteiro; um scan isolado nunca decide nada.",
+        "Este relatório não autoriza trade. Ele existe para provar ou matar a tese.",
+        "A LEITURA DO DIA é observacional e nunca terminal; a DECISÃO DA TESE só sai da "
+        "agregação multi-dia (>= min_days_for_decision dias válidos) contra os gates do PRD.",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
