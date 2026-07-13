@@ -71,3 +71,17 @@ def test_quality_and_skew_gates():
     assert tr.update(_pt(0.0, 50.0), quality_rich=50) is None      # quality baixa
     assert tr.update(_pt(1.0, 50.0), skew_ms=5000.0) is None       # skew alto
     assert tr.n_points == 0
+
+
+def test_cross_paper_harvests_level_with_cooldown():
+    cfg = {"basis_observer": dict(CFG["basis_observer"])}
+    cfg["basis_observer"]["cross_paper"] = {"enabled": True, "entry_bps": 30.0,
+                                            "cycle_cooldown_s": 100.0}
+    tr = BasisTracker(cfg=cfg, data_dir=None)
+    # prêmio parado em +40bps por 500s (nível, sem reversão): ciclos limitados pelo cooldown
+    for i in range(50):
+        tr.update(_pt(i * 10.0, 40.0))
+    assert len(tr.cross_trades) == 5   # 500s / cooldown 100s
+    assert all(t["cross_gross_bps"] > 35.0 for t in tr.cross_trades)
+    # reversão nunca fecha (buyback nunca <= 5) → nenhum trade de reversão fechado
+    assert len(tr.trades) == 0

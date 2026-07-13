@@ -279,6 +279,17 @@ basis_observer:
     exit_bps: 5.0            # recompra quando buyback_premium <= isto
     max_hold_s: 432000       # 5 dias; estoura -> saída timeout a mercado
     cooldown_s: 3600
+  # Cross-venue paper (13/07/2026): Eduardo CONFIRMOU PIX zero-fee in/out na conta
+  # Bybit dele → o loop cross-venue fecha por ~custo de taker + transfer de USDT.
+  # Com inventário nos 2 lados as pernas executam no instante do prêmio (colhe o
+  # NÍVEL, sem esperar reversão); cooldown = tempo de rebalanceamento do ciclo.
+  cross_paper:
+    enabled: true
+    entry_bps: 30.0
+    cycle_cooldown_s: 1800
+  fee_scenarios_cross:       # custo por ciclo cross (bps) aplicado nos relatórios
+    taker: 26.0              # 2x taker (Binance 10 + Bybit 10) + slip 4 + USDT transfer ~2
+    maker_ref_leg: 18.0      # perna Binance a maker (~2.5) — otimista, exige fila
   # custo por CICLO (bps) aplicado nos relatórios sobre o bruto de reversão:
   fee_scenarios:
     taker_unhedged: 22.0     # 2x taker Bybit (10) + 2 slippage; sem hedge (carrega drift)

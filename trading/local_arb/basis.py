@@ -45,6 +45,7 @@ PAPER_FIELDS = [
     "exit_buyback_premium_bps", "gross_reversion_bps", "exit_reason",
     "entry_ref_mid", "exit_ref_mid", "ref_drift_bps",
 ]
+CROSS_FIELDS = ["ts", "cross_gross_bps", "rich_bid", "ref_ask"]
 
 
 def basis_cfg(cfg: dict) -> dict:
@@ -92,6 +93,12 @@ class BasisPoint:
     def buyback_premium_bps(self) -> float:
         return (self.rich_ask / self.ref_mid - 1.0) * 1e4
 
+    @property
+    def cross_gross_bps(self) -> float:
+        """Ciclo cross-venue executado no instante: compra no ask da ref, vende no
+        bid da rich (inventário pré-posicionado; rebalance via PIX/USDT depois)."""
+        return (self.rich_bid / self.ref_ask - 1.0) * 1e4
+
 
 @dataclass
 class _Episode:
@@ -133,8 +140,10 @@ class BasisTracker:
     episode: _Episode | None = None
     open_trade: _OpenTrade | None = None
     last_exit_ts: float = 0.0
+    last_cross_ts: float = -1e18
     episodes: list[dict] = field(default_factory=list)
     trades: list[dict] = field(default_factory=list)
+    cross_trades: list[dict] = field(default_factory=list)
     n_points: int = 0
 
     def _c(self, key: str, default):
@@ -174,12 +183,14 @@ class BasisTracker:
 
         self._update_episode(point.ts, sell_p)
         trade_row = self._update_paper(point.ts, sell_p, buy_p, point.ref_mid)
+        cross_row = self._update_cross(point)
         return {
             "sell_premium_bps": round(sell_p, 2),
             "buyback_premium_bps": round(buy_p, 2),
             "in_episode": self.episode is not None,
             "in_trade": self.open_trade is not None,
             "closed_trade": trade_row,
+            "cross_trade": cross_row,
         }
 
     # ── episódios (descritivo, independente do paper) ─────────────────────
@@ -253,6 +264,28 @@ class BasisTracker:
         if self.data_dir is not None:
             _append(_daily_path(self.data_dir, "paper_trades", utc_date_str(ts), self.mode),
                     PAPER_FIELDS, [row])
+        return row
+
+    def _update_cross(self, point: BasisPoint) -> dict | None:
+        """Paper cross-venue: com inventário nos DOIS lados, o ciclo executa no
+        instante (compra ref ask + vende rich bid); PIX/USDT rebalanceiam depois
+        (PIX zero-fee confirmado pelo Eduardo em 13/07/2026). Um ciclo por
+        cooldown = tempo de rebalanceamento."""
+        cc = basis_cfg(self.cfg).get("cross_paper", {}) or {}
+        if not cc.get("enabled", False):
+            return None
+        entry = float(cc.get("entry_bps", 30.0))
+        cooldown = float(cc.get("cycle_cooldown_s", 1800.0))
+        g = point.cross_gross_bps
+        if g < entry or point.ts - self.last_cross_ts < cooldown:
+            return None
+        self.last_cross_ts = point.ts
+        row = {"ts": point.ts, "cross_gross_bps": round(g, 3),
+               "rich_bid": point.rich_bid, "ref_ask": point.ref_ask}
+        self.cross_trades.append(row)
+        if self.data_dir is not None:
+            _append(_daily_path(self.data_dir, "cross_trades", utc_date_str(point.ts), self.mode),
+                    CROSS_FIELDS, [row])
         return row
 
     def flush(self) -> None:
@@ -419,6 +452,36 @@ def run_backfill(data_dir: Path, cfg: dict, mode: str = "rest",
                     line += f" {sum(nets)/n:+.1f} | {sum(nets):+.1f} |"
                 P(line)
     P("")
+    P("## Paper CROSS-VENUE — colhe o NÍVEL do prêmio (inventário nos 2 lados, PIX zero-fee)")
+    P("")
+    cross_scen = bc.get("fee_scenarios_cross", {}) or {"taker": 26.0}
+    P("Custos por ciclo (bps): " + ", ".join(f"{k}={v:.0f}" for k, v in cross_scen.items()))
+    P("")
+    hdr = "| entry | cooldown | N | N/dia |"
+    for name in cross_scen:
+        hdr += f" net méd {name} | net tot {name} |"
+    P(hdr)
+    P("|" + "---|" * (4 + 2 * len(cross_scen)))
+    for e_ in ([20.0, 25.0, 30.0, 40.0, 50.0] if grid else
+               [float((bc.get("cross_paper", {}) or {}).get("entry_bps", 30.0))]):
+        for cd_ in ([1800.0, 3600.0] if grid else
+                    [float((bc.get("cross_paper", {}) or {}).get("cycle_cooldown_s", 1800.0))]):
+            last, gs = -1e18, []
+            for pt, *_q in points:
+                g = pt.cross_gross_bps
+                if g >= e_ and pt.ts - last >= cd_:
+                    gs.append(g)
+                    last = pt.ts
+            n = len(gs)
+            if n == 0:
+                P(f"| {e_:.0f} | {cd_/60:.0f}min | 0 | 0.0 |" + " — | — |" * len(cross_scen))
+                continue
+            line = f"| {e_:.0f} | {cd_/60:.0f}min | {n} | {n/n_days:.1f} |"
+            for name, c in cross_scen.items():
+                nets = [g - float(c) for g in gs]
+                line += f" {sum(nets)/n:+.1f} | {sum(nets):+.1f} |"
+            P(line)
+    P("")
     P("Leitura: bruto em bps/ciclo sobre o notional do clip; net = bruto − cenário de custo.")
     P(f"⚠️ Amostra de {len(days)} dias — grid é exploratório; validar a config escolhida em coleta live antes de qualquer promoção.")
     P("")
@@ -444,6 +507,7 @@ def generate_basis_report(data_dir: Path, date_str: str, cfg: dict,
     points = read("points")
     episodes = read("episodes")
     trades = read("paper_trades")
+    cross = read("cross_trades")
 
     L: list[str] = []
     P = L.append
@@ -459,7 +523,14 @@ def generate_basis_report(data_dir: Path, date_str: str, cfg: dict,
     else:
         P("- Sem pontos válidos no dia.")
     P(f"- Episódios (≥{bc.get('episode_bps',20.0)}bps): {len(episodes)}")
-    P(f"- Paper trades fechados: {len(trades)}")
+    cross_scen = bc.get("fee_scenarios_cross", {}) or {}
+    P(f"- Ciclos CROSS-VENUE: {len(cross)}")
+    if cross:
+        cg = [float(t["cross_gross_bps"]) for t in cross]
+        P(f"  - bruto: méd {sum(cg)/len(cg):+.1f}bps | total {sum(cg):+.1f}bps")
+        for name, c in cross_scen.items():
+            P(f"  - net {name} (custo {float(c):.0f}bps): total {sum(g - float(c) for g in cg):+.1f}bps")
+    P(f"- Paper trades reversão fechados: {len(trades)}")
     if trades:
         gross = [float(t["gross_reversion_bps"]) for t in trades]
         P(f"- Bruto: méd {sum(gross)/len(gross):+.1f}bps | total {sum(gross):+.1f}bps")
