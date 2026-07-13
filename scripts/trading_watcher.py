@@ -338,7 +338,9 @@ def main() -> None:
     notifications.extend(_check_ny_open_paper(state))
 
     # 5. DOW 3-legs paper trader health
-    notifications.extend(_check_dow_3legs_paper(state))
+    # APOSENTADO em 2026-06-14 (sangria -8,8%, container removido do compose).
+    # Check desativado em 2026-07-11 — gerava falso alarme de "OFFLINE".
+    # notifications.extend(_check_dow_3legs_paper(state))
 
     # 6. Generic paper traders (RSI, Asian DEMA, BW, SOL Burst, EF3 x2)
     for container, port, health_path, label in PAPER_TRADERS:

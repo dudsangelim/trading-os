@@ -63,8 +63,7 @@ _TRADING_OS_ROOT = Path(__file__).resolve().parent.parent
 PAPER_TRADER_CSV = [
     ("NY Open 2C",  "trading/ny_open_paper/data/trades.csv",
      "ts_exit",  "direction", {"1":"LONG","-1":"SHORT"}, "pnl_pct_net", "pct",  "equity_after"),
-    ("DOW 3-Legs", "trading/dow_3legs_paper/data/trades.csv",
-     "exit_ts",  "side",      {},                        "ret_pct_net",  "pct",  "equity_after"),
+    # DOW 3-Legs APOSENTADO 2026-06-14 — removido da review 2026-07-11.
     ("RSI Reversion", "trading/rsi_reversion_paper/data/trades.csv",
      "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  None),
     ("Asian DEMA",    "trading/asian_dema_paper/data/trades.csv",
@@ -76,7 +75,7 @@ PAPER_TRADER_CSV = [
 # Standalone paper traders polled via HTTP (not in Postgres)
 PAPER_TRADER_ENDPOINTS = [
     ("NY Open 2C",     "http://127.0.0.1:8094/healthz"),
-    ("DOW 3-Legs",     "http://127.0.0.1:8096/health"),
+    # DOW 3-Legs APOSENTADO 2026-06-14 — removido da review 2026-07-11.
     ("RSI Reversion",  "http://127.0.0.1:8093/healthz"),
     ("Asian DEMA",     "http://127.0.0.1:8095/healthz"),
     ("BW Jawcross",    "http://127.0.0.1:8097/healthz"),
