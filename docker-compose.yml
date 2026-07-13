@@ -163,42 +163,11 @@ services:
       retries: 3
       start_period: 30s
 
-  # ny_open_paper: standalone 2C fade NY Open paper trader (BTCUSDT 5m, $100/1x)
-  # Fully isolated: no postgres, no redis, no registry entry.
-  # Stop with: docker compose stop trading-ny-open-paper
-  trading-ny-open-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.ny_open_paper
-    container_name: trading_ny_open_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8094:8094"
-    environment:
-      - TRADING_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
-      - TRADING_ALLOWED_USERS=${TRADING_ALLOWED_USERS:-}
-      - NY_OPEN_DATA_DIR=/data
-      - NY_OPEN_LOG_DIR=/logs
-      - NY_OPEN_HEALTH_PORT=8094
-      - NY_OPEN_EXECUTION_MODE=${NY_OPEN_EXECUTION_MODE:-shadow}
-      # live execution (only used when NY_OPEN_EXECUTION_MODE=live) — values from .env
-      - BINANCE_NY_OPEN_API_KEY=${BINANCE_NY_OPEN_API_KEY:-}
-      - BINANCE_NY_OPEN_API_SECRET=${BINANCE_NY_OPEN_API_SECRET:-}
-      - BINANCE_NY_OPEN_MAX_NOTIONAL_USD=${BINANCE_NY_OPEN_MAX_NOTIONAL_USD:-}
-      - NY_OPEN_LIVE_ACCOUNT=${NY_OPEN_LIVE_ACCOUNT:-NY_OPEN}
-      - NY_OPEN_LIVE_NOTIONAL_USD=${NY_OPEN_LIVE_NOTIONAL_USD:-240}
-      - NY_OPEN_LIVE_LEVERAGE=${NY_OPEN_LIVE_LEVERAGE:-10}
-    volumes:
-      - ./trading/ny_open_paper/data:/data
-      - ./trading/ny_open_paper/logs:/logs
-    networks:
-      - trading_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8094/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+  # ny_open_paper: APOSENTADO em 2026-07-13 — revalidação v5 com fill honesto (stop-entry)
+  # matou o edge: universo -8bps/trade WR 47,9%, WF OOS N=2 em 42 meses; o edge do backtest
+  # era fantasia de fill (4 fills sim × 0 fills reais no live 05-13/07/2026).
+  # Código + dados + Dockerfile em trading/_archived/ny_open_paper_archived_20260713.
+  # Não reviver sem edge provado com a regra honesta (backtests/ny_open_2c_honest_fill_oos.py).
 
   # dow_3legs_paper: APOSENTADO em 2026-06-14 — sangria consistente (-8,8%, $50→$45,6).
   # Container removido, código movido para trading/_archived/dow_3legs_paper_archived_20260614.

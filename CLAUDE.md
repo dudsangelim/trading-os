@@ -9,7 +9,6 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 
 | Container | Port | Strategy | Capital |
 |---|---|---|---|
-| `trading_ny_open_paper` | 8094 | NY Open 2C fade, BTCUSDT 5m | $100 / 6x |
 | `trading_asian_dema_paper` | 8095 | R021-B Asian DEMA 1h (DEMA 13/34), SOLUSDT 1h | $1000 / 1x |
 | `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
@@ -21,10 +20,23 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 
 Health check: `GET /health` or `/healthz` on each container's port.
 
+### ny_open_paper (2C) — APOSENTADO 2026-07-13 (Eduardo, pós-auditoria live)
+Live 05-13/07: **4 fills sim × 0 fills reais**. A revalidação v5 com fill honesto
+(`backtests/ny_open_2c_honest_fill_oos.py`, semântica de stop-entry: candle abre além do
+extremo → fill no open; senão fill no re-cruzamento; entrada taker) matou o edge: universo
+sem gate WR 47,9% / **-8bps/trade**, WF OOS N=2 em 42 meses. O edge do backtest de 05/07
+(+8,7bps PF 1,67) era fantasia de fill — o retest ocorre dentro do candle de rompimento em
+~99,6% dos setups, antes de a ordem poder existir; e o retest do backtest é semântica de
+STOP, não da LIMIT que o live_broker colocava. Incidente 08/07: broker inferia fill pela
+posição e adotou/fechou posição manual do Eduardo na conta MAIN (2×). Container, compose e
+monitores removidos; código+dados+Dockerfile em `trading/_archived/ny_open_paper_archived_20260713/`.
+Equity paper final $105,24 (contém 4 trades fantasma pós-05/07). Não reviver sem edge
+provado com a regra honesta. Detalhes históricos na seção "ny_open_paper specifics" abaixo.
+
 ### ny_open_mom_paper — APOSENTADO 2026-07-01 (Eduardo)
 Look-ahead na entrada + re-backtest 30d sem edge. Container, engine, watcher de drawdown e bloco do compose removidos. Não reviver.
 
-## Standalone paper traders (`trading/ny_open_paper/`, `trading/dow_3legs_paper/`, `trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`)
+## Standalone paper traders (`trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`, `trading/btc_lead_paper/`, …)
 
 - No auth, no DB. REST feed from Binance public endpoints.
 - State persisted to `/data/state.json` (volume-mounted).
@@ -39,7 +51,7 @@ Container removido, código em `trading/_archived/dow_3legs_paper_archived_20260
 - State machine: `flat → long_mon → flat → long_wed → [flat | short_thu] → flat`.
 - Stale-position guard: force-closes any position open >30h (missed-close recovery).
 
-### ny_open_paper specifics
+### ny_open_paper specifics — APOSENTADO 2026-07-13 (ver seção acima; histórico abaixo)
 - Session: 13:30–20:00 UTC weekdays. Decision bar at 14:00 UTC.
 - Frozen model in `assets/2C_v4_frozen.json` (2026-07-05) — do NOT retrain without full validation.
 - **2026-07-05 look-ahead fix**: the break bar can no longer fill the entry (engine.py) — the
@@ -169,13 +181,12 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 - Closes always execute regardless of ATR gate — gate only blocks new opens.
 - `FEE_RT_PCT = 0.10` is the roundtrip fee constant; defined in `config.py`, imported by engine.
 - Never mock the DB in core worker tests — use real asyncpg connections.
-- Don't touch `assets/2C_v4_frozen.json` — it's the production-frozen NY Open model (v1-v3 kept as history).
+- NY Open 2C aposentado 2026-07-13 — modelos congelados (v1-v4) arquivados junto com o código em `trading/_archived/ny_open_paper_archived_20260713/assets/`.
 
 ## Common commands
 
 ```bash
 # Health check
-curl localhost:8094/health
 curl localhost:8093/healthz
 curl localhost:8095/healthz
 curl localhost:8101/healthz
@@ -191,5 +202,5 @@ docker exec trading_rsi_reversion_paper python3 -m trading.rsi_reversion_paper.m
 docker compose build rsi_reversion_paper && docker compose up -d rsi_reversion_paper
 
 # View live logs
-docker logs -f trading_ny_open_paper
+docker logs -f trading_btc_lead_paper
 ```

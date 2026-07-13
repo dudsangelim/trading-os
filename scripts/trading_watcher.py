@@ -28,7 +28,6 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 TRADING_API     = "http://127.0.0.1:8091"
-NY_OPEN_API     = "http://127.0.0.1:8094"
 DOW_3LEGS_API   = "http://127.0.0.1:8096"
 
 # Paper traders monitored via generic check (name, port, health_path, label)
@@ -199,31 +198,6 @@ def _check_readiness_regression(state: dict, readiness: dict) -> list[str]:
     return []
 
 
-def _check_ny_open_paper(state: dict) -> list[str]:
-    """Alert if trading_ny_open_paper healthz is unreachable."""
-    health = _get_url(f"{NY_OPEN_API}/healthz")
-    was_offline = state.get("ny_open_paper_offline", False)
-
-    if "error" in health:
-        state["ny_open_paper_offline"] = True
-        if not was_offline:
-            return [
-                "🚨 <b>NY Open Paper — Container OFFLINE</b>\n\n"
-                f"O container <code>trading_ny_open_paper</code> não responde "
-                f"em {NY_OPEN_API}/healthz:\n"
-                f"<code>{health.get('error', '?')}</code>\n\n"
-                "Verificar: <code>docker ps | grep ny_open</code>\n"
-                "Restart: <code>docker compose up -d trading-ny-open-paper</code>"
-            ]
-        return []
-
-    state["ny_open_paper_offline"] = False
-    engine_state = health.get("engine_state", "?")
-    equity = health.get("equity", "?")
-    trades = health.get("processed_trades", "?")
-    print(f"[watcher] ny_open_paper: state={engine_state} equity={equity} trades={trades}")
-    return []
-
 
 def _check_dow_3legs_paper(state: dict) -> list[str]:
     """Alert if trading_dow_3legs_paper health is unreachable."""
@@ -334,8 +308,7 @@ def main() -> None:
     else:
         print(f"[watcher] readiness error: {readiness.get('error')}")
 
-    # 4. NY Open paper trader health
-    notifications.extend(_check_ny_open_paper(state))
+    # 4. NY Open 2C APOSENTADO 2026-07-13 (edge era fantasia de fill) — check removido.
 
     # 5. DOW 3-legs paper trader health
     # APOSENTADO em 2026-06-14 (sangria -8,8%, container removido do compose).
