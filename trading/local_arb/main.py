@@ -36,6 +36,8 @@ from .db import DbUnavailable, connect, get_dsn, init_db, persist_scan
 from .inventory import Ledger
 from .inventory_aware import generate_inventory_report, write_fixture
 from .models import OrderBookLevel, OrderBookSnapshot, Opportunity
+from .basis import (BasisTracker, basis_enabled, generate_basis_report, point_from_scan,
+                    run_backfill as basis_run_backfill)
 from .observer import generate_observer_report, observer_summary, persist_observer_scan
 from .paper import simulate_arb
 from .quality import quality_score
@@ -313,16 +315,42 @@ def cmd_observer_loop(cfg: dict, synthetic: bool, data_dir: Path,
     """Loop observacional contínuo. Sem paper e sem execução real."""
     interval = float(poll_seconds if poll_seconds is not None
                      else cfg.get("observer", {}).get("poll_seconds", 10))
+    basis_tracker = BasisTracker(cfg=cfg, data_dir=data_dir) if basis_enabled(cfg) else None
+    basis_day = None
     cycle = 0
     while True:
         cycle += 1
         scan, mode = _run_scan(cfg, synthetic, paper_enabled=False)
         persisted = persist_observer_scan(scan, cfg, data_dir, config_hash=config_hash(cfg), mode=mode)
         summary = observer_summary(scan, persisted, mode=f"observer_{mode}")
+        basis_note = ""
+        if basis_tracker is not None:
+            extracted = point_from_scan(scan, cfg)
+            if extracted is not None:
+                point, q_r, q_f, skew = extracted
+                b = basis_tracker.update(point, q_r, q_f, skew, source=mode)
+                if b is not None:
+                    basis_note = (f" basis={b['sell_premium_bps']:+.1f}bps"
+                                  f"{' [EP]' if b['in_episode'] else ''}"
+                                  f"{' [POS]' if b['in_trade'] else ''}")
+                    if b["closed_trade"]:
+                        t = b["closed_trade"]
+                        print(f"[basis] trade fechado: bruto {t['gross_reversion_bps']:+.1f}bps "
+                              f"hold {t['hold_s']:.0f}s saída {t['exit_reason']}", flush=True)
+            from .observer import utc_date_str as _uds
+            today = _uds(scan.ts)
+            if basis_day is not None and today != basis_day:
+                basis_tracker.flush()
+                try:
+                    md = generate_basis_report(data_dir, basis_day, cfg, mode=mode)
+                    print(f"[basis] report diário gerado: {md}", flush=True)
+                except Exception as exc:  # report nunca derruba o loop
+                    print(f"[basis] report {basis_day} falhou: {exc}", flush=True)
+            basis_day = today
         print(
             f"[observer-loop] cycle={cycle} books_ok={summary['n_books_ok']}/{summary['n_books']} "
             f"windows={summary['n_spread_windows']} candidates={summary['n_candidate_windows']} "
-            f"watch={summary['n_watch_windows']} best_net={summary['best_net_bps']}",
+            f"watch={summary['n_watch_windows']} best_net={summary['best_net_bps']}{basis_note}",
             flush=True,
         )
         if max_cycles is not None and cycle >= max_cycles:
@@ -354,6 +382,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="gera observer_report_<data>.md a partir dos CSVs do observer")
     parser.add_argument("--observer-loop", action="store_true",
                         help="loop Continuous Observer; persiste CSV sem paper/execução")
+    parser.add_argument("--basis-backfill", action="store_true",
+                        help="replay dos observer_snapshots*.csv pelo Basis Observer + relatório grid")
+    parser.add_argument("--basis-report", action="store_true",
+                        help="gera basis_report_<data>.md a partir dos CSVs live do basis observer")
     parser.add_argument("--inventory-aware-report", action="store_true",
                         help="Fase 3.3: simula cenários de inventário sobre os CSVs do "
                              "observer e gera inventory_aware_report_<data>.md")
@@ -395,6 +427,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.observer_report:
         ran = True
         rc = max(rc, cmd_observer_report(data_dir))
+    if args.basis_backfill:
+        ran = True
+        md = basis_run_backfill(data_dir, cfg)
+        print(f"[basis-backfill] relatório: {md}")
+    if args.basis_report:
+        ran = True
+        from datetime import datetime as _dt, timezone as _tz
+        md = generate_basis_report(data_dir, _dt.now(_tz.utc).strftime("%Y-%m-%d"), cfg)
+        print(f"[basis-report] gerado: {md}")
     if args.inventory_aware_report:
         ran = True
         rc = max(rc, cmd_inventory_aware_report(cfg, data_dir, args.inventory_date,

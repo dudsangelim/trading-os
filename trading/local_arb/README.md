@@ -137,3 +137,24 @@ buffer conservador para evitar falso positivo de edge.
 ## Artefatos gerados
 
 Relatórios e CSVs ficam em `trading/local_arb/data/` localmente ou `/data` no container. Essa pasta é ignorada pelo git via `.gitignore` local.
+
+## Basis Observer (13/07/2026)
+
+Rastreia o prêmio USDT/BRL **Bybit×Binance** como candidato a reversão à média
+(round-trip intra-Bybit, sem mover fiat; hedge opcional na Binance congela o basis).
+Motivação e matemática no docstring de `basis.py`. Integrado ao `--observer-loop`
+(flag `basis_observer.enabled` no YAML); grava `basis_points/episodes/paper_trades_<data>.csv`
+no diretório do observer e gera `basis_report_<data>.md` no rollover do dia UTC.
+
+```bash
+# Backtest sobre os snapshots históricos já coletados (grid entry/exit/hold)
+python -m trading.local_arb.main --basis-backfill --data-dir trading/local_arb/data
+
+# Relatório do dia corrente (live)
+python -m trading.local_arb.main --basis-report
+```
+
+Backfill 09-13/07 (5 dias, 1 ciclo completo do prêmio): o prêmio é um NÍVEL que
+cicla em DIAS (0 → +49bps → 0), não oscilação intradiária; round-trip intraday é
+negativo em todo o grid; a config live testa a tese multi-dia (entry 30 / exit 5 /
+hold máx 5d). Decisão exige mais ciclos — não promover com 1 ciclo de amostra.

@@ -256,3 +256,31 @@ inventory_aware:
         bybit: {BRL: 0.0, USDT: 1000.0}
         okx: {BRL: 0.0, USDT: 1000.0}
         bitso: {BRL: 0.0, USDT: 1000.0}
+
+# Basis Observer (13/07/2026) — prêmio Bybit×Binance USDT/BRL como reversão à média.
+# Motivação: 5 dias de observer provaram que taker-taker cross-venue não paga o
+# rebalanceamento; a única anomalia recorrente é o book da Bybit cotar rico em
+# episódios (fluxo onramp varejo BR, pior 22h-08h UTC). Tese viável = round-trip
+# INTRA-Bybit (sem mover fiat), hedge opcional na Binance. SIGNAL_ONLY.
+basis_observer:
+  enabled: true
+  rich_exchange: bybit       # venue que cota rico (vende-se USDT aqui)
+  ref_exchange: binance      # referência de mid
+  min_quality_score: 70
+  max_skew_ms: 2000
+  episode_bps: 20.0          # descritivo: prêmio que define "episódio"
+  episode_max_gap_s: 600.0   # prêmio é ciclo LENTO (dias); gaps de poll não segmentam
+  episode_min_duration_s: 60.0
+  # Backfill 13/07 (5 dias): prêmio NÃO oscila intraday — é um NÍVEL que cicla em
+  # dias (09/07 ~0 → 12/07 ~+49bps → 13/07 ~0). Round-trip intradiário deu negativo
+  # no grid inteiro; o paper live testa a tese multi-dia (hold de até 5 dias).
+  paper:
+    entry_bps: 30.0          # vende na Bybit quando sell_premium >= isto
+    exit_bps: 5.0            # recompra quando buyback_premium <= isto
+    max_hold_s: 432000       # 5 dias; estoura -> saída timeout a mercado
+    cooldown_s: 3600
+  # custo por CICLO (bps) aplicado nos relatórios sobre o bruto de reversão:
+  fee_scenarios:
+    taker_unhedged: 22.0     # 2x taker Bybit (10) + 2 slippage; sem hedge (carrega drift)
+    taker_hedged: 37.0       # + 2x taker Binance c/ BNB (7.5) no hedge do basis
+    maker_bybit_hedged: 27.0 # pernas Bybit a maker VIP/promo (~5) + hedge; otimista
