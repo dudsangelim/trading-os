@@ -297,3 +297,35 @@ basis_observer:
     taker_unhedged: 22.0     # 2x taker Bybit (10) + 2 slippage; sem hedge (carrega drift)
     taker_hedged: 37.0       # + 2x taker Binance c/ BNB (7.5) no hedge do basis
     maker_bybit_hedged: 27.0 # pernas Bybit a maker VIP/promo (~5) + hedge; otimista
+
+# Gold Basis Observer (13/07/2026) — clone do basis p/ ouro tokenizado PAXG↔XAUT.
+# Sem arb pura (emissores distintos, sem loop de resgate no varejo); candidato é o
+# basis como reversão à média. Verificado 13/07: Binance lista PAXGUSDT E XAUTUSDT
+# (books ≤1bp) e Bybit lista XAUTUSDT (~0.3bp); OKX não tem. SIGNAL_ONLY.
+gold_basis:
+  enabled: true
+  min_quality_score: 70
+  max_skew_ms: 2000
+  episode_bps: 10.0            # basis do ouro é mais apertado que o do BRL
+  episode_max_gap_s: 600.0
+  episode_min_duration_s: 60.0
+  paper:
+    entry_bps: 20.0
+    exit_bps: 5.0
+    max_hold_s: 432000         # 5 dias (amplitude/meia-vida desconhecidas — medir)
+    cooldown_s: 3600
+  routes:
+    # pair-trade same-venue (zero rails; custo = 4 pernas taker ~40bps + slip)
+    - name: xaut_paxg_binance
+      rich: {venue: binance, symbol: XAUTUSDT}
+      ref:  {venue: binance, symbol: PAXGUSDT}
+      fee_scenarios:
+        taker_4_pernas: 46.0
+        maker_4_pernas: 22.0
+    # mesmo token cross-venue (inventário nos 2 lados = 2 pernas, análogo ao BRL)
+    - name: xaut_bybit_binance
+      rich: {venue: bybit, symbol: XAUTUSDT}
+      ref:  {venue: binance, symbol: XAUTUSDT}
+      fee_scenarios:
+        taker_2_pernas: 24.0
+        maker_2_pernas: 12.0

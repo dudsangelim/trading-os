@@ -85,3 +85,27 @@ def test_cross_paper_harvests_level_with_cooldown():
     assert all(t["cross_gross_bps"] > 35.0 for t in tr.cross_trades)
     # reversão nunca fecha (buyback nunca <= 5) → nenhum trade de reversão fechado
     assert len(tr.trades) == 0
+
+
+def test_gold_observer_routes_and_step(tmp_path):
+    from trading.local_arb.gold_basis import GoldBasisObserver
+    cfg = {"gold_basis": {
+        "enabled": True, "episode_bps": 10.0,
+        "paper": {"entry_bps": 20.0, "exit_bps": 5.0, "max_hold_s": 3600.0,
+                  "cooldown_s": 0.0},
+        "routes": [{"name": "r1",
+                    "rich": {"venue": "binance", "symbol": "XAUTUSDT"},
+                    "ref": {"venue": "binance", "symbol": "PAXGUSDT"}}],
+    }}
+    fake_books = {"XAUTUSDT": (4010.0, 4010.4, 50.0),   # rico +25bps vs PAXG
+                  "PAXGUSDT": (3999.8, 4000.2, 60.0)}
+    g = GoldBasisObserver(cfg=cfg, data_dir=tmp_path,
+                          fetchers={"binance": lambda s: fake_books[s]})
+    assert len(g.dirs) == 2                              # fwd + rev
+    out = g.step(now_ts=1000.0)
+    assert "r1" in out and 24.0 < out["r1"] < 26.0       # fwd: XAUT rico ~+25bps
+    fwd = next(d for d in g.dirs if d.name == "r1_fwd")
+    assert fwd.tracker.open_trade is not None            # paper entrou (>=20bps)
+    rev = next(d for d in g.dirs if d.name == "r1_rev")
+    assert rev.tracker.open_trade is None                # direção oposta não entra
+    assert (tmp_path / "gold_basis" / "r1_fwd").exists() # CSVs no dir da rota

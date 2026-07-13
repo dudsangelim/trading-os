@@ -158,3 +158,11 @@ Backfill 09-13/07 (5 dias, 1 ciclo completo do prêmio): o prêmio é um NÍVEL 
 cicla em DIAS (0 → +49bps → 0), não oscilação intradiária; round-trip intraday é
 negativo em todo o grid; a config live testa a tese multi-dia (entry 30 / exit 5 /
 hold máx 5d). Decisão exige mais ciclos — não promover com 1 ciclo de amostra.
+
+## Gold Basis Observer (13/07/2026)
+
+Clone do basis p/ ouro tokenizado **PAXG↔XAUT** (`gold_basis.py`, flag `gold_basis.enabled`).
+Sem arb pura (emissores distintos); mede o basis como candidato a reversão à média em 2 rotas
+× 2 direções: XAUT↔PAXG same-venue Binance (4 pernas) e XAUT Bybit↔Binance (mesmo token,
+2 pernas c/ inventário). CSVs+reports em `data/gold_basis/<rota>_<dir>/`. Começa do zero
+(sem histórico p/ backfill) — avaliar após 2-4 semanas junto com o basis do BRL.

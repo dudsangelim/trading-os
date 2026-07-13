@@ -38,6 +38,7 @@ from .inventory_aware import generate_inventory_report, write_fixture
 from .models import OrderBookLevel, OrderBookSnapshot, Opportunity
 from .basis import (BasisTracker, basis_enabled, generate_basis_report, point_from_scan,
                     run_backfill as basis_run_backfill)
+from .gold_basis import GoldBasisObserver, gold_enabled
 from .observer import generate_observer_report, observer_summary, persist_observer_scan
 from .paper import simulate_arb
 from .quality import quality_score
@@ -317,6 +318,8 @@ def cmd_observer_loop(cfg: dict, synthetic: bool, data_dir: Path,
                      else cfg.get("observer", {}).get("poll_seconds", 10))
     basis_tracker = BasisTracker(cfg=cfg, data_dir=data_dir) if basis_enabled(cfg) else None
     basis_day = None
+    gold = (GoldBasisObserver(cfg=cfg, data_dir=data_dir)
+            if (gold_enabled(cfg) and not synthetic) else None)
     cycle = 0
     while True:
         cycle += 1
@@ -347,10 +350,19 @@ def cmd_observer_loop(cfg: dict, synthetic: bool, data_dir: Path,
                 except Exception as exc:  # report nunca derruba o loop
                     print(f"[basis] report {basis_day} falhou: {exc}", flush=True)
             basis_day = today
+        gold_note = ""
+        if gold is not None:
+            try:
+                gsum = gold.step(scan.ts)
+                if gsum:
+                    gold_note = " gold[" + " ".join(
+                        f"{k.replace('xaut_', '')}={v:+.1f}" for k, v in gsum.items()) + "]"
+            except Exception as exc:
+                print(f"[gold-basis] step falhou: {exc}", flush=True)
         print(
             f"[observer-loop] cycle={cycle} books_ok={summary['n_books_ok']}/{summary['n_books']} "
             f"windows={summary['n_spread_windows']} candidates={summary['n_candidate_windows']} "
-            f"watch={summary['n_watch_windows']} best_net={summary['best_net_bps']}{basis_note}",
+            f"watch={summary['n_watch_windows']} best_net={summary['best_net_bps']}{basis_note}{gold_note}",
             flush=True,
         )
         if max_cycles is not None and cycle >= max_cycles:
