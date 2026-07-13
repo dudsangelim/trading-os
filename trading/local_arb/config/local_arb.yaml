@@ -280,7 +280,9 @@ basis_observer:
     max_hold_s: 432000       # 5 dias; estoura -> saída timeout a mercado
     cooldown_s: 3600
   # Cross-venue paper (13/07/2026): Eduardo CONFIRMOU PIX zero-fee in/out na conta
-  # Bybit dele → o loop cross-venue fecha por ~custo de taker + transfer de USDT.
+  # Bybit dele (limites: min R$50 / máx R$95.000 por dia) → o loop cross-venue
+  # fecha por ~custo de taker + transfer de USDT. Teto fiat de R$95k/dia limita o
+  # notional reciclável por dia; alerta de janela = basis_alert_watcher (Ariadne).
   # Com inventário nos 2 lados as pernas executam no instante do prêmio (colhe o
   # NÍVEL, sem esperar reversão); cooldown = tempo de rebalanceamento do ciclo.
   cross_paper:
