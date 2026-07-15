@@ -77,15 +77,22 @@ def slope_sample(now: datetime) -> dict | None:
     insts = D.option_instruments()
     iv7 = _atm_iv_bucket(now, S, insts, 5.0, 9.5)
     iv30 = _atm_iv_bucket(now, S, insts, 20.0, 40.0)
-    if iv7 is None or iv30 is None:
+    # research kept atm_iv_7d/atm_iv_30d as independent columns (207 of its days
+    # had iv7 without iv30 — the ladder leaves [20,40] empty for stretches of
+    # each month); slope is simply NaN there. Mirror that: record whatever the
+    # surface gives, so the IV7-DVOL fallback and the freshness of the last row
+    # do not depend on the 30d bucket being populated.
+    if iv7 is None and iv30 is None:
         return None
     try:
         dvol = D.dvol_now()
     except Exception:
         dvol = float("nan")
-    return {"date": now.strftime("%Y-%m-%d"), "iv7": round(iv7, 6),
-            "iv30": round(iv30, 6), "slope": round(iv30 - iv7, 6),
-            "dvol": round(dvol, 6)}
+    slope = None if (iv7 is None or iv30 is None) else round(iv30 - iv7, 6)
+    return {"date": now.strftime("%Y-%m-%d"),
+            "iv7": None if iv7 is None else round(iv7, 6),
+            "iv30": None if iv30 is None else round(iv30, 6),
+            "slope": slope, "dvol": round(dvol, 6)}
 
 
 # ── history ───────────────────────────────────────────────────────────────────
@@ -113,10 +120,16 @@ def record_daily(now: datetime) -> None:
         log.warning("volsurface: no valid slope sample today")
         return
     with open(HIST_FILE, "a", newline="") as f:
-        csv.writer(f).writerow([s["date"], s["iv7"], s["iv30"], s["slope"], s["dvol"]])
-    log.info("volsurface: iv7=%.1f%% iv30=%.1f%% slope=%+.1f vpts dvol=%.1f%%",
-             s["iv7"] * 100, s["iv30"] * 100, s["slope"] * 100,
-             (s["dvol"] or 0) * 100)
+        csv.writer(f).writerow(["" if s[k] is None else s[k]
+                                for k in ("date", "iv7", "iv30", "slope", "dvol")])
+
+    def _pct(v):
+        return "n/a" if v is None else "%.1f%%" % (v * 100)
+
+    log.info("volsurface: iv7=%s iv30=%s slope=%s dvol=%s", _pct(s["iv7"]),
+             _pct(s["iv30"]),
+             "n/a" if s["slope"] is None else "%+.1f vpts" % (s["slope"] * 100),
+             _pct(s["dvol"] or 0))
 
 
 # ── signal ────────────────────────────────────────────────────────────────────
