@@ -32,7 +32,6 @@ DOW_3LEGS_API   = "http://127.0.0.1:8096"
 
 # Paper traders monitored via generic check (name, port, health_path, label)
 PAPER_TRADERS = [
-    ("rsi_reversion_paper",  8093, "/healthz", "RSI Reversion"),
     ("asian_dema_paper",     8095, "/healthz", "Asian DEMA"),
     ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
     ("btc_lead_paper",       8106, "/healthz", "BTC-Lead ETH 4h"),
