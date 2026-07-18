@@ -1,0 +1,566 @@
+[
+  {
+    "file": "WDON26_2026-06-18.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-18",
+    "compressed_bytes": 0,
+    "status": "empty_http_200_response"
+  },
+  {
+    "file": "WDON26_2026-06-19.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-19",
+    "compressed_bytes": 1907636,
+    "sha256": "e89e3b474cc44fccc83c387fecd0edc5a12da1b71ebba3911390fef61bcf0d6b",
+    "status": "zip_opened",
+    "members": [
+      "19-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 21952776,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-22.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-22",
+    "compressed_bytes": 2657815,
+    "sha256": "8b99605d3e3e3b4abadf5a259b384b5f56d874e5d197ecf3a32393a3ded4e5b4",
+    "status": "zip_opened",
+    "members": [
+      "22-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 31801559,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-23.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-23",
+    "compressed_bytes": 2682342,
+    "sha256": "952a72eb10ea70a2637c2f49f0c682185b8b3682dd2f2eab1cf0d9362fe00a67",
+    "status": "zip_opened",
+    "members": [
+      "23-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 31852124,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-24.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-24",
+    "compressed_bytes": 3037166,
+    "sha256": "230d9ae2deced10bed83622a336ced31f847922c6adb7d63d7b9fdf309d45ba0",
+    "status": "zip_opened",
+    "members": [
+      "24-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 36974756,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-25.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-25",
+    "compressed_bytes": 3194376,
+    "sha256": "8f4845703a0b46549c5d7c804a9379b278ba963cbc6db56110954b80ac5fcd19",
+    "status": "zip_opened",
+    "members": [
+      "25-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 38911220,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-26.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-26",
+    "compressed_bytes": 2676088,
+    "sha256": "486fbb8b33942cfd03fe116b8060e9b6a3cf8735b44f8760041955b59a19afc7",
+    "status": "zip_opened",
+    "members": [
+      "26-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 32498442,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-29.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-29",
+    "compressed_bytes": 2238847,
+    "sha256": "f817fb8744a7ecbb7a172a6e47a21e2e049d1807dfa3fe5f85dff2ef32df1dc2",
+    "status": "zip_opened",
+    "members": [
+      "29-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 27013542,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDON26_2026-06-30.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDON26/2026-06-30",
+    "compressed_bytes": 270791,
+    "sha256": "df054ac8fff251485d79545d3e14f81f6f8c494fe210de052a3501b86abadd03",
+    "status": "zip_opened",
+    "members": [
+      "30-06-2026_NEGOCIOSAVISTA_WDON26.txt"
+    ],
+    "uncompressed_bytes": 2489525,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-06-16.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-16",
+    "compressed_bytes": 0,
+    "status": "empty_http_200_response"
+  },
+  {
+    "file": "WDOQ26_2026-06-24.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-24",
+    "compressed_bytes": 25271,
+    "sha256": "ba50af7615dc69490b3ccc6bb0e98adce4168fa960c9c924180d9621b79ff423",
+    "status": "zip_opened",
+    "members": [
+      "24-06-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 197328,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-06-25.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-25",
+    "compressed_bytes": 30356,
+    "sha256": "2bd926bc589bd7a707caa1cbd7063c1e3e44a2fb6c9d96e87448221eeefebb84",
+    "status": "zip_opened",
+    "members": [
+      "25-06-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 277789,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-06-26.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-26",
+    "compressed_bytes": 60660,
+    "sha256": "d705c9dbbc3551ff58f72caa1cd30a77f24636c7b7dfe4eaeec648d6ddda7bcc",
+    "status": "zip_opened",
+    "members": [
+      "26-06-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 493711,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-06-29.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-29",
+    "compressed_bytes": 148806,
+    "sha256": "ef42701b9ce0691aebeb3a5761c62748b30cecbddb74ccf46432601b9a6d7522",
+    "status": "zip_opened",
+    "members": [
+      "29-06-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 1342623,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-06-30.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-06-30",
+    "compressed_bytes": 2553056,
+    "sha256": "34520401681e50c97c45004a7ecb532926b5283f0d8ab0ff799de96820bf3fa6",
+    "status": "zip_opened",
+    "members": [
+      "30-06-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 30920823,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-01.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-01",
+    "compressed_bytes": 3022811,
+    "sha256": "a385c0538214276e3d39d32342ae6d25ac9f7b480fa77065c8c84d2409091b98",
+    "status": "zip_opened",
+    "members": [
+      "01-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 35434562,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-02.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-02",
+    "compressed_bytes": 2432986,
+    "sha256": "c103a3f0436d9ae4d97a31a0be274c46c027367893c051beb4a99da5fea9e820",
+    "status": "zip_opened",
+    "members": [
+      "02-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 29544571,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-03.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-03",
+    "compressed_bytes": 1701826,
+    "sha256": "085d18acc4131393d4685db3c14af3e49a024aabb59e5ed1cd66ba8a7e9a1bd4",
+    "status": "zip_opened",
+    "members": [
+      "03-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 19278828,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-06.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-06",
+    "compressed_bytes": 2424000,
+    "sha256": "e0ee226a5dbc8265c7de0ad1415858bf8b104070d357e9f80631c1bd713225ac",
+    "status": "zip_opened",
+    "members": [
+      "06-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 28845286,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-07.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-07",
+    "compressed_bytes": 2405708,
+    "sha256": "f0913201d5d4b71ae9179288efb40d6397c847c3397eee3dccef5e8cf25aa026",
+    "status": "zip_opened",
+    "members": [
+      "07-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 28702030,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-08.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-08",
+    "compressed_bytes": 2891890,
+    "sha256": "087b1e1c5fe7d11827937cb8332c7c36a632b4f729c319b266530f7a5c7b9d53",
+    "status": "zip_opened",
+    "members": [
+      "08-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 34973074,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-09.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-09",
+    "compressed_bytes": 2057579,
+    "sha256": "da23a4a8a2c4f1cb3d2669f88a0b19ae506105642660790bba20a188b65b16d7",
+    "status": "zip_opened",
+    "members": [
+      "09-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 24377359,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-10.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-10",
+    "compressed_bytes": 2436369,
+    "sha256": "011ead001d5fbc9e36aea01b3c5824aabfeb0525d545fa6e2b442e9b32eb7db5",
+    "status": "zip_opened",
+    "members": [
+      "10-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 28767498,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-13.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-13",
+    "compressed_bytes": 2618319,
+    "sha256": "98abe5c1077867c030fd38ad03a6614e8d62b3df8c6b6cbbfac648fff2d16f9e",
+    "status": "zip_opened",
+    "members": [
+      "13-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 31524222,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-14.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-14",
+    "compressed_bytes": 2882184,
+    "sha256": "f71976ac3ee14e27d0ab3757f51815318ad9ed80a7ec93dd340cf83ed58b326b",
+    "status": "zip_opened",
+    "members": [
+      "14-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 34229738,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-15.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-15",
+    "compressed_bytes": 2454383,
+    "sha256": "2afd515522da2064d5fbf032202e500878d43a1316dbf9e599675c33bc837d17",
+    "status": "zip_opened",
+    "members": [
+      "15-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 29175310,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WDOQ26_2026-07-16.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WDOQ26/2026-07-16",
+    "compressed_bytes": 2059976,
+    "sha256": "bb59eecea90bac1b4a92131230b3461b5e1a2fb23bde4c1bd5f5cb85a0c6186e",
+    "status": "zip_opened",
+    "members": [
+      "16-07-2026_NEGOCIOSAVISTA_WDOQ26.txt"
+    ],
+    "uncompressed_bytes": 24570465,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-16.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-16",
+    "compressed_bytes": 0,
+    "status": "empty_http_200_response"
+  },
+  {
+    "file": "WINQ26_2026-06-18.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-18",
+    "compressed_bytes": 0,
+    "status": "empty_http_200_response"
+  },
+  {
+    "file": "WINQ26_2026-06-19.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-19",
+    "compressed_bytes": 21625302,
+    "sha256": "e801f0407acdc7c8b5975e2bed4fca0ffd4f81b65cdbcb93e3566dcc7da48889",
+    "status": "zip_opened",
+    "members": [
+      "19-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 243812010,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-22.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-22",
+    "compressed_bytes": 28630401,
+    "sha256": "af41065d2b1533513c4bb586b07f2dbd9f2480befa0284592a28cd05bb49fab7",
+    "status": "zip_opened",
+    "members": [
+      "22-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 331708483,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-23.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-23",
+    "compressed_bytes": 29683071,
+    "sha256": "0145dd918dc0781d8bd984f646a203d10f2ba19cf250b1eb23a1098283925cd3",
+    "status": "zip_opened",
+    "members": [
+      "23-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 343324736,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-24.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-24",
+    "compressed_bytes": 31121318,
+    "sha256": "66b821016a360c02fe3cd109c35feda2673fc1c11a57639c725e81004008fc2d",
+    "status": "zip_opened",
+    "members": [
+      "24-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 360561940,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-25.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-25",
+    "compressed_bytes": 30179324,
+    "sha256": "d5174125e6bf45dc06ff6eb7b4acdc0219ea9a47d8ffee56112b40ae48930a99",
+    "status": "zip_opened",
+    "members": [
+      "25-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 347977011,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-26.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-26",
+    "compressed_bytes": 30863174,
+    "sha256": "3f9e3b261ca14c010bf8b3c9a9c2bc8e57ececf1e7ef8f58542712f2e115d3f6",
+    "status": "zip_opened",
+    "members": [
+      "26-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 353793758,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-29.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-29",
+    "compressed_bytes": 24885605,
+    "sha256": "70e3a6bf0608eec0f1d8704482b9da019711fc9c19386a86760662a86d077246",
+    "status": "zip_opened",
+    "members": [
+      "29-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 289782980,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-06-30.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-06-30",
+    "compressed_bytes": 32507823,
+    "sha256": "f65f791299dd4677b2faf65b8af300c6e0922a7f3b8a98bb12e077c61f140ee0",
+    "status": "zip_opened",
+    "members": [
+      "30-06-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 379432501,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-01.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-01",
+    "compressed_bytes": 30088298,
+    "sha256": "de9fa417cbb8025ab85e7744273621046394bd4b0866b13643eeb1753379ee91",
+    "status": "zip_opened",
+    "members": [
+      "01-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 346561986,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-02.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-02",
+    "compressed_bytes": 22924160,
+    "sha256": "cb351699a43c4e19567958c96149bcf4cb09f65b171a7a3e0da4267b0008101f",
+    "status": "zip_opened",
+    "members": [
+      "02-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 268400885,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-03.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-03",
+    "compressed_bytes": 23473041,
+    "sha256": "a59835196596bedd6262be1fbb416875cf9a80cd487e0a7a7c0646cab7b1e9ba",
+    "status": "zip_opened",
+    "members": [
+      "03-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 269883877,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-06.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-06",
+    "compressed_bytes": 29228103,
+    "sha256": "37aefb185f9d088befbe0d93df0be73b5f3b87239712eddfdaafd987a759e8db",
+    "status": "zip_opened",
+    "members": [
+      "06-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 341277028,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-07.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-07",
+    "compressed_bytes": 31544524,
+    "sha256": "8d9d0bb21e4b83e17e819c0cb67d8ae022958c244afc740e16def3fa3914a894",
+    "status": "zip_opened",
+    "members": [
+      "07-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 367788055,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-08.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-08",
+    "compressed_bytes": 28779612,
+    "sha256": "07983dd98d395cb3c3bf4874f955cac3a4035b6ebcc2d81d767bf181e3ac7e1b",
+    "status": "zip_opened",
+    "members": [
+      "08-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 334487180,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-09.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-09",
+    "compressed_bytes": 26245265,
+    "sha256": "999f1ef27ea1a8ecb44e1e4c4a2a6b14080f25843eed35f93b571fab98d7b0d2",
+    "status": "zip_opened",
+    "members": [
+      "09-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 302098104,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-10.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-10",
+    "compressed_bytes": 30329676,
+    "sha256": "a6db2ae6294ec801312ae916edd628cdcda1cb14d3f94a2c96d8ff97ad45b862",
+    "status": "zip_opened",
+    "members": [
+      "10-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 347068893,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-13.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-13",
+    "compressed_bytes": 28898781,
+    "sha256": "7e5eadd20224393609835366b0a1e1c0d6a3153772e30eec548fe03e07935de8",
+    "status": "zip_opened",
+    "members": [
+      "13-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 334597262,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-14.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-14",
+    "compressed_bytes": 28542071,
+    "sha256": "db7629e7a95c40dc704c1db388a5b8bc993e0fe0e500796d68694bc7c4803ef5",
+    "status": "zip_opened",
+    "members": [
+      "14-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 332387487,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-15.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-15",
+    "compressed_bytes": 26785483,
+    "sha256": "a9f9daaded6c670bf7c79fa49a9b94038d5eeb958ffc8430f892575cb28ad0c3",
+    "status": "zip_opened",
+    "members": [
+      "15-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 310425235,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  },
+  {
+    "file": "WINQ26_2026-07-16.zip",
+    "source_url": "https://drp.b3.com.br/rapinegocios/tickercsv/WINQ26/2026-07-16",
+    "compressed_bytes": 28632533,
+    "sha256": "24c7f09318a87250df6e7217f6eb5ab65913ef9a47ffd21d55930dd04898b01c",
+    "status": "zip_opened",
+    "members": [
+      "16-07-2026_NEGOCIOSAVISTA_WINQ26.txt"
+    ],
+    "uncompressed_bytes": 334115290,
+    "header": "DataReferencia;CodigoInstrumento;AcaoAtualizacao;PrecoNegocio;QuantidadeNegociada;HoraFechamento;CodigoIdentificadorNegocio;TipoSessaoPregao;DataNegocio;CodigoParticipanteComprador;CodigoParticipanteVendedor"
+  }
+]
