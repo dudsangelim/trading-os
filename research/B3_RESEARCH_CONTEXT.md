@@ -6,10 +6,11 @@
 
 ## Estado atual (1 linha)
 
-Campanhas 1 (`b3_or_continuation_v0`, opening range) **REFUTADA** e 2 (`b3_ny_open_v0`,
-sessão B3 × abertura NY) **ENCERRADA NA FASE B** (`premise_not_supported`, 0 backtests
-gastos) em 2026-07-18. Próxima sugerida: **WDO × prêmio USDT/BRL** (aguarda histórico do
-Basis Observer na VPS). OOS 2025+ **virgem**.
+Campanhas 1 (`b3_or_continuation_v0`, opening range) **REFUTADA**; 2 (`b3_ny_open_v0`,
+sessão B3 × abertura NY) e 3 (`b3_wdo_ptax_v0`, janelas PTAX/fixing EOM) **ENCERRADAS NA
+FASE B** (`premise_not_supported`, 0 backtests gastos) — tudo em 2026-07-18. Famílias
+intraday-direcionais em OHLCV estão se esgotando; candidatas restantes abaixo. USDT/BRL ×
+WDO adiada até haver histórico do Basis Observer (VPS). OOS 2025+ **virgem**.
 
 ## Dados — `research/b3_win_wdo_data_audit/mt5_history/`
 
@@ -74,13 +75,28 @@ Ver `research/b3_ny_open_v0/` (spec, mapa, review, decisão). Resumo:
 - Rompimento/fade do range da manhã = re-tunagem da família refutada da campanha 1;
   proibido sem dado novo (Manifesto §5).
 
-## Próxima campanha (sugerida, não iniciada)
+## O que a campanha 3 estabeleceu (não retestar)
 
-**WDO/câmbio × prêmio USDT/BRL (cross-market).** Lead-lag entre o prêmio Bybit×Binance
-do Basis Observer (`trading/local_arb/`) e o WDO. Dado novo de verdade, nenhuma geometria
-refutada, resultado alimenta a promoção do basis observer. **Bloqueio:** CSVs do observer
-estão na VPS e o histórico é curto (~10 dias em 18/07) — acumular mais semanas e
-versionar os snapshots no repo antes de abrir a campanha.
+Ver `research/b3_wdo_ptax_v0/`. Resumo: janelas do PTAX NÃO são localmente quentes de
+forma específica no WDO (aquecimento de hora cheia é market-wide — WIN 10:00 razão 1.21
+estável 4/4 anos, maior que qualquer janela do WDO); arco drift→unwind do dia de fixing
+tem o SINAL OPOSTO ao previsto (corr +0.23, n=42); nenhum contraste WDO≫WIN. Reabre só
+com dado de fluxo cambial ou tick data (Manifesto §5). Observação registrada (não é
+hipótese): leve drift positivo intradiário do WDO em D-3/D-1/D0 do fim de mês (~10-20bps,
+t≈1.7, possível seleção entre células do P5).
+
+## Candidatas restantes (avaliadas em 2026-07-18, nenhuma aberta)
+
+1. **Par WIN×WDO divergência** — explorar a corr −0,55 estável (campanha 2 A6): mapear
+   dias de mesmo-sinal (quebra da relação) e o que segue. Sinal cross-asset, não refutado.
+2. **Overnight vs intradiário** — maior área não testada (campanhas foram 100% intraday).
+   EXIGE Eduardo relaxar a regra "nunca overnight" + contabilidade de rolagem no P&L.
+3. **Última hora (fluxo MOC)** — dia→última hora; fronteira do refutado, spec precisaria
+   blindagem extra contra o closeout da campanha 1.
+4. **Dias de macro US (FOMC/CPI/payroll)** — eco do 08:30 ET é visível (campanha 2 A1);
+   exige montar calendário de eventos externo.
+5. **WDO/câmbio × prêmio USDT/BRL (cross-market)** — adiada: aguarda semanas de histórico
+   do Basis Observer (VPS) versionadas no repo.
 
 ## Limitações de ambiente (sessão cloud/mobile)
 
