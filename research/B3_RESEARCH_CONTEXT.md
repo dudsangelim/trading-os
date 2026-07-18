@@ -6,8 +6,10 @@
 
 ## Estado atual (1 linha)
 
-Campanha 1 (`b3_or_continuation_v0`, opening range) **REFUTADA** em 2026-07-18; próxima
-campanha sugerida: **interação sessão B3 × abertura NY (~10:30 local)**. OOS 2025+ **virgem**.
+Campanhas 1 (`b3_or_continuation_v0`, opening range) **REFUTADA** e 2 (`b3_ny_open_v0`,
+sessão B3 × abertura NY) **ENCERRADA NA FASE B** (`premise_not_supported`, 0 backtests
+gastos) em 2026-07-18. Próxima sugerida: **WDO × prêmio USDT/BRL** (aguarda histórico do
+Basis Observer na VPS). OOS 2025+ **virgem**.
 
 ## Dados — `research/b3_win_wdo_data_audit/mt5_history/`
 
@@ -60,12 +62,25 @@ Ver `research/b3_or_continuation_v0/campaign_closeout.md`. Resumo:
 - Melhor config C3 ORB-CONT WIN M5 = PF 1.079 < gate 1.10, sem replicação WDO — ruído
   selecionado (melhor de 12). Não continuar esta família sem dado novo (book/fluxo B3).
 
-## Próxima campanha (aberta, não iniciada)
+## O que a campanha 2 estabeleceu (não retestar)
 
-**Sessão B3 × abertura NY (~10:30 local B3 quando NY abre 09:30 EDT; ~11:30 quando EST — 
-cuidado: o offset muda com o DST americano).** Regime de vol distinto, não testado. Começar
-pela fase A (mapa descritivo): comportamento de WIN/WDO na janela pré/pós abertura NYSE,
-condicionado a gap overnight, direção da manhã B3, e vol. IS até 2024-12, como sempre.
+Ver `research/b3_ny_open_v0/` (spec, mapa, review, decisão). Resumo:
+- O bump de vol da abertura NY é REAL e segue o relógio de NY (desloca com o DST; eco
+  também dos indicadores US 08:30 ET) — mas NÃO carrega direção monetizável: corr
+  manhã→pós ≤0,05, gap→pós sem dose-resposta, impulso NY-30min→resto ≈ 0.
+- Range da manhã quebra pós-anchor em 92-96% dos dias (~26% quebram os 2 lados).
+- corr(WIN,WDO) pós-anchor = −0,55 estável todos os anos — estrutura mais forte do
+  mapa; avaliar futuras estratégias B3 também como PAR.
+- Rompimento/fade do range da manhã = re-tunagem da família refutada da campanha 1;
+  proibido sem dado novo (Manifesto §5).
+
+## Próxima campanha (sugerida, não iniciada)
+
+**WDO/câmbio × prêmio USDT/BRL (cross-market).** Lead-lag entre o prêmio Bybit×Binance
+do Basis Observer (`trading/local_arb/`) e o WDO. Dado novo de verdade, nenhuma geometria
+refutada, resultado alimenta a promoção do basis observer. **Bloqueio:** CSVs do observer
+estão na VPS e o histórico é curto (~10 dias em 18/07) — acumular mais semanas e
+versionar os snapshots no repo antes de abrir a campanha.
 
 ## Limitações de ambiente (sessão cloud/mobile)
 

@@ -1,0 +1,435 @@
+============================================================================================
+b3_ny_open_v0 - Fase A: mapa descritivo (sessao B3 x abertura NY 09:30 America/New_York)
+IS: inicio dos dados ate 2024-12-31 (datetime_b3 < 2025-01-01). OOS (2025+) NAO computado.
+Zero backtest / zero trade simulado / zero custo / zero PF -- estatisticas descritivas apenas.
+============================================================================================
+
+--- LOAD STATS ---
+WIN_M15: {'n_bars_raw': 46535, 'n_bars_is': 31938, 'n_bars_is_no_ash': 31872}
+WDO_M15: {'n_bars_raw': 46534, 'n_bars_is': 31935, 'n_bars_is_no_ash': 31869}
+WIN_M5: {'n_bars_raw': 100000, 'n_bars_is': 56611, 'n_bars_is_no_ash': 56481}
+WDO_M5: {'n_bars_raw': 100000, 'n_bars_is': 56206, 'n_bars_is_no_ash': 56074}
+
+--- ROLL DAYS (calculados a partir do M15, algoritmo reusado de b3_or_continuation_v0) ---
+WIN: 22 roll days no IS
+WDO: 41 roll days no IS
+
+============================================================================================
+WIN  |  Fonte primaria M15
+============================================================================================
+
+### A7 -- Qualidade / anomalias ###
+  n sessoes totais (IS, sem quartas de Cinzas): 860
+  n sessoes por ano: {'2021': 114, '2022': 249, '2023': 247, '2024': 250}
+  n sem barra-ancora: 0
+  n abertura tardia (>anchor+15min): 0
+  n roll days: 22
+  n validas p/ estatisticas condicionais (A2-A6): 860
+  n anomalias total (M15): 0
+  anomalias por tipo:
+
+### A1 -- Perfil de vol em event-time (M15, offset t-8..t+12 vs barra-ancora) ###
+  [alinhado por ANCHOR, regime=EDT]
+    t -6: tr_mean=529.61 tr_median=490.00 absret_mean=0.2222% vol_mean=205694 n=571
+    t -5: tr_mean=304.59 tr_median=280.00 absret_mean=0.1215% vol_mean=149613 n=571
+    t -4: tr_mean=365.78 tr_median=290.00 absret_mean=0.1531% vol_mean=180020 n=571
+    t -3: tr_mean=283.65 tr_median=250.00 absret_mean=0.1172% vol_mean=150953 n=571
+    t -2: tr_mean=432.86 tr_median=400.00 absret_mean=0.1818% vol_mean=254364 n=571
+    t -1: tr_mean=445.67 tr_median=410.00 absret_mean=0.1920% vol_mean=241515 n=571
+    t  0: tr_mean=513.02 tr_median=480.00 absret_mean=0.2218% vol_mean=292439 n=571
+    t  1: tr_mean=441.75 tr_median=400.00 absret_mean=0.1958% vol_mean=230461 n=571
+    t  2: tr_mean=417.22 tr_median=385.00 absret_mean=0.1710% vol_mean=220281 n=571
+    t  3: tr_mean=369.49 tr_median=345.00 absret_mean=0.1647% vol_mean=185988 n=571
+    t  4: tr_mean=354.74 tr_median=325.00 absret_mean=0.1515% vol_mean=176333 n=571
+    t  5: tr_mean=323.55 tr_median=295.00 absret_mean=0.1294% vol_mean=153881 n=571
+    t  6: tr_mean=308.87 tr_median=285.00 absret_mean=0.1253% vol_mean=140867 n=571
+    t  7: tr_mean=283.32 tr_median=250.00 absret_mean=0.1158% vol_mean=122017 n=571
+    t  8: tr_mean=277.40 tr_median=250.00 absret_mean=0.1169% vol_mean=115263 n=571
+    t  9: tr_mean=241.87 tr_median=220.00 absret_mean=0.0994% vol_mean=100304 n=571
+    t 10: tr_mean=238.46 tr_median=215.00 absret_mean=0.0928% vol_mean=98935 n=571
+    t 11: tr_mean=229.40 tr_median=205.00 absret_mean=0.0915% vol_mean=94486 n=571
+    t 12: tr_mean=234.28 tr_median=210.00 absret_mean=0.0939% vol_mean=96267 n=571
+  [alinhado por ANCHOR, regime=EST]
+    t -8: tr_mean=258.24 tr_median=230.00 absret_mean=0.1099% vol_mean=134253 n=289
+    t -7: tr_mean=253.44 tr_median=230.00 absret_mean=0.1031% vol_mean=132623 n=289
+    t -6: tr_mean=430.07 tr_median=385.00 absret_mean=0.1932% vol_mean=238006 n=289
+    t -5: tr_mean=427.96 tr_median=395.00 absret_mean=0.1791% vol_mean=225154 n=289
+    t -4: tr_mean=502.30 tr_median=445.00 absret_mean=0.2178% vol_mean=246634 n=289
+    t -3: tr_mean=382.82 tr_median=350.00 absret_mean=0.1643% vol_mean=196321 n=289
+    t -2: tr_mean=379.69 tr_median=335.00 absret_mean=0.1628% vol_mean=190078 n=289
+    t -1: tr_mean=352.98 tr_median=330.00 absret_mean=0.1503% vol_mean=170060 n=289
+    t  0: tr_mean=475.85 tr_median=440.00 absret_mean=0.2092% vol_mean=238963 n=289
+    t  1: tr_mean=400.14 tr_median=365.00 absret_mean=0.1728% vol_mean=188936 n=289
+    t  2: tr_mean=393.27 tr_median=365.00 absret_mean=0.1707% vol_mean=179056 n=289
+    t  3: tr_mean=330.02 tr_median=300.00 absret_mean=0.1399% vol_mean=144546 n=289
+    t  4: tr_mean=316.38 tr_median=300.00 absret_mean=0.1298% vol_mean=133758 n=289
+    t  5: tr_mean=291.45 tr_median=250.00 absret_mean=0.1268% vol_mean=119181 n=289
+    t  6: tr_mean=273.06 tr_median=245.00 absret_mean=0.1075% vol_mean=115277 n=289
+    t  7: tr_mean=259.95 tr_median=230.00 absret_mean=0.1115% vol_mean=104696 n=289
+    t  8: tr_mean=257.02 tr_median=235.00 absret_mean=0.1010% vol_mean=106855 n=289
+    t  9: tr_mean=259.98 tr_median=225.00 absret_mean=0.1087% vol_mean=103346 n=289
+    t 10: tr_mean=248.08 tr_median=225.00 absret_mean=0.0964% vol_mean=104613 n=289
+    t 11: tr_mean=244.83 tr_median=210.00 absret_mean=0.1020% vol_mean=101135 n=289
+    t 12: tr_mean=262.99 tr_median=220.00 absret_mean=0.1026% vol_mean=105851 n=289
+  [alinhado por HORA LOCAL FIXA, regime=EDT]
+    09:00:00: tr_mean=529.61 tr_median=490.00 absret_mean=0.2222% vol_mean=205694 n=571
+    09:15:00: tr_mean=304.59 tr_median=280.00 absret_mean=0.1215% vol_mean=149613 n=571
+    09:30:00: tr_mean=365.78 tr_median=290.00 absret_mean=0.1531% vol_mean=180020 n=571
+    09:45:00: tr_mean=283.65 tr_median=250.00 absret_mean=0.1172% vol_mean=150953 n=571
+    10:00:00: tr_mean=432.86 tr_median=400.00 absret_mean=0.1818% vol_mean=254364 n=571
+    10:15:00: tr_mean=445.67 tr_median=410.00 absret_mean=0.1920% vol_mean=241515 n=571
+    10:30:00: tr_mean=513.02 tr_median=480.00 absret_mean=0.2218% vol_mean=292439 n=571
+    10:45:00: tr_mean=441.75 tr_median=400.00 absret_mean=0.1958% vol_mean=230461 n=571
+    11:00:00: tr_mean=417.22 tr_median=385.00 absret_mean=0.1710% vol_mean=220281 n=571
+    11:15:00: tr_mean=369.49 tr_median=345.00 absret_mean=0.1647% vol_mean=185988 n=571
+    11:30:00: tr_mean=354.74 tr_median=325.00 absret_mean=0.1515% vol_mean=176333 n=571
+    11:45:00: tr_mean=323.55 tr_median=295.00 absret_mean=0.1294% vol_mean=153881 n=571
+    12:00:00: tr_mean=308.87 tr_median=285.00 absret_mean=0.1253% vol_mean=140867 n=571
+    12:15:00: tr_mean=283.32 tr_median=250.00 absret_mean=0.1158% vol_mean=122017 n=571
+    12:30:00: tr_mean=277.40 tr_median=250.00 absret_mean=0.1169% vol_mean=115263 n=571
+    12:45:00: tr_mean=241.87 tr_median=220.00 absret_mean=0.0994% vol_mean=100304 n=571
+    13:00:00: tr_mean=238.46 tr_median=215.00 absret_mean=0.0928% vol_mean=98935 n=571
+    13:15:00: tr_mean=229.40 tr_median=205.00 absret_mean=0.0915% vol_mean=94486 n=571
+    13:30:00: tr_mean=234.28 tr_median=210.00 absret_mean=0.0939% vol_mean=96267 n=571
+  [alinhado por HORA LOCAL FIXA, regime=EST]
+    09:30:00: tr_mean=258.24 tr_median=230.00 absret_mean=0.1099% vol_mean=134253 n=289
+    09:45:00: tr_mean=253.44 tr_median=230.00 absret_mean=0.1031% vol_mean=132623 n=289
+    10:00:00: tr_mean=430.07 tr_median=385.00 absret_mean=0.1932% vol_mean=238006 n=289
+    10:15:00: tr_mean=427.96 tr_median=395.00 absret_mean=0.1791% vol_mean=225154 n=289
+    10:30:00: tr_mean=502.30 tr_median=445.00 absret_mean=0.2178% vol_mean=246634 n=289
+    10:45:00: tr_mean=382.82 tr_median=350.00 absret_mean=0.1643% vol_mean=196321 n=289
+    11:00:00: tr_mean=379.69 tr_median=335.00 absret_mean=0.1628% vol_mean=190078 n=289
+    11:15:00: tr_mean=352.98 tr_median=330.00 absret_mean=0.1503% vol_mean=170060 n=289
+    11:30:00: tr_mean=475.85 tr_median=440.00 absret_mean=0.2092% vol_mean=238963 n=289
+    11:45:00: tr_mean=400.14 tr_median=365.00 absret_mean=0.1728% vol_mean=188936 n=289
+    12:00:00: tr_mean=393.27 tr_median=365.00 absret_mean=0.1707% vol_mean=179056 n=289
+    12:15:00: tr_mean=330.02 tr_median=300.00 absret_mean=0.1399% vol_mean=144546 n=289
+    12:30:00: tr_mean=316.38 tr_median=300.00 absret_mean=0.1298% vol_mean=133758 n=289
+    12:45:00: tr_mean=291.45 tr_median=250.00 absret_mean=0.1268% vol_mean=119181 n=289
+    13:00:00: tr_mean=273.06 tr_median=245.00 absret_mean=0.1075% vol_mean=115277 n=289
+    13:15:00: tr_mean=259.95 tr_median=230.00 absret_mean=0.1115% vol_mean=104696 n=289
+    13:30:00: tr_mean=257.02 tr_median=235.00 absret_mean=0.1010% vol_mean=106855 n=289
+    13:45:00: tr_mean=259.98 tr_median=225.00 absret_mean=0.1087% vol_mean=103346 n=289
+    14:00:00: tr_mean=248.08 tr_median=225.00 absret_mean=0.0964% vol_mean=104613 n=289
+    14:15:00: tr_mean=244.83 tr_median=210.00 absret_mean=0.1020% vol_mean=101135 n=289
+    14:30:00: tr_mean=262.99 tr_median=220.00 absret_mean=0.1026% vol_mean=105851 n=289
+
+### A1 -- Replica M5 (2023-2024), so alinhamento por ANCHOR ###
+  [M5, regime=EDT]
+    t -8: tr_mean=152.53 absret_mean=0.0599% vol_mean=47626 n=330
+    t -7: tr_mean=146.08 absret_mean=0.0579% vol_mean=45671 n=330
+    t -6: tr_mean=221.98 absret_mean=0.0874% vol_mean=79692 n=330
+    t -5: tr_mean=240.52 absret_mean=0.1026% vol_mean=82333 n=330
+    t -4: tr_mean=252.24 absret_mean=0.1015% vol_mean=88787 n=330
+    t -3: tr_mean=270.92 absret_mean=0.1241% vol_mean=90344 n=330
+    t -2: tr_mean=245.95 absret_mean=0.1047% vol_mean=80932 n=330
+    t -1: tr_mean=237.15 absret_mean=0.1011% vol_mean=74568 n=330
+    t  0: tr_mean=303.65 absret_mean=0.1250% vol_mean=109086 n=330
+    t  1: tr_mean=269.62 absret_mean=0.1109% vol_mean=90362 n=330
+    t  2: tr_mean=248.89 absret_mean=0.1060% vol_mean=80200 n=330
+    t  3: tr_mean=249.15 absret_mean=0.1032% vol_mean=80443 n=330
+    t  4: tr_mean=234.14 absret_mean=0.0955% vol_mean=73844 n=330
+    t  5: tr_mean=203.85 absret_mean=0.0837% vol_mean=61513 n=330
+    t  6: tr_mean=251.67 absret_mean=0.1011% vol_mean=79127 n=330
+    t  7: tr_mean=210.68 absret_mean=0.0860% vol_mean=66210 n=330
+    t  8: tr_mean=204.06 absret_mean=0.0854% vol_mean=63395 n=330
+    t  9: tr_mean=196.06 absret_mean=0.0794% vol_mean=60623 n=330
+    t 10: tr_mean=194.18 absret_mean=0.0800% vol_mean=57299 n=330
+    t 11: tr_mean=184.97 absret_mean=0.0788% vol_mean=54576 n=330
+    t 12: tr_mean=191.26 absret_mean=0.0817% vol_mean=58462 n=330
+  [M5, regime=EST]
+    t -8: tr_mean=195.18 absret_mean=0.0744% vol_mean=58369 n=167
+    t -7: tr_mean=184.34 absret_mean=0.0710% vol_mean=54508 n=167
+    t -6: tr_mean=208.71 absret_mean=0.0843% vol_mean=63133 n=167
+    t -5: tr_mean=196.71 absret_mean=0.0795% vol_mean=56822 n=167
+    t -4: tr_mean=197.90 absret_mean=0.0839% vol_mean=54658 n=167
+    t -3: tr_mean=192.51 absret_mean=0.0825% vol_mean=53329 n=167
+    t -2: tr_mean=176.26 absret_mean=0.0684% vol_mean=50481 n=167
+    t -1: tr_mean=185.51 absret_mean=0.0851% vol_mean=49794 n=167
+    t  0: tr_mean=264.79 absret_mean=0.1131% vol_mean=81901 n=167
+    t  1: tr_mean=229.40 absret_mean=0.0840% vol_mean=69343 n=167
+    t  2: tr_mean=222.99 absret_mean=0.0959% vol_mean=61516 n=167
+    t  3: tr_mean=204.52 absret_mean=0.0755% vol_mean=60663 n=167
+    t  4: tr_mean=208.08 absret_mean=0.0881% vol_mean=56704 n=167
+    t  5: tr_mean=181.41 absret_mean=0.0690% vol_mean=47346 n=167
+    t  6: tr_mean=235.75 absret_mean=0.1017% vol_mean=63343 n=167
+    t  7: tr_mean=193.47 absret_mean=0.0726% vol_mean=52852 n=167
+    t  8: tr_mean=182.63 absret_mean=0.0723% vol_mean=47903 n=167
+    t  9: tr_mean=171.71 absret_mean=0.0599% vol_mean=45076 n=167
+    t 10: tr_mean=170.09 absret_mean=0.0661% vol_mean=42397 n=167
+    t 11: tr_mean=159.76 absret_mean=0.0624% vol_mean=39105 n=167
+    t 12: tr_mean=160.39 absret_mean=0.0633% vol_mean=40530 n=167
+
+### A2 -- Manha -> pos-NY ###
+  corr(ret_morning, ret_post) GERAL: pearson=0.0538 spearman=0.0793 (n=860)
+  corr(ret_morning, ret_ny30) GERAL: pearson=0.0264 spearman=0.0058 (n=860)
+  ret_post | morning>0: 0.0403% (n=399)  | morning<0: -0.0514% (n=458)
+  por ano:
+    2021: corr(morning,post) pearson=0.0288 (n=114)
+    2022: corr(morning,post) pearson=0.0562 (n=249)
+    2023: corr(morning,post) pearson=0.0361 (n=247)
+    2024: corr(morning,post) pearson=0.1096 (n=250)
+
+### A3 -- Gap overnight -> pos-NY (buckets de gap_on) ###
+  agregado todos os anos:
+    <=-0.5%: mean_ret_post=0.0237% median=-0.0984% n=96
+    (-0.5%,-0.1%]: mean_ret_post=0.0325% median=0.0315% n=241
+    (-0.1%,+0.1%]: mean_ret_post=-0.0097% median=0.0627% n=126
+    (+0.1%,+0.5%]: mean_ret_post=-0.0746% median=-0.0431% n=247
+    >+0.5%: mean_ret_post=0.0019% median=0.0191% n=106
+  primeira metade do IS (split em 2023-04-11):
+    <=-0.5%: mean_ret_post=-0.0128% median=-0.1935% n=74
+    (-0.5%,-0.1%]: mean_ret_post=-0.0206% median=-0.0139% n=108
+    (-0.1%,+0.1%]: mean_ret_post=-0.0832% median=0.1408% n=40
+    (+0.1%,+0.5%]: mean_ret_post=-0.1074% median=-0.0094% n=109
+    >+0.5%: mean_ret_post=0.0114% median=0.0225% n=77
+  segunda metade do IS:
+    <=-0.5%: mean_ret_post=0.1465% median=0.1529% n=22
+    (-0.5%,-0.1%]: mean_ret_post=0.0756% median=0.1021% n=133
+    (-0.1%,+0.1%]: mean_ret_post=0.0245% median=-0.0104% n=86
+    (+0.1%,+0.5%]: mean_ret_post=-0.0487% median=-0.0464% n=138
+    >+0.5%: mean_ret_post=-0.0234% median=0.0157% n=29
+
+### A4 -- NY-30min -> resto (continuacao vs reversao) ###
+  corr(ret_ny30, ret_post_after30) GERAL: pearson=0.0114 spearman=0.0238 (n=860)
+  ret_post_after30 | ny30>0: -0.0231% (n=427)  | ny30<0: 0.0001% (n=429)
+  por ano:
+    2021: pearson=-0.0861 (n=114)
+    2022: pearson=0.0161 (n=249)
+    2023: pearson=0.0385 (n=247)
+    2024: pearson=0.0465 (n=250)
+
+### A5 -- Quebras dos extremos da manha ###
+  GERAL: P(broke_high)=57.9070% P(broke_low)=62.5581% P(qualquer)=95.5814% n=860
+    t_first_break quartis (min): {'0.25': 0.0, '0.5': 0.0, '0.75': 30.0}
+    false break rate high=35.9438% low=36.9888%
+  por dst_regime:
+    EDT: P(qualquer)=97.3730% n=571 t_first_break_median=0.0
+    EST: P(qualquer)=92.0415% n=289 t_first_break_median=0.0
+  por ano:
+    2021: P(qualquer)=98.2456% n=114
+    2022: P(qualquer)=95.1807% n=249
+    2023: P(qualquer)=95.9514% n=247
+    2024: P(qualquer)=94.4000% n=250
+
+============================================================================================
+WDO  |  Fonte primaria M15
+============================================================================================
+
+### A7 -- Qualidade / anomalias ###
+  n sessoes totais (IS, sem quartas de Cinzas): 860
+  n sessoes por ano: {'2021': 114, '2022': 249, '2023': 247, '2024': 250}
+  n sem barra-ancora: 0
+  n abertura tardia (>anchor+15min): 0
+  n roll days: 41
+  n validas p/ estatisticas condicionais (A2-A6): 860
+  n anomalias total (M15): 0
+  anomalias por tipo:
+
+### A1 -- Perfil de vol em event-time (M15, offset t-8..t+12 vs barra-ancora) ###
+  [alinhado por ANCHOR, regime=EDT]
+    t -6: tr_mean=20.30 tr_median=18.50 absret_mean=0.1900% vol_mean=55443 n=571
+    t -5: tr_mean=16.08 tr_median=15.00 absret_mean=0.1535% vol_mean=48160 n=571
+    t -4: tr_mean=19.03 tr_median=16.50 absret_mean=0.1768% vol_mean=59710 n=571
+    t -3: tr_mean=15.78 tr_median=14.50 absret_mean=0.1491% vol_mean=49638 n=571
+    t -2: tr_mean=15.82 tr_median=14.00 absret_mean=0.1550% vol_mean=50733 n=571
+    t -1: tr_mean=13.96 tr_median=13.00 absret_mean=0.1334% vol_mean=42047 n=571
+    t  0: tr_mean=15.30 tr_median=14.00 absret_mean=0.1448% vol_mean=48183 n=571
+    t  1: tr_mean=14.28 tr_median=13.00 absret_mean=0.1318% vol_mean=41977 n=571
+    t  2: tr_mean=15.08 tr_median=13.50 absret_mean=0.1418% vol_mean=44093 n=571
+    t  3: tr_mean=13.40 tr_median=12.00 absret_mean=0.1237% vol_mean=35843 n=571
+    t  4: tr_mean=13.05 tr_median=12.00 absret_mean=0.1237% vol_mean=33277 n=571
+    t  5: tr_mean=12.23 tr_median=11.00 absret_mean=0.1101% vol_mean=31240 n=571
+    t  6: tr_mean=11.46 tr_median=10.50 absret_mean=0.1074% vol_mean=27995 n=571
+    t  7: tr_mean=10.46 tr_median=9.50 absret_mean=0.0942% vol_mean=22415 n=571
+    t  8: tr_mean=9.67 tr_median=8.50 absret_mean=0.0895% vol_mean=19502 n=571
+    t  9: tr_mean=9.13 tr_median=8.00 absret_mean=0.0865% vol_mean=18106 n=571
+    t 10: tr_mean=8.85 tr_median=8.00 absret_mean=0.0763% vol_mean=18236 n=571
+    t 11: tr_mean=8.32 tr_median=7.50 absret_mean=0.0721% vol_mean=15517 n=571
+    t 12: tr_mean=8.48 tr_median=7.50 absret_mean=0.0766% vol_mean=15369 n=571
+  [alinhado por ANCHOR, regime=EST]
+    t -8: tr_mean=13.83 tr_median=13.00 absret_mean=0.1195% vol_mean=39069 n=289
+    t -7: tr_mean=14.00 tr_median=13.00 absret_mean=0.1344% vol_mean=38107 n=289
+    t -6: tr_mean=14.84 tr_median=14.00 absret_mean=0.1429% vol_mean=43039 n=289
+    t -5: tr_mean=13.49 tr_median=12.50 absret_mean=0.1104% vol_mean=36084 n=289
+    t -4: tr_mean=16.49 tr_median=14.00 absret_mean=0.1313% vol_mean=45660 n=289
+    t -3: tr_mean=13.81 tr_median=13.00 absret_mean=0.1290% vol_mean=36408 n=289
+    t -2: tr_mean=13.65 tr_median=12.50 absret_mean=0.1252% vol_mean=35809 n=289
+    t -1: tr_mean=12.45 tr_median=11.50 absret_mean=0.1120% vol_mean=30475 n=289
+    t  0: tr_mean=14.22 tr_median=13.50 absret_mean=0.1264% vol_mean=36198 n=289
+    t  1: tr_mean=12.95 tr_median=12.50 absret_mean=0.1169% vol_mean=31260 n=289
+    t  2: tr_mean=14.08 tr_median=13.00 absret_mean=0.1299% vol_mean=32685 n=289
+    t  3: tr_mean=11.70 tr_median=10.50 absret_mean=0.1064% vol_mean=24830 n=289
+    t  4: tr_mean=11.35 tr_median=10.00 absret_mean=0.1021% vol_mean=22646 n=289
+    t  5: tr_mean=11.41 tr_median=10.00 absret_mean=0.1051% vol_mean=22675 n=289
+    t  6: tr_mean=10.63 tr_median=9.50 absret_mean=0.0887% vol_mean=21776 n=289
+    t  7: tr_mean=9.68 tr_median=8.50 absret_mean=0.0834% vol_mean=17297 n=289
+    t  8: tr_mean=9.35 tr_median=8.50 absret_mean=0.0831% vol_mean=16497 n=289
+    t  9: tr_mean=9.56 tr_median=8.50 absret_mean=0.0819% vol_mean=16781 n=289
+    t 10: tr_mean=9.67 tr_median=8.50 absret_mean=0.0869% vol_mean=16925 n=289
+    t 11: tr_mean=9.72 tr_median=8.50 absret_mean=0.0876% vol_mean=16932 n=289
+    t 12: tr_mean=9.79 tr_median=8.00 absret_mean=0.0812% vol_mean=17048 n=289
+  [alinhado por HORA LOCAL FIXA, regime=EDT]
+    09:00:00: tr_mean=20.30 tr_median=18.50 absret_mean=0.1900% vol_mean=55443 n=571
+    09:15:00: tr_mean=16.08 tr_median=15.00 absret_mean=0.1535% vol_mean=48160 n=571
+    09:30:00: tr_mean=19.03 tr_median=16.50 absret_mean=0.1768% vol_mean=59710 n=571
+    09:45:00: tr_mean=15.78 tr_median=14.50 absret_mean=0.1491% vol_mean=49638 n=571
+    10:00:00: tr_mean=15.82 tr_median=14.00 absret_mean=0.1550% vol_mean=50733 n=571
+    10:15:00: tr_mean=13.96 tr_median=13.00 absret_mean=0.1334% vol_mean=42047 n=571
+    10:30:00: tr_mean=15.30 tr_median=14.00 absret_mean=0.1448% vol_mean=48183 n=571
+    10:45:00: tr_mean=14.28 tr_median=13.00 absret_mean=0.1318% vol_mean=41977 n=571
+    11:00:00: tr_mean=15.08 tr_median=13.50 absret_mean=0.1418% vol_mean=44093 n=571
+    11:15:00: tr_mean=13.40 tr_median=12.00 absret_mean=0.1237% vol_mean=35843 n=571
+    11:30:00: tr_mean=13.05 tr_median=12.00 absret_mean=0.1237% vol_mean=33277 n=571
+    11:45:00: tr_mean=12.23 tr_median=11.00 absret_mean=0.1101% vol_mean=31240 n=571
+    12:00:00: tr_mean=11.46 tr_median=10.50 absret_mean=0.1074% vol_mean=27995 n=571
+    12:15:00: tr_mean=10.46 tr_median=9.50 absret_mean=0.0942% vol_mean=22415 n=571
+    12:30:00: tr_mean=9.67 tr_median=8.50 absret_mean=0.0895% vol_mean=19502 n=571
+    12:45:00: tr_mean=9.13 tr_median=8.00 absret_mean=0.0865% vol_mean=18106 n=571
+    13:00:00: tr_mean=8.85 tr_median=8.00 absret_mean=0.0763% vol_mean=18236 n=571
+    13:15:00: tr_mean=8.32 tr_median=7.50 absret_mean=0.0721% vol_mean=15517 n=571
+    13:30:00: tr_mean=8.48 tr_median=7.50 absret_mean=0.0766% vol_mean=15369 n=571
+  [alinhado por HORA LOCAL FIXA, regime=EST]
+    09:30:00: tr_mean=13.83 tr_median=13.00 absret_mean=0.1195% vol_mean=39069 n=289
+    09:45:00: tr_mean=14.00 tr_median=13.00 absret_mean=0.1344% vol_mean=38107 n=289
+    10:00:00: tr_mean=14.84 tr_median=14.00 absret_mean=0.1429% vol_mean=43039 n=289
+    10:15:00: tr_mean=13.49 tr_median=12.50 absret_mean=0.1104% vol_mean=36084 n=289
+    10:30:00: tr_mean=16.49 tr_median=14.00 absret_mean=0.1313% vol_mean=45660 n=289
+    10:45:00: tr_mean=13.81 tr_median=13.00 absret_mean=0.1290% vol_mean=36408 n=289
+    11:00:00: tr_mean=13.65 tr_median=12.50 absret_mean=0.1252% vol_mean=35809 n=289
+    11:15:00: tr_mean=12.45 tr_median=11.50 absret_mean=0.1120% vol_mean=30475 n=289
+    11:30:00: tr_mean=14.22 tr_median=13.50 absret_mean=0.1264% vol_mean=36198 n=289
+    11:45:00: tr_mean=12.95 tr_median=12.50 absret_mean=0.1169% vol_mean=31260 n=289
+    12:00:00: tr_mean=14.08 tr_median=13.00 absret_mean=0.1299% vol_mean=32685 n=289
+    12:15:00: tr_mean=11.70 tr_median=10.50 absret_mean=0.1064% vol_mean=24830 n=289
+    12:30:00: tr_mean=11.35 tr_median=10.00 absret_mean=0.1021% vol_mean=22646 n=289
+    12:45:00: tr_mean=11.41 tr_median=10.00 absret_mean=0.1051% vol_mean=22675 n=289
+    13:00:00: tr_mean=10.63 tr_median=9.50 absret_mean=0.0887% vol_mean=21776 n=289
+    13:15:00: tr_mean=9.68 tr_median=8.50 absret_mean=0.0834% vol_mean=17297 n=289
+    13:30:00: tr_mean=9.35 tr_median=8.50 absret_mean=0.0831% vol_mean=16497 n=289
+    13:45:00: tr_mean=9.56 tr_median=8.50 absret_mean=0.0819% vol_mean=16781 n=289
+    14:00:00: tr_mean=9.67 tr_median=8.50 absret_mean=0.0869% vol_mean=16925 n=289
+    14:15:00: tr_mean=9.72 tr_median=8.50 absret_mean=0.0876% vol_mean=16932 n=289
+    14:30:00: tr_mean=9.79 tr_median=8.00 absret_mean=0.0812% vol_mean=17048 n=289
+
+### A1 -- Replica M5 (2023-2024), so alinhamento por ANCHOR ###
+  [M5, regime=EDT]
+    t -8: tr_mean=7.48 absret_mean=0.0685% vol_mean=13660 n=330
+    t -7: tr_mean=8.07 absret_mean=0.0778% vol_mean=14051 n=330
+    t -6: tr_mean=8.22 absret_mean=0.0784% vol_mean=16037 n=330
+    t -5: tr_mean=7.36 absret_mean=0.0645% vol_mean=13787 n=330
+    t -4: tr_mean=7.13 absret_mean=0.0659% vol_mean=12642 n=330
+    t -3: tr_mean=7.07 absret_mean=0.0647% vol_mean=12610 n=330
+    t -2: tr_mean=7.00 absret_mean=0.0681% vol_mean=11842 n=330
+    t -1: tr_mean=6.54 absret_mean=0.0596% vol_mean=11420 n=330
+    t  0: tr_mean=7.53 absret_mean=0.0685% vol_mean=14118 n=330
+    t  1: tr_mean=7.37 absret_mean=0.0679% vol_mean=13211 n=330
+    t  2: tr_mean=7.35 absret_mean=0.0728% vol_mean=12235 n=330
+    t  3: tr_mean=7.39 absret_mean=0.0647% vol_mean=12767 n=330
+    t  4: tr_mean=6.93 absret_mean=0.0643% vol_mean=11487 n=330
+    t  5: tr_mean=6.59 absret_mean=0.0585% vol_mean=10383 n=330
+    t  6: tr_mean=8.19 absret_mean=0.0772% vol_mean=14279 n=330
+    t  7: tr_mean=7.09 absret_mean=0.0646% vol_mean=11843 n=330
+    t  8: tr_mean=6.77 absret_mean=0.0631% vol_mean=10816 n=330
+    t  9: tr_mean=6.67 absret_mean=0.0606% vol_mean=10265 n=330
+    t 10: tr_mean=6.46 absret_mean=0.0616% vol_mean=9884 n=330
+    t 11: tr_mean=6.12 absret_mean=0.0571% vol_mean=9274 n=330
+    t 12: tr_mean=6.47 absret_mean=0.0622% vol_mean=9621 n=330
+  [M5, regime=EST]
+    t -8: tr_mean=7.29 absret_mean=0.0649% vol_mean=11003 n=167
+    t -7: tr_mean=6.57 absret_mean=0.0560% vol_mean=9913 n=167
+    t -6: tr_mean=7.72 absret_mean=0.0686% vol_mean=12133 n=167
+    t -5: tr_mean=6.77 absret_mean=0.0575% vol_mean=10415 n=167
+    t -4: tr_mean=6.97 absret_mean=0.0631% vol_mean=10081 n=167
+    t -3: tr_mean=6.97 absret_mean=0.0640% vol_mean=9999 n=167
+    t -2: tr_mean=6.49 absret_mean=0.0564% vol_mean=9318 n=167
+    t -1: tr_mean=6.25 absret_mean=0.0556% vol_mean=8763 n=167
+    t  0: tr_mean=7.53 absret_mean=0.0684% vol_mean=11790 n=167
+    t  1: tr_mean=6.97 absret_mean=0.0636% vol_mean=10287 n=167
+    t  2: tr_mean=6.96 absret_mean=0.0648% vol_mean=9744 n=167
+    t  3: tr_mean=6.91 absret_mean=0.0624% vol_mean=10116 n=167
+    t  4: tr_mean=6.33 absret_mean=0.0576% vol_mean=8911 n=167
+    t  5: tr_mean=6.24 absret_mean=0.0550% vol_mean=8148 n=167
+    t  6: tr_mean=8.23 absret_mean=0.0802% vol_mean=12310 n=167
+    t  7: tr_mean=7.03 absret_mean=0.0588% vol_mean=10304 n=167
+    t  8: tr_mean=6.82 absret_mean=0.0625% vol_mean=9068 n=167
+    t  9: tr_mean=6.76 absret_mean=0.0597% vol_mean=8740 n=167
+    t 10: tr_mean=6.20 absret_mean=0.0599% vol_mean=7594 n=167
+    t 11: tr_mean=5.93 absret_mean=0.0523% vol_mean=7165 n=167
+    t 12: tr_mean=6.08 absret_mean=0.0537% vol_mean=7358 n=167
+
+### A2 -- Manha -> pos-NY ###
+  corr(ret_morning, ret_post) GERAL: pearson=0.0370 spearman=0.0479 (n=860)
+  corr(ret_morning, ret_ny30) GERAL: pearson=0.0089 spearman=0.0087 (n=860)
+  ret_post | morning>0: 0.0003% (n=456)  | morning<0: -0.0409% (n=398)
+  por ano:
+    2021: corr(morning,post) pearson=0.0030 (n=114)
+    2022: corr(morning,post) pearson=0.0252 (n=249)
+    2023: corr(morning,post) pearson=0.0177 (n=247)
+    2024: corr(morning,post) pearson=0.0903 (n=250)
+
+### A3 -- Gap overnight -> pos-NY (buckets de gap_on) ###
+  agregado todos os anos:
+    <=-0.5%: mean_ret_post=0.0596% median=0.0944% n=52
+    (-0.5%,-0.1%]: mean_ret_post=-0.0417% median=0.0000% n=267
+    (-0.1%,+0.1%]: mean_ret_post=-0.0520% median=-0.0740% n=216
+    (+0.1%,+0.5%]: mean_ret_post=-0.0025% median=0.0095% n=188
+    >+0.5%: mean_ret_post=-0.0179% median=-0.1049% n=54
+  primeira metade do IS (split em 2023-04-11):
+    <=-0.5%: mean_ret_post=0.0081% median=0.0944% n=38
+    (-0.5%,-0.1%]: mean_ret_post=-0.1051% median=-0.0794% n=130
+    (-0.1%,+0.1%]: mean_ret_post=-0.0793% median=-0.1977% n=82
+    (+0.1%,+0.5%]: mean_ret_post=-0.0716% median=-0.0648% n=99
+    >+0.5%: mean_ret_post=0.0384% median=0.0986% n=38
+  segunda metade do IS:
+    <=-0.5%: mean_ret_post=0.1993% median=0.0890% n=14
+    (-0.5%,-0.1%]: mean_ret_post=0.0185% median=0.0797% n=137
+    (-0.1%,+0.1%]: mean_ret_post=-0.0353% median=-0.0406% n=134
+    (+0.1%,+0.5%]: mean_ret_post=0.0744% median=0.0603% n=89
+    >+0.5%: mean_ret_post=-0.1516% median=-0.1779% n=16
+
+### A4 -- NY-30min -> resto (continuacao vs reversao) ###
+  corr(ret_ny30, ret_post_after30) GERAL: pearson=-0.0011 spearman=-0.0083 (n=860)
+  ret_post_after30 | ny30>0: -0.0053% (n=398)  | ny30<0: 0.0002% (n=440)
+  por ano:
+    2021: pearson=-0.1196 (n=114)
+    2022: pearson=0.1098 (n=249)
+    2023: pearson=-0.0143 (n=247)
+    2024: pearson=-0.0921 (n=250)
+
+### A5 -- Quebras dos extremos da manha ###
+  GERAL: P(broke_high)=55.1163% P(broke_low)=52.2093% P(qualquer)=92.2093% n=860
+    t_first_break quartis (min): {'0.25': 0.0, '0.5': 15.0, '0.75': 60.0}
+    false break rate high=37.7637% low=38.3073%
+  por dst_regime:
+    EDT: P(qualquer)=93.5201% n=571 t_first_break_median=15.0
+    EST: P(qualquer)=89.6194% n=289 t_first_break_median=30.0
+  por ano:
+    2021: P(qualquer)=94.7368% n=114
+    2022: P(qualquer)=93.9759% n=249
+    2023: P(qualquer)=90.6883% n=247
+    2024: P(qualquer)=90.8000% n=250
+
+============================================================================================
+### A6 -- Cross-asset WIN x WDO (alinhado por data) ###
+  corr(ret_post_WIN, ret_post_WDO): pearson=-0.5542 spearman=-0.5113 (n=860)
+  corr(ret_ny30_WIN, ret_ny30_WDO): pearson=-0.5796 spearman=-0.5598 (n=860)
+  por ano:
+    2021: corr_ret_post=-0.6043 (n=114) corr_ret_ny30=-0.5278 (n=114)
+    2022: corr_ret_post=-0.5158 (n=249) corr_ret_ny30=-0.6059 (n=249)
+    2023: corr_ret_post=-0.6105 (n=247) corr_ret_ny30=-0.5912 (n=247)
+    2024: corr_ret_post=-0.5362 (n=250) corr_ret_ny30=-0.5638 (n=250)
+
+============================================================================================
+ANOMALIAS DE DADOS DETECTADAS (todas tf/instrumentos): 5
+============================================================================================
+Resumo por tipo:
+  [WDO M5] sessao nao comeca as 09: 3 ocorrencias
+  [WIN M5] sessao nao comeca as 09: 2 ocorrencias
+
+Detalhe completo (primeiras 200):
+  [WIN M5] 2023-01-24: sessao nao comeca as 09:00: primeira barra as 09:10:00
+  [WIN M5] 2024-03-08: sessao nao comeca as 09:00: primeira barra as 09:05:00
+  [WDO M5] 2023-01-24: sessao nao comeca as 09:00: primeira barra as 09:10:00
+  [WDO M5] 2023-12-14: sessao nao comeca as 09:00: primeira barra as 09:05:00
+  [WDO M5] 2024-12-12: sessao nao comeca as 09:00: primeira barra as 09:05:00
