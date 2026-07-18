@@ -6,11 +6,13 @@
 
 ## Estado atual (1 linha)
 
-Campanhas 1 (`b3_or_continuation_v0`, opening range) **REFUTADA**; 2 (`b3_ny_open_v0`,
-sessão B3 × abertura NY) e 3 (`b3_wdo_ptax_v0`, janelas PTAX/fixing EOM) **ENCERRADAS NA
-FASE B** (`premise_not_supported`, 0 backtests gastos) — tudo em 2026-07-18. Famílias
-intraday-direcionais em OHLCV estão se esgotando; candidatas restantes abaixo. USDT/BRL ×
-WDO adiada até haver histórico do Basis Observer (VPS). OOS 2025+ **virgem**.
+**4 campanhas, 4 negativas limpas (2026-07-18):** 1 `b3_or_continuation_v0` (opening
+range) REFUTADA; 2 `b3_ny_open_v0` (B3×NY), 3 `b3_wdo_ptax_v0` (PTAX/fixing) e
+4 `b3_pair_divergence_v0` (par WIN×WDO) encerradas na Fase B (`premise_not_supported`,
+0 backtests). **Programa direcional B3 em OHLCV: SUSPENSO** (ver
+`b3_pair_divergence_v0/DECISION_PHASE_B.md` §4). Retomar só com dado novo: fluxo/book
+B3, calendário macro US, USDT/BRL×WDO (aguarda Basis Observer), ou família OVERNIGHT
+(exige Eduardo relaxar regra). OOS 2025+ **virgem** após 4 campanhas.
 
 ## Dados — `research/b3_win_wdo_data_audit/mt5_history/`
 
@@ -85,18 +87,27 @@ com dado de fluxo cambial ou tick data (Manifesto §5). Observação registrada 
 hipótese): leve drift positivo intradiário do WDO em D-3/D-1/D0 do fim de mês (~10-20bps,
 t≈1.7, possível seleção entre células do P5).
 
-## Candidatas restantes (avaliadas em 2026-07-18, nenhuma aberta)
+## O que a campanha 4 estabeleceu (não retestar)
 
-1. **Par WIN×WDO divergência** — explorar a corr −0,55 estável (campanha 2 A6): mapear
-   dias de mesmo-sinal (quebra da relação) e o que segue. Sinal cross-asset, não refutado.
-2. **Overnight vs intradiário** — maior área não testada (campanhas foram 100% intraday).
-   EXIGE Eduardo relaxar a regra "nunca overnight" + contabilidade de rolagem no P&L.
-3. **Última hora (fluxo MOC)** — dia→última hora; fronteira do refutado, spec precisaria
-   blindagem extra contra o closeout da campanha 1.
-4. **Dias de macro US (FOMC/CPI/payroll)** — eco do 08:30 ET é visível (campanha 2 A1);
-   exige montar calendário de eventos externo.
-5. **WDO/câmbio × prêmio USDT/BRL (cross-market)** — adiada: aguarda semanas de histórico
-   do Basis Observer (VPS) versionadas no repo.
+Ver `research/b3_pair_divergence_v0/`. Resumo: mesmo-sinal WIN×WDO ocorre 33% dos dias
+(estável — é distribuição normal do par com corr −0,56, não anomalia); recomposição NÃO
+é previsível (autocorr div lag-1 = −0,005; quintis sem monotonicidade; melhor célula do
+mapa +7,4bps t=0,97, melhor de ~16). Produto real: relação inversa é estrutural
+(rolling60 NUNCA positiva) — futuro sleeve B3 deveria tratar WIN+WDO como par com hedge
+interno. Quebras diárias em OHLCV = ruído; reabre só com dado de fluxo.
+
+## Candidatas restantes (pós-suspensão do programa OHLCV direcional)
+
+1. **Overnight vs intradiário** — única dimensão OHLCV não varrida. EXIGE Eduardo
+   relaxar a regra "nunca overnight" + contabilidade de rolagem no P&L.
+2. **Dias de macro US (FOMC/CPI/payroll)** — eco do 08:30 ET visível (campanha 2 A1);
+   exige montar calendário de eventos externo (única candidata OHLCV intraday restante).
+3. **WDO/câmbio × prêmio USDT/BRL (cross-market)** — aguarda semanas de histórico do
+   Basis Observer (VPS) versionadas no repo.
+4. **Fluxo/book B3** — reabriria as famílias 1-4 via Manifesto §5; exige compra/coleta
+   de dados novos (agressão, participante, tick).
+- (Última hora/MOC: rebaixada — após 4 negativas na mesma classe de dados, a priori
+  baixa; só com pedido explícito do Eduardo.)
 
 ## Limitações de ambiente (sessão cloud/mobile)
 

@@ -1,0 +1,161 @@
+====================================================================================================
+b3_pair_divergence_v0 - Fase A: mapa descritivo (WIN x WDO -- quebras da relacao inversa)
+IS: inicio dos dados ate 2024-12-31 (datetime_b3 < 2025-01-01). OOS (2025+) NAO computado.
+Zero backtest / zero trade simulado / zero custo / zero PF -- estatisticas descritivas apenas.
+====================================================================================================
+
+--- LOAD STATS ---
+WIN_M15: {'n_bars_raw': 46535, 'n_bars_is': 31938, 'n_bars_is_no_ash': 31872}
+WDO_M15: {'n_bars_raw': 46534, 'n_bars_is': 31935, 'n_bars_is_no_ash': 31869}
+
+====================================================================================================
+### Q6 -- Qualidade ###
+====================================================================================================
+n dias alinhados (total): 860
+n dias alinhados por ano: {'2021': 114, '2022': 249, '2023': 247, '2024': 250}
+n dias WIN sem par WDO: 0  |  n dias WDO sem par WIN: 0
+excluidos ret_am (bar13 ausente em algum lado, NaN): 0  |  excluidos ret_am==0: 5
+excluidos ret_day NaN: 0  |  excluidos ret_day==0: 6
+is_roll_win no alinhado: 22  |  is_roll_wdo no alinhado: 41
+roll days WIN (calendario proprio, total IS): 22  |  roll days WDO (calendario proprio, total IS): 41
+NaN sigma60 (warmup, calendario proprio) WIN: 60  |  WDO: 60
+pares (t,t+1) total: 859  |  cruzando roll de qualquer ativo: 125
+n anomalias total: 0
+anomalias por tipo:
+
+====================================================================================================
+### Q1 -- Base rates e estabilidade ###
+====================================================================================================
+-- Corr agregada full-sample (sanity: ret_day perto de -0.5 esperado) --
+  ret_day: pearson=-0.5597 spearman=-0.5170 (n=860)
+  ret_pm: pearson=-0.5236 spearman=-0.4495 (n=860)
+  ret_am: pearson=-0.5386 spearman=-0.4993 (n=860)
+
+-- Corr rolling 60d ret_day WIN x WDO (media/min/max por ano) --
+  2021: mean=-0.6004 min=-0.6892 max=-0.4895 (n=55)
+  2022: mean=-0.4844 min=-0.8244 max=-0.2045 (n=249)
+  2023: mean=-0.5699 min=-0.8130 max=-0.3308 (n=247)
+  2024: mean=-0.5209 min=-0.6743 max=-0.3803 (n=250)
+  AGREGADO: mean=-0.5301 min=-0.8244 max=-0.2045 (n=801)
+
+-- Corr rolling 60d ret_pm WIN x WDO (media/min/max por ano) --
+  2021: mean=-0.5905 min=-0.6439 max=-0.5291 (n=55)
+  2022: mean=-0.4565 min=-0.6498 max=-0.2871 (n=249)
+  2023: mean=-0.5563 min=-0.7276 max=-0.2778 (n=247)
+  2024: mean=-0.5088 min=-0.7190 max=-0.2428 (n=250)
+  AGREGADO: mean=-0.5128 min=-0.7276 max=-0.2428 (n=801)
+
+-- P(mesmo sinal) ret_am, por ano --
+  2021: p=32.7434% (n=113)
+  2022: p=30.1205% (n=249)
+  2023: p=31.2757% (n=243)
+  2024: p=33.2000% (n=250)
+  AGREGADO: p=31.6959% (n=855)
+
+-- P(mesmo sinal) ret_day, por ano --
+  2021: p=34.2105% (n=114)
+  2022: p=33.8710% (n=248)
+  2023: p=29.0984% (n=244)
+  2024: p=36.6935% (n=248)
+  AGREGADO: p=33.3724% (n=854)
+
+-- Matriz 2x2 combos ret_day (agregado) --
+  (+,+): 155
+  (+,-): 285
+  (-,+): 284
+  (-,-): 130
+  excluidos (ret==0 em algum lado): 6  |  excluidos NaN: 0  |  n valido: 854
+
+-- Matriz 2x2 combos ret_am (agregado) --
+  (+,+): 133
+  (+,-): 280
+  (-,+): 304
+  (-,-): 138
+  excluidos (ret==0 em algum lado): 5  |  excluidos NaN (bar13 ausente): 0  |  n valido: 855
+
+====================================================================================================
+### Q2 -- Quebra na manha -> tarde do MESMO dia (por combo_am), agregado ###
+====================================================================================================
+  (+,+) (n_cell=133):
+    ret_pm WIN: mean=0.0053% median=-0.0039% (n=133)
+    ret_pm WDO: mean=-0.0326% median=-0.0387% (n=133)
+    P(tarde recompoe = sinais ret_pm opostos): 60.0000% (n=130)
+  (+,-) (n_cell=280):
+    ret_pm WIN: mean=0.0539% median=0.0496% (n=280)
+    ret_pm WDO: mean=0.0205% median=0.0305% (n=280)
+    P(tarde recompoe = sinais ret_pm opostos): 61.5385% (n=273)
+  (-,+) (n_cell=304):
+    ret_pm WIN: mean=-0.0395% median=-0.0488% (n=304)
+    ret_pm WDO: mean=0.0601% median=0.0830% (n=304)
+    P(tarde recompoe = sinais ret_pm opostos): 66.1074% (n=298)
+  (-,-) (n_cell=138):
+    ret_pm WIN: mean=-0.0489% median=0.0115% (n=138)
+    ret_pm WDO: mean=-0.0027% median=-0.0151% (n=138)
+    P(tarde recompoe = sinais ret_pm opostos): 70.5882% (n=136)
+
+====================================================================================================
+### Q3 -- Quebra dia t -> pregao t+1 (calendario alinhado), COM roll-crossing ###
+====================================================================================================
+  (+,+) (n_cell=155):
+    ret_day(WIN,t+1): mean=-0.0024% (n=155)  |  ret_am(WIN,t+1): mean=0.0106% (n=155)
+    ret_day(WDO,t+1): mean=-0.0103% (n=155)  |  ret_am(WDO,t+1): mean=-0.0239% (n=155)
+  (+,-) (n_cell=284):
+    ret_day(WIN,t+1): mean=-0.0934% (n=284)  |  ret_am(WIN,t+1): mean=-0.1080% (n=284)
+    ret_day(WDO,t+1): mean=-0.0282% (n=284)  |  ret_am(WDO,t+1): mean=-0.0423% (n=284)
+  (-,+) (n_cell=284):
+    ret_day(WIN,t+1): mean=0.0014% (n=284)  |  ret_am(WIN,t+1): mean=0.0329% (n=284)
+    ret_day(WDO,t+1): mean=0.0609% (n=284)  |  ret_am(WDO,t+1): mean=0.0156% (n=284)
+  (-,-) (n_cell=130):
+    ret_day(WIN,t+1): mean=-0.0075% (n=130)  |  ret_am(WIN,t+1): mean=-0.0383% (n=130)
+    ret_day(WDO,t+1): mean=0.0744% (n=130)  |  ret_am(WDO,t+1): mean=0.0738% (n=130)
+
+  Autocorr lag-1 div: pearson=-0.0048 spearman=0.0197 (n=799)
+  div(t+1) por quintil de div(t):
+    Q1_baixo: div(t) mean=-1.3933 -> div(t+1) mean=0.0153 (n=160)
+    Q2: div(t) mean=-0.5013 -> div(t+1) mean=-0.0585 (n=160)
+    Q3: div(t) mean=0.0075 -> div(t+1) mean=-0.0374 (n=159)
+    Q4: div(t) mean=0.5328 -> div(t+1) mean=0.1138 (n=160)
+    Q5_alto: div(t) mean=1.3644 -> div(t+1) mean=-0.0310 (n=160)
+
+----------------------------------------------------------------------------------------------------
+### Q3 -- MESMO, SEM pares cruzando roll day de qualquer ativo (robustez) ###
+----------------------------------------------------------------------------------------------------
+  (+,+) (n_cell=126):
+    ret_day(WIN,t+1): mean=0.0218% (n=126)
+    ret_day(WDO,t+1): mean=-0.0333% (n=126)
+  (+,-) (n_cell=257):
+    ret_day(WIN,t+1): mean=-0.0742% (n=257)
+    ret_day(WDO,t+1): mean=-0.0455% (n=257)
+  (-,+) (n_cell=236):
+    ret_day(WIN,t+1): mean=0.0108% (n=236)
+    ret_day(WDO,t+1): mean=0.0459% (n=236)
+  (-,-) (n_cell=110):
+    ret_day(WIN,t+1): mean=-0.0118% (n=110)
+    ret_day(WDO,t+1): mean=0.0576% (n=110)
+
+  Autocorr lag-1 div (sem roll-crossing): pearson=-0.0082 spearman=0.0107 (n=684)
+
+====================================================================================================
+### Q4 -- Dose-resposta na magnitude (forte |z|>1 ambos vs fraco), celulas mesmo-sinal ###
+====================================================================================================
+  (+,+) (n_cell_total=155, n_z_nan_excluido=12):
+    [forte] n=4  ret_day(WIN,t+1) mean=0.3719% (n=4)  ret_day(WDO,t+1) mean=-0.1891% (n=4)  div(t+1) mean=-0.0152 (n=4)
+    [fraco] n=139  ret_day(WIN,t+1) mean=0.0316% (n=139)  ret_day(WDO,t+1) mean=-0.0136% (n=139)  div(t+1) mean=0.0286 (n=139)
+  (-,-) (n_cell_total=130, n_z_nan_excluido=11):
+    [forte] n=1  ret_day(WIN,t+1) mean=1.3793% (n=1)  ret_day(WDO,t+1) mean=0.2385% (n=1)  div(t+1) mean=1.6514 (n=1)
+    [fraco] n=118  ret_day(WIN,t+1) mean=0.0243% (n=118)  ret_day(WDO,t+1) mean=0.0322% (n=118)  div(t+1) mean=0.0838 (n=118)
+
+====================================================================================================
+### Q5 -- Qual ativo ajusta (|media ret(t+1)| WIN vs WDO, celulas mesmo-sinal), sem juizo ###
+====================================================================================================
+-- AM -> PM (mesmo dia) --
+  (+,+): ret_pm WIN mean=0.0053% (n=133)  |  ret_pm WDO mean=-0.0326% (n=133)  |  |maior|=WDO
+  (-,-): ret_pm WIN mean=-0.0489% (n=138)  |  ret_pm WDO mean=-0.0027% (n=138)  |  |maior|=WIN
+-- dia t -> t+1 --
+  (+,+): ret_day(t+1) WIN mean=-0.0024% (n=155)  |  ret_day(t+1) WDO mean=-0.0103% (n=155)  |  |maior|=WDO
+  (-,-): ret_day(t+1) WIN mean=-0.0075% (n=130)  |  ret_day(t+1) WDO mean=0.0744% (n=130)  |  |maior|=WDO
+
+====================================================================================================
+ANOMALIAS DE DADOS DETECTADAS: 0
+====================================================================================================
+Nenhuma anomalia detectada.
