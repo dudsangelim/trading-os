@@ -110,9 +110,11 @@ Contém:
 - saldos iniciais do inventário paper;
 - regras do veredito `VIVA | FERIDA | MORTA | HOLD`.
 
-A auditoria de taxas fica em `config/fee_audit_2026-07-09.md`. Enquanto não houver
-fee tier autenticado por conta, o break-even aplica `fee_uncertainty_bps` como
-buffer conservador para evitar falso positivo de edge.
+As auditorias de taxas ficam em `config/fee_audit_2026-07-09.md` (fontes
+públicas e demais exchanges) e `config/fee_audit_2026-07-14.md` (validação
+autenticada de Binance/Bybit e custos das rotas de basis). O break-even mantém
+`fee_uncertainty_bps` como buffer conservador para fontes e custos ainda
+incertos.
 
 ## Módulos
 

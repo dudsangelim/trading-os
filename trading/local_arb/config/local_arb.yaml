@@ -68,10 +68,10 @@ exchanges:
   binance:
     display_name: "Binance"
     enabled: true
-    taker_bps: 10        # 0.10% spot base; conta/tier podem reduzir
-    maker_bps: 10
+    taker_bps: 7.5       # taxa efetiva da conta confirmada em 14/07/2026
+    maker_bps: 7.5
     withdrawal_brl_fixed: 0.0
-    withdrawal_usdt_fixed: 1.0
+    withdrawal_usdt_fixed: 0.01  # BSC/BEP20; Bybit confirmou suporte ao depósito
     synthetic: {bid: 5.560, ask: 5.565, latency_ms: 120.0}
     api:
       url: "https://api.binance.com/api/v3/depth?symbol=USDTBRL&limit=20"
@@ -84,9 +84,9 @@ exchanges:
   bybit:
     display_name: "Bybit"
     enabled: true
-    taker_bps: 10        # 0.10% spot base; conta/tier podem reduzir
-    maker_bps: 10
-    withdrawal_brl_fixed: 0.0
+    taker_bps: 55        # taxa fiat USDT/BRL efetiva da conta (14/07/2026)
+    maker_bps: 25        # taxa fiat USDT/BRL efetiva da conta (14/07/2026)
+    withdrawal_brl_fixed: 0.0  # PIX confirmado zero-fee
     withdrawal_usdt_fixed: 1.0
     synthetic: {bid: 5.561, ask: 5.566, latency_ms: 140.0}
     api:
@@ -287,16 +287,21 @@ basis_observer:
   # NÍVEL, sem esperar reversão); cooldown = tempo de rebalanceamento do ciclo.
   cross_paper:
     enabled: true
-    entry_bps: 30.0
+    # Custos reais confirmados por screenshots em 14/07/2026: Binance spot
+    # maker/taker 7,5bps; Bybit USDT/BRL fiat maker 25bps / taker 55bps;
+    # PIX Bybit zero; rebalance USDT Binance->Bybit por BSC custa 0,01 USDT
+    # (~0,2bps num ciclo de R$2.500). Gatilho deixa ~13bps sobre o cenário
+    # taker conservador de 66,7bps.
+    entry_bps: 80.0
     cycle_cooldown_s: 1800
   fee_scenarios_cross:       # custo por ciclo cross (bps) aplicado nos relatórios
-    taker: 26.0              # 2x taker (Binance 10 + Bybit 10) + slip 4 + USDT transfer ~2
-    maker_ref_leg: 18.0      # perna Binance a maker (~2.5) — otimista, exige fila
+    taker: 66.7              # Binance 7,5 + Bybit fiat 55 + slip 4 + BSC ~0,2
+    maker_bybit: 36.7        # Binance taker 7,5 + Bybit fiat maker 25 + slip 4 + BSC ~0,2
   # custo por CICLO (bps) aplicado nos relatórios sobre o bruto de reversão:
   fee_scenarios:
-    taker_unhedged: 22.0     # 2x taker Bybit (10) + 2 slippage; sem hedge (carrega drift)
-    taker_hedged: 37.0       # + 2x taker Binance c/ BNB (7.5) no hedge do basis
-    maker_bybit_hedged: 27.0 # pernas Bybit a maker VIP/promo (~5) + hedge; otimista
+    taker_unhedged: 112.0    # 2x taker fiat Bybit (55) + 2 slippage
+    taker_hedged: 127.0      # acima + 2x Binance spot (7,5) no hedge
+    maker_bybit_hedged: 67.0 # 2x maker fiat Bybit (25) + hedge Binance 15 + slip 2
 
 # Gold Basis Observer (13/07/2026) — clone do basis p/ ouro tokenizado PAXG↔XAUT.
 # Sem arb pura (emissores distintos, sem loop de resgate no varejo); candidato é o
