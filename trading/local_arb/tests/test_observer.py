@@ -11,6 +11,8 @@ from trading.local_arb.config import DEFAULT_CONFIG_PATH, load_config
 from trading.local_arb.main import main
 from trading.local_arb.observer import (
     generate_observer_report,
+    iter_spread_rows_for_date,
+    multi_day_thesis_decision,
     observer_summary,
     persist_observer_scan,
     spread_daily_path,
@@ -123,3 +125,50 @@ def test_observer_report_contains_hourly_and_rejection_sections(cfg, tmp_path):
     assert "## Reason rejected" in text
     assert "## Análise por horário" in text
     assert "## Top janelas líquidas" in text
+
+
+def test_daily_file_is_canonical_over_legacy_without_duplicates(tmp_path):
+    observer = tmp_path / "observer"
+    observer.mkdir()
+    fields = ["timestamp_local", "source", "net_bps"]
+    daily = observer / "observer_spread_windows_2026-07-09.csv"
+    legacy = observer / "observer_spread_windows.csv"
+    with daily.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow({"timestamp_local": 1783555200, "source": "rest", "net_bps": 1})
+    with legacy.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow({"timestamp_local": 1783555200, "source": "rest", "net_bps": 99})
+
+    rows = list(iter_spread_rows_for_date(tmp_path, "2026-07-09"))
+
+    assert len(rows) == 1
+    assert rows[0]["net_bps"] == "1"
+
+
+def test_multi_day_counts_cache_is_reused(cfg, tmp_path, monkeypatch):
+    observer = tmp_path / "observer"
+    observer.mkdir()
+    daily = observer / "observer_spread_windows_2026-07-09.csv"
+    fields = ["timestamp_local", "source", "net_bps"]
+    with daily.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow({"timestamp_local": 1783555200, "source": "rest", "net_bps": 21})
+    cfg["observer"]["min_days_for_decision"] = 1
+    cfg["observer"]["min_valid_observations_per_day"] = 1
+
+    first = multi_day_thesis_decision(tmp_path, cfg)
+    cache = observer / "observer_day_counts_2026-07-09.json"
+    assert cache.exists()
+
+    def fail_if_reparsed(*args, **kwargs):
+        raise AssertionError("cache válido não deveria reler o CSV")
+
+    monkeypatch.setattr(
+        "trading.local_arb.observer.iter_spread_rows_for_date", fail_if_reparsed)
+    second = multi_day_thesis_decision(tmp_path, cfg)
+
+    assert first.status == second.status
