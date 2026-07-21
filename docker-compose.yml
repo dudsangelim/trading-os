@@ -511,6 +511,39 @@ services:
       retries: 3
       start_period: 30s
 
+  # Binance variant of the same audited VRP engine. Public market data only;
+  # realistic 0.01 BTC quantity step, USDT premiums/fees, isolated paper state.
+  vrp-binance-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.vrp_paper
+    container_name: trading_vrp_binance_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8112:8112"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - VRP_TELEGRAM_TAG=VRPBINANCE
+      - VRP_VENUE=binance
+      - VRP_CAPITAL=2000.0
+      - VRP_SIZE_MULT=1.0
+      - VRP_HEALTH_PORT=8112
+      - VRP_DATA_DIR=/data
+      - VRP_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/vrp_paper/data_binance:/data
+      - ./trading/vrp_paper/logs_binance:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8112/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 
 
   # expiry-short-paper: short BTC+ETH perp (paper) qui 08:00 → sex 08:00 UTC
