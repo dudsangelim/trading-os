@@ -1,0 +1,1361 @@
+{
+  "generated": "2026-07-18T15:25:12.176140",
+  "is_end_exclusive": "2025-01-01 00:00:00",
+  "ash_wednesdays_excluded": [
+    "2022-03-02",
+    "2023-02-22",
+    "2024-02-14"
+  ],
+  "anomaly_union_excluded": [
+    "2022-12-14",
+    "2022-12-26",
+    "2023-01-24",
+    "2023-12-14",
+    "2024-03-08",
+    "2024-12-12"
+  ],
+  "load_stats": {
+    "WIN_M5": {
+      "n_bars_raw": 100000,
+      "n_bars_is": 56611,
+      "n_bars_is_pos_exclusoes": 55863,
+      "n_roll_days": 13
+    },
+    "WDO_M5": {
+      "n_bars_raw": 100000,
+      "n_bars_is": 56206,
+      "n_bars_is_pos_exclusoes": 55556,
+      "n_roll_days": 24
+    },
+    "WIN_M15": {
+      "n_bars_raw": 46535,
+      "n_bars_is": 31938,
+      "n_bars_is_pos_exclusoes": 31644,
+      "n_roll_days": 22
+    },
+    "WDO_M15": {
+      "n_bars_raw": 46534,
+      "n_bars_is": 31935,
+      "n_bars_is_pos_exclusoes": 31641,
+      "n_roll_days": 41
+    }
+  },
+  "exclusion_counts_dynamic_guards": {
+    "WIN_M5": {
+      "first_bar_not_0900": 0,
+      "or_window_incomplete": 0,
+      "or_width_lt_2ticks": 0,
+      "no_bars_after_or": 0
+    },
+    "WDO_M5": {
+      "first_bar_not_0900": 0,
+      "or_window_incomplete": 0,
+      "or_width_lt_2ticks": 0,
+      "no_bars_after_or": 0
+    },
+    "WIN_M15": {
+      "first_bar_not_0900": 0,
+      "or_window_incomplete": 0,
+      "or_width_lt_2ticks": 0,
+      "no_bars_after_or": 0
+    },
+    "WDO_M15": {
+      "first_bar_not_0900": 0,
+      "or_window_incomplete": 0,
+      "or_width_lt_2ticks": 0,
+      "no_bars_after_or": 0
+    }
+  },
+  "universe_years": {
+    "WIN_M5": 2.0424366872005475,
+    "WDO_M5": 2.0095824777549622,
+    "WIN_M15": 3.4496919917864477,
+    "WDO_M15": 3.4496919917864477
+  },
+  "metrics": {
+    "C1_WIN_M5": {
+      "n_trades": 405,
+      "trades_por_ano": 198.29256032171583,
+      "win_rate_net_1tick": 0.5358024691358024,
+      "payoff_net_1tick": 0.8268456025378259,
+      "pf_bruto": 1.0729665071770336,
+      "pf_liq_05tick": 1.0120762403608323,
+      "expectancy_pts_liq_05tick": 1.0246913580246915,
+      "expectancy_pct_liq_05tick": 3.0723184266045528e-06,
+      "expectancy_rs_liq_05tick": 0.20493827160493827,
+      "pf_liq_1tick": 0.9543909348441927,
+      "expectancy_pts_liq_1tick": -3.9753086419753085,
+      "expectancy_pct_liq_1tick": -3.816484552085614e-05,
+      "expectancy_rs_liq_1tick": -0.7950617283950617,
+      "pf_liq_2tick": 0.8478085506856682,
+      "expectancy_pts_liq_2tick": -13.975308641975309,
+      "expectancy_pct_liq_2tick": -0.00012063917341577745,
+      "expectancy_rs_liq_2tick": -2.7950617283950616,
+      "equity_final_1tick": 98.4090061729832,
+      "max_drawdown_1tick": -0.047272638931417636,
+      "sharpe_annualized_1tick": -0.3170860073001986,
+      "equity_final_05tick": 100.06638476716965,
+      "equity_final_2tick": 95.17594879159012,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 156,
+          "pct": 0.3851851851851852,
+          "expectancy_pts_liq_1tick": -210.32051282051282
+        },
+        "time": {
+          "n": 5,
+          "pct": 0.012345679012345678,
+          "expectancy_pts_liq_1tick": -72.0
+        },
+        "tp": {
+          "n": 244,
+          "pct": 0.6024691358024692,
+          "expectancy_pts_liq_1tick": 129.34426229508196
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 196,
+          "pf_liq_1tick": 0.997144217039505,
+          "win_rate": 0.5510204081632653,
+          "expectancy_pts_liq_1tick": -0.22959183673469388
+        },
+        "short": {
+          "n": 209,
+          "pf_liq_1tick": 0.9199181271587565,
+          "win_rate": 0.5215311004784688,
+          "expectancy_pts_liq_1tick": -7.488038277511961
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 8,
+          "pf_liq_1tick": 0.6576923076923077,
+          "expectancy_pts_liq_1tick": -55.625
+        },
+        "2023": {
+          "n": 197,
+          "pf_liq_1tick": 0.8653516295025729,
+          "expectancy_pts_liq_1tick": -11.954314720812183
+        },
+        "2024": {
+          "n": 200,
+          "pf_liq_1tick": 1.072077528770442,
+          "expectancy_pts_liq_1tick": 5.95
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 396,
+          "pf_liq_1tick": 0.9884517955595291,
+          "expectancy_pts_liq_1tick": -0.9785353535353535
+        },
+        "True": {
+          "n": 9,
+          "pf_liq_1tick": 0.2994269340974212,
+          "expectancy_pts_liq_1tick": -135.83333333333334
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 134,
+          "pf_liq_1tick": 0.841481760060173,
+          "expectancy_pts_liq_1tick": -15.727611940298507
+        },
+        "2": {
+          "n": 137,
+          "pf_liq_1tick": 0.8706302021403092,
+          "expectancy_pts_liq_1tick": -9.927007299270073
+        },
+        "3": {
+          "n": 134,
+          "pf_liq_1tick": 1.1616271481400913,
+          "expectancy_pts_liq_1tick": 13.861940298507463
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.9286827195467422
+    },
+    "C1_WDO_M5": {
+      "n_trades": 360,
+      "trades_por_ano": 179.14168937329703,
+      "win_rate_net_1tick": 0.5333333333333333,
+      "payoff_net_1tick": 0.6304424157303371,
+      "pf_bruto": 0.9698352847787259,
+      "pf_liq_05tick": 0.837404437814656,
+      "expectancy_pts_liq_05tick": -0.6055555555555555,
+      "expectancy_pct_liq_05tick": -0.00011872737797706091,
+      "expectancy_rs_liq_05tick": -6.055555555555555,
+      "pf_liq_1tick": 0.7205056179775281,
+      "expectancy_pts_liq_1tick": -1.1055555555555556,
+      "expectancy_pct_liq_1tick": -0.00021545864235628868,
+      "expectancy_rs_liq_1tick": -11.055555555555555,
+      "pf_liq_2tick": 0.5271366188396757,
+      "expectancy_pts_liq_2tick": -2.1055555555555556,
+      "expectancy_pct_liq_2tick": -0.00040892117111474436,
+      "expectancy_rs_liq_2tick": -21.055555555555557,
+      "equity_final_1tick": 92.49362391389816,
+      "max_drawdown_1tick": -0.09086510005332038,
+      "sharpe_annualized_1tick": -1.808264443100518,
+      "equity_final_05tick": 95.77186370188603,
+      "equity_final_2tick": 86.2690673060586,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 128,
+          "pct": 0.35555555555555557,
+          "expectancy_pts_liq_1tick": -9.6640625
+        },
+        "time": {
+          "n": 6,
+          "pct": 0.016666666666666666,
+          "expectancy_pts_liq_1tick": -8.0
+        },
+        "tp": {
+          "n": 226,
+          "pct": 0.6277777777777778,
+          "expectancy_pts_liq_1tick": 3.924778761061947
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 163,
+          "pf_liq_1tick": 0.7395331604297888,
+          "win_rate": 0.558282208588957,
+          "expectancy_pts_liq_1tick": -1.0782208588957056
+        },
+        "short": {
+          "n": 197,
+          "pf_liq_1tick": 0.7033700367033701,
+          "win_rate": 0.5126903553299492,
+          "expectancy_pts_liq_1tick": -1.1281725888324874
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 2,
+          "pf_liq_1tick": 1.0,
+          "expectancy_pts_liq_1tick": 0.0
+        },
+        "2023": {
+          "n": 184,
+          "pf_liq_1tick": 0.6065998058880622,
+          "expectancy_pts_liq_1tick": -1.6521739130434783
+        },
+        "2024": {
+          "n": 174,
+          "pf_liq_1tick": 0.854093907644548,
+          "expectancy_pts_liq_1tick": -0.5402298850574713
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 343,
+          "pf_liq_1tick": 0.737256371814093,
+          "expectancy_pts_liq_1tick": -1.021865889212828
+        },
+        "True": {
+          "n": 17,
+          "pf_liq_1tick": 0.4722222222222222,
+          "expectancy_pts_liq_1tick": -2.7941176470588234
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 120,
+          "pf_liq_1tick": 0.5795348837209302,
+          "expectancy_pts_liq_1tick": -1.8833333333333333
+        },
+        "2": {
+          "n": 123,
+          "pf_liq_1tick": 0.657328990228013,
+          "expectancy_pts_liq_1tick": -1.0691056910569106
+        },
+        "3": {
+          "n": 117,
+          "pf_liq_1tick": 0.9194430631526603,
+          "expectancy_pts_liq_1tick": -0.34615384615384615
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.6954002808988764
+    },
+    "C2_WIN_M5": {
+      "n_trades": 251,
+      "trades_por_ano": 122.89242627345845,
+      "win_rate_net_1tick": 0.2948207171314741,
+      "payoff_net_1tick": 1.5121603606272545,
+      "pf_bruto": 0.7552945069490403,
+      "pf_liq_05tick": 0.6903235891824293,
+      "expectancy_pts_liq_05tick": -19.731075697211157,
+      "expectancy_pct_liq_05tick": -0.00016530681226029333,
+      "expectancy_rs_liq_05tick": -3.946215139442231,
+      "pf_liq_1tick": 0.6322026366464227,
+      "expectancy_pts_liq_1tick": -24.731075697211157,
+      "expectancy_pct_liq_1tick": -0.000206804611834864,
+      "expectancy_rs_liq_1tick": -4.946215139442231,
+      "pf_liq_2tick": 0.5326990083087644,
+      "expectancy_pts_liq_2tick": -34.73107569721115,
+      "expectancy_pct_liq_2tick": -0.0002898002109840052,
+      "expectancy_rs_liq_2tick": -6.946215139442231,
+      "equity_final_1tick": 94.92630449273658,
+      "max_drawdown_1tick": -0.05415346089211632,
+      "sharpe_annualized_1tick": -2.05190414926216,
+      "equity_final_05tick": 95.92040873206673,
+      "equity_final_2tick": 92.96877602563104,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 167,
+          "pct": 0.6653386454183267,
+          "expectancy_pts_liq_1tick": -97.48502994011976
+        },
+        "tp": {
+          "n": 84,
+          "pct": 0.3346613545816733,
+          "expectancy_pts_liq_1tick": 119.91071428571429
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 132,
+          "pf_liq_1tick": 0.59375,
+          "win_rate": 0.26515151515151514,
+          "expectancy_pts_liq_1tick": -26.098484848484848
+        },
+        "short": {
+          "n": 119,
+          "pf_liq_1tick": 0.6710330455492706,
+          "win_rate": 0.3277310924369748,
+          "expectancy_pts_liq_1tick": -23.214285714285715
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 3,
+          "pf_liq_1tick": 0.8787878787878788,
+          "expectancy_pts_liq_1tick": -13.333333333333334
+        },
+        "2023": {
+          "n": 136,
+          "pf_liq_1tick": 0.5351101998974884,
+          "expectancy_pts_liq_1tick": -33.345588235294116
+        },
+        "2024": {
+          "n": 112,
+          "pf_liq_1tick": 0.7596613912403386,
+          "expectancy_pts_liq_1tick": -14.575892857142858
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 244,
+          "pf_liq_1tick": 0.6280739269894609,
+          "expectancy_pts_liq_1tick": -24.94877049180328
+        },
+        "True": {
+          "n": 7,
+          "pf_liq_1tick": 0.7647058823529411,
+          "expectancy_pts_liq_1tick": -17.142857142857142
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 89,
+          "pf_liq_1tick": 0.6297109403585803,
+          "expectancy_pts_liq_1tick": -28.426966292134832
+        },
+        "2": {
+          "n": 82,
+          "pf_liq_1tick": 0.47444501806917916,
+          "expectancy_pts_liq_1tick": -31.036585365853657
+        },
+        "3": {
+          "n": 80,
+          "pf_liq_1tick": 0.7823161941374339,
+          "expectancy_pts_liq_1tick": -14.15625
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.575025922085617
+    },
+    "C2_WDO_M5": {
+      "n_trades": 241,
+      "trades_por_ano": 119.92540871934605,
+      "win_rate_net_1tick": 0.2946058091286307,
+      "payoff_net_1tick": 1.25309352200842,
+      "pf_bruto": 0.7828322784810127,
+      "pf_liq_05tick": 0.63925822253324,
+      "expectancy_pts_liq_05tick": -1.0695020746887967,
+      "expectancy_pct_liq_05tick": -0.00020839083890307188,
+      "expectancy_rs_liq_05tick": -10.695020746887966,
+      "pf_liq_1tick": 0.5264475743348983,
+      "expectancy_pts_liq_1tick": -1.5695020746887967,
+      "expectancy_pct_liq_1tick": -0.0003047656673494883,
+      "expectancy_rs_liq_1tick": -15.695020746887966,
+      "pf_liq_2tick": 0.3619268418341061,
+      "expectancy_pts_liq_2tick": -2.569502074688797,
+      "expectancy_pct_liq_2tick": -0.0004975153242423213,
+      "expectancy_rs_liq_2tick": -25.695020746887966,
+      "equity_final_1tick": 92.90413707679012,
+      "max_drawdown_1tick": -0.0739385318387357,
+      "sharpe_annualized_1tick": -3.0650913848133996,
+      "equity_final_05tick": 95.087789986938,
+      "equity_final_2tick": 88.68552144798225,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 155,
+          "pct": 0.6431535269709544,
+          "expectancy_pts_liq_1tick": -4.97741935483871
+        },
+        "tp": {
+          "n": 86,
+          "pct": 0.35684647302904565,
+          "expectancy_pts_liq_1tick": 4.5726744186046515
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 119,
+          "pf_liq_1tick": 0.7159090909090909,
+          "win_rate": 0.35294117647058826,
+          "expectancy_pts_liq_1tick": -0.7878151260504201
+        },
+        "short": {
+          "n": 122,
+          "pf_liq_1tick": 0.3930666666666667,
+          "win_rate": 0.23770491803278687,
+          "expectancy_pts_liq_1tick": -2.331967213114754
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 2,
+          "pf_liq_1tick": 2.2857142857142856,
+          "expectancy_pts_liq_1tick": 2.25
+        },
+        "2023": {
+          "n": 118,
+          "pf_liq_1tick": 0.44097439100562147,
+          "expectancy_pts_liq_1tick": -1.896186440677966
+        },
+        "2024": {
+          "n": 121,
+          "pf_liq_1tick": 0.5974683544303797,
+          "expectancy_pts_liq_1tick": -1.3140495867768596
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 224,
+          "pf_liq_1tick": 0.5241990456714383,
+          "expectancy_pts_liq_1tick": -1.5580357142857142
+        },
+        "True": {
+          "n": 17,
+          "pf_liq_1tick": 0.5517241379310345,
+          "expectancy_pts_liq_1tick": -1.7205882352941178
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 82,
+          "pf_liq_1tick": 0.47278635255889523,
+          "expectancy_pts_liq_1tick": -1.978658536585366
+        },
+        "2": {
+          "n": 80,
+          "pf_liq_1tick": 0.413265306122449,
+          "expectancy_pts_liq_1tick": -1.4375
+        },
+        "3": {
+          "n": 79,
+          "pf_liq_1tick": 0.6576271186440678,
+          "expectancy_pts_liq_1tick": -1.2784810126582278
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.4807511737089202
+    },
+    "C3_WIN_M5": {
+      "n_trades": 496,
+      "trades_por_ano": 242.84718498659518,
+      "win_rate_net_1tick": 0.3689516129032258,
+      "payoff_net_1tick": 1.8400492489585427,
+      "pf_bruto": 1.112695049123483,
+      "pf_liq_05tick": 1.0958133324856152,
+      "expectancy_pts_liq_05tick": 30.383064516129032,
+      "expectancy_pct_liq_05tick": 0.00025303503855314416,
+      "expectancy_rs_liq_05tick": 6.076612903225806,
+      "pf_liq_1tick": 1.0792596556391452,
+      "expectancy_pts_liq_1tick": 25.383064516129032,
+      "expectancy_pct_liq_1tick": 0.00021180590001172449,
+      "expectancy_rs_liq_1tick": 5.076612903225806,
+      "pf_liq_2tick": 1.0471060348819263,
+      "expectancy_pts_liq_2tick": 15.383064516129032,
+      "expectancy_pct_liq_2tick": 0.0001293476229288852,
+      "expectancy_rs_liq_2tick": 3.0766129032258065,
+      "equity_final_1tick": 109.75767573911467,
+      "max_drawdown_1tick": -0.16140452948123227,
+      "sharpe_annualized_1tick": 0.47368239833647025,
+      "equity_final_05tick": 112.02485999984759,
+      "equity_final_2tick": 105.35976173546774,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 224,
+          "pct": 0.45161290322580644,
+          "expectancy_pts_liq_1tick": 719.1071428571429
+        },
+        "stop": {
+          "n": 272,
+          "pct": 0.5483870967741935,
+          "expectancy_pts_liq_1tick": -545.9191176470588
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 254,
+          "pf_liq_1tick": 1.0051011535563157,
+          "win_rate": 0.32677165354330706,
+          "expectancy_pts_liq_1tick": 1.7322834645669292
+        },
+        "short": {
+          "n": 242,
+          "pf_liq_1tick": 1.1673784267805483,
+          "win_rate": 0.4132231404958678,
+          "expectancy_pts_liq_1tick": 50.20661157024794
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 10,
+          "pf_liq_1tick": 1.6417391304347826,
+          "expectancy_pts_liq_1tick": 184.5
+        },
+        "2023": {
+          "n": 242,
+          "pf_liq_1tick": 1.0773444083303239,
+          "expectancy_pts_liq_1tick": 26.549586776859503
+        },
+        "2024": {
+          "n": 244,
+          "pf_liq_1tick": 1.0592592592592593,
+          "expectancy_pts_liq_1tick": 17.704918032786885
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 483,
+          "pf_liq_1tick": 1.0528355509624079,
+          "expectancy_pts_liq_1tick": 16.935817805383024
+        },
+        "True": {
+          "n": 13,
+          "pf_liq_1tick": 2.0956521739130434,
+          "expectancy_pts_liq_1tick": 339.2307692307692
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 166,
+          "pf_liq_1tick": 1.0492741600995437,
+          "expectancy_pts_liq_1tick": 17.89156626506024
+        },
+        "2": {
+          "n": 166,
+          "pf_liq_1tick": 1.189905099593284,
+          "expectancy_pts_liq_1tick": 54.84939759036145
+        },
+        "3": {
+          "n": 164,
+          "pf_liq_1tick": 1.0101728395061729,
+          "expectancy_pts_liq_1tick": 3.1402439024390243
+        }
+      },
+      "pf_liq_1tick_sem_top2": 1.035569265636312
+    },
+    "C3_WDO_M5": {
+      "n_trades": 478,
+      "trades_por_ano": 237.86035422343326,
+      "win_rate_net_1tick": 0.39330543933054396,
+      "payoff_net_1tick": 1.5002637594513804,
+      "pf_bruto": 1.0667468987224589,
+      "pf_liq_05tick": 1.0219195381562332,
+      "expectancy_pts_liq_05tick": 0.25418410041841005,
+      "expectancy_pct_liq_05tick": 3.755370326359277e-05,
+      "expectancy_rs_liq_05tick": 2.5418410041841004,
+      "pf_liq_1tick": 0.9793388429752066,
+      "expectancy_pts_liq_1tick": -0.24581589958158995,
+      "expectancy_pct_liq_1tick": -5.900783126878098e-05,
+      "expectancy_rs_liq_1tick": -2.4581589958158996,
+      "pf_liq_2tick": 0.900409733255289,
+      "expectancy_pts_liq_2tick": -1.24581589958159,
+      "expectancy_pct_liq_2tick": -0.0002521309003335287,
+      "expectancy_rs_liq_2tick": -12.4581589958159,
+      "equity_final_1tick": 96.51439956178858,
+      "max_drawdown_1tick": -0.11480794076647921,
+      "sharpe_annualized_1tick": -0.1645044797173907,
+      "equity_final_05tick": 101.07381073015816,
+      "equity_final_2tick": 88.00213932871678,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 237,
+          "pct": 0.49581589958158995,
+          "expectancy_pts_liq_1tick": 21.485232067510548
+        },
+        "stop": {
+          "n": 241,
+          "pct": 0.50418410041841,
+          "expectancy_pts_liq_1tick": -21.616182572614107
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 262,
+          "pf_liq_1tick": 1.0451050743208612,
+          "win_rate": 0.4083969465648855,
+          "expectancy_pts_liq_1tick": 0.5038167938931297
+        },
+        "short": {
+          "n": 216,
+          "pf_liq_1tick": 0.9096178228581778,
+          "win_rate": 0.375,
+          "expectancy_pts_liq_1tick": -1.1550925925925926
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 3,
+          "pf_liq_1tick": 0.6666666666666666,
+          "expectancy_pts_liq_1tick": -6.5
+        },
+        "2023": {
+          "n": 238,
+          "pf_liq_1tick": 0.8941009239516702,
+          "expectancy_pts_liq_1tick": -1.2521008403361344
+        },
+        "2024": {
+          "n": 237,
+          "pf_liq_1tick": 1.07106057914372,
+          "expectancy_pts_liq_1tick": 0.8438818565400844
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 455,
+          "pf_liq_1tick": 0.9751720290124605,
+          "expectancy_pts_liq_1tick": -0.2934065934065934
+        },
+        "True": {
+          "n": 23,
+          "pf_liq_1tick": 1.0516129032258064,
+          "expectancy_pts_liq_1tick": 0.6956521739130435
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 161,
+          "pf_liq_1tick": 0.986779745572462,
+          "expectancy_pts_liq_1tick": -0.16459627329192547
+        },
+        "2": {
+          "n": 161,
+          "pf_liq_1tick": 0.9950089126559715,
+          "expectancy_pts_liq_1tick": -0.043478260869565216
+        },
+        "3": {
+          "n": 156,
+          "pf_liq_1tick": 0.9631578947368421,
+          "expectancy_pts_liq_1tick": -0.5384615384615384
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.9315104624582381
+    },
+    "C4_WIN_M5": {
+      "n_trades": 496,
+      "trades_por_ano": 242.84718498659518,
+      "win_rate_net_1tick": 0.37298387096774194,
+      "payoff_net_1tick": 1.4181450024857913,
+      "pf_bruto": 0.8922470097072459,
+      "pf_liq_05tick": 0.868920656531276,
+      "expectancy_pts_liq_05tick": -26.204637096774192,
+      "expectancy_pct_liq_05tick": -0.00019892476301442834,
+      "expectancy_rs_liq_05tick": -5.240927419354839,
+      "pf_liq_1tick": 0.8463123401931336,
+      "expectancy_pts_liq_1tick": -31.204637096774192,
+      "expectancy_pct_liq_1tick": -0.00024015390155584802,
+      "expectancy_rs_liq_1tick": -6.240927419354839,
+      "pf_liq_2tick": 0.803140125701351,
+      "expectancy_pts_liq_2tick": -41.20463709677419,
+      "expectancy_pct_liq_2tick": -0.00032261217863868735,
+      "expectancy_rs_liq_2tick": -8.240927419354838,
+      "equity_final_1tick": 88.51444815166761,
+      "max_drawdown_1tick": -0.15770109378934247,
+      "sharpe_annualized_1tick": -1.0978063797929887,
+      "equity_final_05tick": 90.34356626191183,
+      "equity_final_2tick": 84.96634401784412,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 7,
+          "pct": 0.014112903225806451,
+          "expectancy_pts_liq_1tick": 197.14285714285714
+        },
+        "stop": {
+          "n": 309,
+          "pct": 0.6229838709677419,
+          "expectancy_pts_liq_1tick": -325.6391585760518
+        },
+        "tp": {
+          "n": 180,
+          "pct": 0.3629032258064516,
+          "expectancy_pts_liq_1tick": 465.3611111111111
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 254,
+          "pf_liq_1tick": 0.7825177153184002,
+          "win_rate": 0.35826771653543305,
+          "expectancy_pts_liq_1tick": -45.00984251968504
+        },
+        "short": {
+          "n": 242,
+          "pf_liq_1tick": 0.9159742417947653,
+          "win_rate": 0.3884297520661157,
+          "expectancy_pts_liq_1tick": -16.714876033057852
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 10,
+          "pf_liq_1tick": 1.5141388174807198,
+          "expectancy_pts_liq_1tick": 100.0
+        },
+        "2023": {
+          "n": 242,
+          "pf_liq_1tick": 0.9264832330180568,
+          "expectancy_pts_liq_1tick": -14.132231404958677
+        },
+        "2024": {
+          "n": 244,
+          "pf_liq_1tick": 0.7500598171986409,
+          "expectancy_pts_liq_1tick": -53.51434426229508
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 483,
+          "pf_liq_1tick": 0.8300764871801387,
+          "expectancy_pts_liq_1tick": -34.61180124223603
+        },
+        "True": {
+          "n": 13,
+          "pf_liq_1tick": 1.5333333333333334,
+          "expectancy_pts_liq_1tick": 95.38461538461539
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 166,
+          "pf_liq_1tick": 1.037098352020468,
+          "expectancy_pts_liq_1tick": 7.424698795180723
+        },
+        "2": {
+          "n": 166,
+          "pf_liq_1tick": 0.8623036649214659,
+          "expectancy_pts_liq_1tick": -23.765060240963855
+        },
+        "3": {
+          "n": 164,
+          "pf_liq_1tick": 0.6713016608729239,
+          "expectancy_pts_liq_1tick": -77.83536585365853
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.8254102226745773
+    },
+    "C4_WDO_M5": {
+      "n_trades": 478,
+      "trades_por_ano": 237.86035422343326,
+      "win_rate_net_1tick": 0.40585774058577406,
+      "payoff_net_1tick": 1.311809912783464,
+      "pf_bruto": 1.0285426702135307,
+      "pf_liq_05tick": 0.9613763559731915,
+      "expectancy_pts_liq_05tick": -0.29236401673640167,
+      "expectancy_pct_liq_05tick": -7.246150661462717e-05,
+      "expectancy_rs_liq_05tick": -2.9236401673640167,
+      "pf_liq_1tick": 0.8992619190105725,
+      "expectancy_pts_liq_1tick": -0.7923640167364017,
+      "expectancy_pct_liq_1tick": -0.00016902304114700095,
+      "expectancy_rs_liq_1tick": -7.923640167364017,
+      "pf_liq_2tick": 0.7881298299845441,
+      "expectancy_pts_liq_2tick": -1.7923640167364017,
+      "expectancy_pct_liq_2tick": -0.0003621461102117485,
+      "expectancy_rs_liq_2tick": -17.923640167364017,
+      "equity_final_1tick": 92.01626158300694,
+      "max_drawdown_1tick": -0.12809322673805626,
+      "sharpe_annualized_1tick": -0.8206677155256809,
+      "equity_final_05tick": 96.36359315504946,
+      "equity_final_2tick": 83.89999853165232,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 16,
+          "pct": 0.03347280334728033,
+          "expectancy_pts_liq_1tick": 2.90625
+        },
+        "stop": {
+          "n": 278,
+          "pct": 0.5815899581589958,
+          "expectancy_pts_liq_1tick": -13.39478417266187
+        },
+        "tp": {
+          "n": 184,
+          "pct": 0.38493723849372385,
+          "expectancy_pts_liq_1tick": 17.92663043478261
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 262,
+          "pf_liq_1tick": 0.9645995480793372,
+          "win_rate": 0.42748091603053434,
+          "expectancy_pts_liq_1tick": -0.26908396946564883
+        },
+        "short": {
+          "n": 216,
+          "pf_liq_1tick": 0.8256751025024742,
+          "win_rate": 0.37962962962962965,
+          "expectancy_pts_liq_1tick": -1.4270833333333333
+        }
+      },
+      "breakdown_year": {
+        "2022": {
+          "n": 3,
+          "pf_liq_1tick": 5.310344827586207,
+          "expectancy_pts_liq_1tick": 20.833333333333332
+        },
+        "2023": {
+          "n": 238,
+          "pf_liq_1tick": 0.7628729865328756,
+          "expectancy_pts_liq_1tick": -1.8865546218487395
+        },
+        "2024": {
+          "n": 237,
+          "pf_liq_1tick": 1.0041852301876604,
+          "expectancy_pts_liq_1tick": 0.03270042194092827
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 455,
+          "pf_liq_1tick": 0.8507813580417646,
+          "expectancy_pts_liq_1tick": -1.1857142857142857
+        },
+        "True": {
+          "n": 23,
+          "pf_liq_1tick": 2.1143847487001732,
+          "expectancy_pts_liq_1tick": 6.989130434782608
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 161,
+          "pf_liq_1tick": 0.9005175388154112,
+          "expectancy_pts_liq_1tick": -0.8059006211180124
+        },
+        "2": {
+          "n": 161,
+          "pf_liq_1tick": 0.7890605216510509,
+          "expectancy_pts_liq_1tick": -1.2934782608695652
+        },
+        "3": {
+          "n": 156,
+          "pf_liq_1tick": 0.9722458709347863,
+          "expectancy_pts_liq_1tick": -0.26121794871794873
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.8686747789081721
+    },
+    "C1_WIN_M15": {
+      "n_trades": 538,
+      "trades_por_ano": 155.95595238095237,
+      "win_rate_net_1tick": 0.5018587360594795,
+      "payoff_net_1tick": 0.6161420007531577,
+      "pf_bruto": 0.697342015808658,
+      "pf_liq_05tick": 0.6605589190489556,
+      "expectancy_pts_liq_05tick": -39.34014869888476,
+      "expectancy_pct_liq_05tick": -0.00034189918425915405,
+      "expectancy_rs_liq_05tick": -7.868029739776952,
+      "pf_liq_1tick": 0.625407293997566,
+      "expectancy_pts_liq_1tick": -44.34014869888476,
+      "expectancy_pct_liq_1tick": -0.00038472156177071586,
+      "expectancy_rs_liq_1tick": -8.868029739776953,
+      "pf_liq_2tick": 0.5596972777589517,
+      "expectancy_pts_liq_2tick": -54.34014869888476,
+      "expectancy_pct_liq_2tick": -0.00047036631679383943,
+      "expectancy_rs_liq_2tick": -10.868029739776953,
+      "equity_final_1tick": 81.20183519622191,
+      "max_drawdown_1tick": -0.18899085177874336,
+      "sharpe_annualized_1tick": -2.2628960801684466,
+      "equity_final_05tick": 83.09503405809747,
+      "equity_final_2tick": 77.54362470726808,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 152,
+          "pct": 0.2825278810408922,
+          "expectancy_pts_liq_1tick": -336.25
+        },
+        "time": {
+          "n": 14,
+          "pct": 0.026022304832713755,
+          "expectancy_pts_liq_1tick": -187.5
+        },
+        "tp": {
+          "n": 372,
+          "pct": 0.6914498141263941,
+          "expectancy_pts_liq_1tick": 80.3225806451613
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 265,
+          "pf_liq_1tick": 0.75470715835141,
+          "win_rate": 0.5509433962264151,
+          "expectancy_pts_liq_1tick": -26.669811320754718
+        },
+        "short": {
+          "n": 273,
+          "pf_liq_1tick": 0.5185689704617149,
+          "win_rate": 0.4542124542124542,
+          "expectancy_pts_liq_1tick": -61.49267399267399
+        }
+      },
+      "breakdown_year": {
+        "2021": {
+          "n": 68,
+          "pf_liq_1tick": 0.3159257660768235,
+          "expectancy_pts_liq_1tick": -116.54411764705883
+        },
+        "2022": {
+          "n": 156,
+          "pf_liq_1tick": 0.7756028001037075,
+          "expectancy_pts_liq_1tick": -27.740384615384617
+        },
+        "2023": {
+          "n": 161,
+          "pf_liq_1tick": 0.6683703271028038,
+          "expectancy_pts_liq_1tick": -35.2639751552795
+        },
+        "2024": {
+          "n": 153,
+          "pf_liq_1tick": 0.6224310976581169,
+          "expectancy_pts_liq_1tick": -38.72549019607843
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 528,
+          "pf_liq_1tick": 0.6282510140777857,
+          "expectancy_pts_liq_1tick": -44.26136363636363
+        },
+        "True": {
+          "n": 10,
+          "pf_liq_1tick": 0.40672782874617736,
+          "expectancy_pts_liq_1tick": -48.5
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 172,
+          "pf_liq_1tick": 0.5848902382064456,
+          "expectancy_pts_liq_1tick": -51.67151162790697
+        },
+        "2": {
+          "n": 188,
+          "pf_liq_1tick": 0.7018712337456391,
+          "expectancy_pts_liq_1tick": -37.5
+        },
+        "3": {
+          "n": 178,
+          "pf_liq_1tick": 0.5748993288590604,
+          "expectancy_pts_liq_1tick": -44.48033707865169
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.603187688925529
+    },
+    "C1_WDO_M15": {
+      "n_trades": 482,
+      "trades_por_ano": 139.72261904761905,
+      "win_rate_net_1tick": 0.5352697095435685,
+      "payoff_net_1tick": 0.5643935794222928,
+      "pf_bruto": 0.8744487678339818,
+      "pf_liq_05tick": 0.7623031496062992,
+      "expectancy_pts_liq_05tick": -1.0020746887966805,
+      "expectancy_pct_liq_05tick": -0.00019312786511059386,
+      "expectancy_rs_liq_05tick": -10.020746887966805,
+      "pf_liq_1tick": 0.6618797431406889,
+      "expectancy_pts_liq_1tick": -1.5020746887966805,
+      "expectancy_pct_liq_1tick": -0.00028905561760627095,
+      "expectancy_rs_liq_1tick": -15.020746887966805,
+      "pf_liq_2tick": 0.4920501210908708,
+      "expectancy_pts_liq_2tick": -2.5020746887966805,
+      "expectancy_pct_liq_2tick": -0.00048091112259762524,
+      "expectancy_rs_liq_2tick": -25.020746887966805,
+      "equity_final_1tick": 86.92188691091782,
+      "max_drawdown_1tick": -0.1391077022082685,
+      "sharpe_annualized_1tick": -1.8570292740344236,
+      "equity_final_05tick": 91.03630814161627,
+      "equity_final_2tick": 79.2414404712216,
+      "breakdown_exit_reason": {
+        "stop": {
+          "n": 102,
+          "pct": 0.21161825726141079,
+          "expectancy_pts_liq_1tick": -15.181372549019608
+        },
+        "time": {
+          "n": 12,
+          "pct": 0.024896265560165973,
+          "expectancy_pts_liq_1tick": -12.625
+        },
+        "tp": {
+          "n": 368,
+          "pct": 0.7634854771784232,
+          "expectancy_pts_liq_1tick": 2.652173913043478
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 237,
+          "pf_liq_1tick": 0.6032656663724625,
+          "win_rate": 0.5358649789029536,
+          "expectancy_pts_liq_1tick": -1.8966244725738397
+        },
+        "short": {
+          "n": 245,
+          "pf_liq_1tick": 0.7277460947185718,
+          "win_rate": 0.5346938775510204,
+          "expectancy_pts_liq_1tick": -1.120408163265306
+        }
+      },
+      "breakdown_year": {
+        "2021": {
+          "n": 67,
+          "pf_liq_1tick": 0.630659253375695,
+          "expectancy_pts_liq_1tick": -1.7350746268656716
+        },
+        "2022": {
+          "n": 143,
+          "pf_liq_1tick": 0.5284629981024668,
+          "expectancy_pts_liq_1tick": -2.6066433566433567
+        },
+        "2023": {
+          "n": 141,
+          "pf_liq_1tick": 0.7269135802469135,
+          "expectancy_pts_liq_1tick": -0.9804964539007093
+        },
+        "2024": {
+          "n": 131,
+          "pf_liq_1tick": 0.8173666823973572,
+          "expectancy_pts_liq_1tick": -0.7385496183206107
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 463,
+          "pf_liq_1tick": 0.6793254216114928,
+          "expectancy_pts_liq_1tick": -1.3860691144708424
+        },
+        "True": {
+          "n": 19,
+          "pf_liq_1tick": 0.4125,
+          "expectancy_pts_liq_1tick": -4.328947368421052
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 166,
+          "pf_liq_1tick": 0.5231788079470199,
+          "expectancy_pts_liq_1tick": -2.3855421686746987
+        },
+        "2": {
+          "n": 164,
+          "pf_liq_1tick": 0.7497263772345859,
+          "expectancy_pts_liq_1tick": -1.045731707317073
+        },
+        "3": {
+          "n": 152,
+          "pf_liq_1tick": 0.7498001598721024,
+          "expectancy_pts_liq_1tick": -1.0296052631578947
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.6373613543490951
+    },
+    "C3_WIN_M15": {
+      "n_trades": 826,
+      "trades_por_ano": 239.44166666666666,
+      "win_rate_net_1tick": 0.37772397094430993,
+      "payoff_net_1tick": 1.673981227683158,
+      "pf_bruto": 1.0466519650580373,
+      "pf_liq_05tick": 1.0322487713946789,
+      "expectancy_pts_liq_05tick": 11.519370460048426,
+      "expectancy_pct_liq_05tick": 7.292986670782354e-05,
+      "expectancy_rs_liq_05tick": 2.303874092009685,
+      "pf_liq_1tick": 1.0180938460763067,
+      "expectancy_pts_liq_1tick": 6.519370460048426,
+      "expectancy_pct_liq_1tick": 3.0108030541423378e-05,
+      "expectancy_rs_liq_1tick": 1.3038740920096852,
+      "pf_liq_2tick": 0.9905040295943982,
+      "expectancy_pts_liq_2tick": -3.4806295399515736,
+      "expectancy_pct_liq_2tick": -5.553564179137718e-05,
+      "expectancy_rs_liq_2tick": -0.6961259079903148,
+      "equity_final_1tick": 100.00987689505061,
+      "max_drawdown_1tick": -0.2454082026030232,
+      "sharpe_annualized_1tick": 0.059939214903051666,
+      "equity_final_05tick": 103.61075340903002,
+      "equity_final_2tick": 93.17878148665316,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 390,
+          "pct": 0.4721549636803874,
+          "expectancy_pts_liq_1tick": 717.1666666666666
+        },
+        "stop": {
+          "n": 436,
+          "pct": 0.5278450363196125,
+          "expectancy_pts_liq_1tick": -629.151376146789
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 405,
+          "pf_liq_1tick": 0.9974511469838573,
+          "win_rate": 0.362962962962963,
+          "expectancy_pts_liq_1tick": -0.9259259259259259
+        },
+        "short": {
+          "n": 421,
+          "pf_liq_1tick": 1.038274968436441,
+          "win_rate": 0.3919239904988123,
+          "expectancy_pts_liq_1tick": 13.681710213776721
+        }
+      },
+      "breakdown_year": {
+        "2021": {
+          "n": 113,
+          "pf_liq_1tick": 1.0747313171707074,
+          "expectancy_pts_liq_1tick": 26.460176991150444
+        },
+        "2022": {
+          "n": 238,
+          "pf_liq_1tick": 0.9213257612846373,
+          "expectancy_pts_liq_1tick": -33.760504201680675
+        },
+        "2023": {
+          "n": 241,
+          "pf_liq_1tick": 1.032063305978898,
+          "expectancy_pts_liq_1tick": 11.348547717842324
+        },
+        "2024": {
+          "n": 234,
+          "pf_liq_1tick": 1.109654435340221,
+          "expectancy_pts_liq_1tick": 32.88461538461539
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 804,
+          "pf_liq_1tick": 1.018651736032866,
+          "expectancy_pts_liq_1tick": 6.691542288557214
+        },
+        "True": {
+          "n": 22,
+          "pf_liq_1tick": 1.000545256270447,
+          "expectancy_pts_liq_1tick": 0.22727272727272727
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 278,
+          "pf_liq_1tick": 0.8728790114348949,
+          "expectancy_pts_liq_1tick": -49.5863309352518
+        },
+        "2": {
+          "n": 279,
+          "pf_liq_1tick": 1.0859740850193225,
+          "expectancy_pts_liq_1tick": 33.888888888888886
+        },
+        "3": {
+          "n": 269,
+          "pf_liq_1tick": 1.1226641414141414,
+          "expectancy_pts_liq_1tick": 36.11524163568773
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.9930447054079935
+    },
+    "C3_WDO_M15": {
+      "n_trades": 810,
+      "trades_por_ano": 234.80357142857142,
+      "win_rate_net_1tick": 0.4012345679012346,
+      "payoff_net_1tick": 1.4256838549112318,
+      "pf_bruto": 1.035746201966041,
+      "pf_liq_05tick": 0.9977001977829907,
+      "expectancy_pts_liq_05tick": -0.030864197530864196,
+      "expectancy_pct_liq_05tick": -2.563130112708681e-06,
+      "expectancy_rs_liq_05tick": -0.30864197530864196,
+      "pf_liq_1tick": 0.9613013544525941,
+      "expectancy_pts_liq_1tick": -0.5308641975308642,
+      "expectancy_pct_liq_1tick": -9.847400564577479e-05,
+      "expectancy_rs_liq_1tick": -5.308641975308642,
+      "pf_liq_2tick": 0.8930896236582316,
+      "expectancy_pts_liq_2tick": -1.5308641975308641,
+      "expectancy_pct_liq_2tick": -0.00029029575671190693,
+      "expectancy_rs_liq_2tick": -15.308641975308642,
+      "equity_final_1tick": 90.9171829804655,
+      "max_drawdown_1tick": -0.14376216921501067,
+      "sharpe_annualized_1tick": -0.24367606895558447,
+      "equity_final_05tick": 98.26259052830646,
+      "equity_final_2tick": 77.83084617301708,
+      "breakdown_exit_reason": {
+        "eod": {
+          "n": 415,
+          "pct": 0.5123456790123457,
+          "expectancy_pts_liq_1tick": 23.20843373493976
+        },
+        "stop": {
+          "n": 395,
+          "pct": 0.4876543209876543,
+          "expectancy_pts_liq_1tick": -25.47215189873418
+        }
+      },
+      "breakdown_direction": {
+        "long": {
+          "n": 421,
+          "pf_liq_1tick": 0.9800053557082924,
+          "win_rate": 0.4085510688836104,
+          "expectancy_pts_liq_1tick": -0.2660332541567696
+        },
+        "short": {
+          "n": 389,
+          "pf_liq_1tick": 0.9422867513611616,
+          "win_rate": 0.39331619537275064,
+          "expectancy_pts_liq_1tick": -0.8174807197943444
+        }
+      },
+      "breakdown_year": {
+        "2021": {
+          "n": 111,
+          "pf_liq_1tick": 0.8195727482678984,
+          "expectancy_pts_liq_1tick": -2.815315315315315
+        },
+        "2022": {
+          "n": 237,
+          "pf_liq_1tick": 0.9268916155419223,
+          "expectancy_pts_liq_1tick": -1.2067510548523206
+        },
+        "2023": {
+          "n": 229,
+          "pf_liq_1tick": 0.9768060836501901,
+          "expectancy_pts_liq_1tick": -0.2663755458515284
+        },
+        "2024": {
+          "n": 233,
+          "pf_liq_1tick": 1.0808810572687224,
+          "expectancy_pts_liq_1tick": 0.9849785407725322
+        }
+      },
+      "breakdown_roll_day": {
+        "False": {
+          "n": 772,
+          "pf_liq_1tick": 0.9497530395136778,
+          "expectancy_pts_liq_1tick": -0.6852331606217616
+        },
+        "True": {
+          "n": 38,
+          "pf_liq_1tick": 1.1696658097686374,
+          "expectancy_pts_liq_1tick": 2.6052631578947367
+        }
+      },
+      "breakdown_tercile": {
+        "1": {
+          "n": 277,
+          "pf_liq_1tick": 0.930455351862803,
+          "expectancy_pts_liq_1tick": -1.0613718411552346
+        },
+        "2": {
+          "n": 267,
+          "pf_liq_1tick": 0.9189733942488578,
+          "expectancy_pts_liq_1tick": -1.1292134831460674
+        },
+        "3": {
+          "n": 266,
+          "pf_liq_1tick": 1.0523237432816945,
+          "expectancy_pts_liq_1tick": 0.6221804511278195
+        }
+      },
+      "pf_liq_1tick_sem_top2": 0.9356072537461189
+    }
+  },
+  "gate_check": {
+    "primary_results": [
+      {
+        "config": "C1_WIN_M5",
+        "pf_liq_1tick": 0.9543909348441927,
+        "n_trades": 405,
+        "expectancy_pts_liq_1tick": -3.9753086419753085,
+        "terc_positivos": 1,
+        "passes_gate1": false
+      },
+      {
+        "config": "C1_WDO_M5",
+        "pf_liq_1tick": 0.7205056179775281,
+        "n_trades": 360,
+        "expectancy_pts_liq_1tick": -1.1055555555555556,
+        "terc_positivos": 0,
+        "passes_gate1": false
+      },
+      {
+        "config": "C2_WIN_M5",
+        "pf_liq_1tick": 0.6322026366464227,
+        "n_trades": 251,
+        "expectancy_pts_liq_1tick": -24.731075697211157,
+        "terc_positivos": 0,
+        "passes_gate1": false
+      },
+      {
+        "config": "C2_WDO_M5",
+        "pf_liq_1tick": 0.5264475743348983,
+        "n_trades": 241,
+        "expectancy_pts_liq_1tick": -1.5695020746887967,
+        "terc_positivos": 0,
+        "passes_gate1": false
+      },
+      {
+        "config": "C3_WIN_M5",
+        "pf_liq_1tick": 1.0792596556391452,
+        "n_trades": 496,
+        "expectancy_pts_liq_1tick": 25.383064516129032,
+        "terc_positivos": 3,
+        "passes_gate1": false
+      },
+      {
+        "config": "C3_WDO_M5",
+        "pf_liq_1tick": 0.9793388429752066,
+        "n_trades": 478,
+        "expectancy_pts_liq_1tick": -0.24581589958158995,
+        "terc_positivos": 0,
+        "passes_gate1": false
+      },
+      {
+        "config": "C4_WIN_M5",
+        "pf_liq_1tick": 0.8463123401931336,
+        "n_trades": 496,
+        "expectancy_pts_liq_1tick": -31.204637096774192,
+        "terc_positivos": 1,
+        "passes_gate1": false
+      },
+      {
+        "config": "C4_WDO_M5",
+        "pf_liq_1tick": 0.8992619190105725,
+        "n_trades": 478,
+        "expectancy_pts_liq_1tick": -0.7923640167364017,
+        "terc_positivos": 0,
+        "passes_gate1": false
+      }
+    ],
+    "any_config_passes_gate1_pf1.10_n200_exp_pos_2of3_tercis": false
+  },
+  "implementation_notes": []
+}
