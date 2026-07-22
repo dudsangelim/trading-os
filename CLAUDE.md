@@ -10,7 +10,6 @@ Two layers: **standalone paper traders** (Docker, no DB) + **core worker** (asyn
 | Container | Port | Strategy | Capital |
 |---|---|---|---|
 | `trading_asian_dema_paper` | 8095 | R021-B Asian DEMA 1h (DEMA 13/34), SOLUSDT 1h | $1000 / 1x |
-| `trading_rsi_reversion_paper` | 8093 | R021-A C1 RSI Reversion 5m (RSI14 os=10 ob=85), SOLUSDT 5m | $1000 / 1x |
 | `trading_sol_burst_paper` | 8101 | R012 SOL Extreme Burst Reversal 5m (\|ret\|>2% fade), SOLUSDT 5m | $1000 / 1x |
 | `trading_btc_lead_paper` | 8106 | BTC→ETH lead-lag 4h (btc_lead roc40/ema100), ETHUSDT | $1000 / 1x |
 | `trading_taker_cap_paper` | 8107 | Taker-capitulation LONG 4h (z(taker LSR)<-2), BTC/ETH/SOL 1h | $1000 / 1x (3×$333) |
@@ -36,7 +35,16 @@ provado com a regra honesta. Detalhes históricos na seção "ny_open_paper spec
 ### ny_open_mom_paper — APOSENTADO 2026-07-01 (Eduardo)
 Look-ahead na entrada + re-backtest 30d sem edge. Container, engine, watcher de drawdown e bloco do compose removidos. Não reviver.
 
-## Standalone paper traders (`trading/asian_dema_paper/`, `trading/rsi_reversion_paper/`, `trading/sol_burst_paper/`, `trading/btc_lead_paper/`, …)
+### rsi_reversion_paper — APOSENTADO 2026-07-18 (Eduardo, pós-revalidação honesta)
+O R021-A C1 foi removido integralmente. O backtest aprovado tinha timeout de 16 candles,
+mas o engine deployado não possuía timeout; ambos ainda marcavam fill no close do candle
+que confirmava o RSI. Com regras deployadas e fill next-open, o histórico caiu para PF 1,286,
+EV +23,0bps, maxDD -$341 e bootstrap p=0,22; o short isolado ficou negativo (PF 0,884).
+No unseen 10/05→04/07: PF 0,284, EV -60,4bps. Live final: 7 trades, WR 42,9%,
+PF 0,315, PnL -$39,72. Container, imagem, compose, código, dados e monitores removidos.
+Não reviver sem hipótese nova, execução honesta e validação independente.
+
+## Standalone paper traders (`trading/asian_dema_paper/`, `trading/sol_burst_paper/`, `trading/btc_lead_paper/`, …)
 
 - No auth, no DB. REST feed from Binance public endpoints.
 - State persisted to `/data/state.json` (volume-mounted).
@@ -156,17 +164,6 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 - Status: `docker exec trading_expiry_short_paper python -m trading.expiry_short_paper.main --status`
   | health `curl localhost:8109/healthz` | Telegram tag `EXPSHORT`. Monitorado pelo `trading_watcher.py`.
 
-### rsi_reversion_paper specifics (R021-A C1 Phase 0)
-- Trigger: polls every minute, processes new closed 5m bars (30s grace after bar close).
-- Entry: RSI(14 Wilder) crosses below 10 → LONG; crosses above 85 → SHORT. At bar close.
-- Exit: RSI crosses 50, any session.
-- Blacklist: hours 13–15 UTC and Tuesdays (permanent from R020/R021 research).
-- Data: asyncpg → `el_candles_1m` → resample 5m. DB same as asian_dema_paper.
-- Fee: 13 bps RT. Notional: $1000/trade at 1x.
-- Phase 0 gate: halts if WR < 30% after 30 trades; alerts at 4 consecutive losses.
-- Status: `docker exec trading_rsi_reversion_paper python3 -m trading.rsi_reversion_paper.main --status`
-- Replay: `docker exec trading_rsi_reversion_paper python3 -m trading.rsi_reversion_paper.main --replay-days 30`
-
 ## Core worker (`trading/core/`)
 
 - Runs `trading_worker` container. Reads `el_candles_1m` from `jarvis_edgelab` DB.
@@ -187,19 +184,12 @@ btc_lead_paper, que a domina (~4,9%/mês / DD -33%). Encerrado com equity $978,7
 
 ```bash
 # Health check
-curl localhost:8093/healthz
 curl localhost:8095/healthz
 curl localhost:8101/healthz
 curl localhost:8104/healthz
 
-# Smoke test (one tick)
-docker exec trading_rsi_reversion_paper python3 -m trading.rsi_reversion_paper.main --once
-
-# Replay last 14 days
-docker exec trading_rsi_reversion_paper python3 -m trading.rsi_reversion_paper.main --replay-days 14
-
 # Rebuild and restart a paper trader
-docker compose build rsi_reversion_paper && docker compose up -d rsi_reversion_paper
+docker compose build trading-asian-dema-paper && docker compose up -d trading-asian-dema-paper
 
 # View live logs
 docker logs -f trading_btc_lead_paper

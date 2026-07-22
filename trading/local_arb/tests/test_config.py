@@ -31,8 +31,15 @@ def test_git_sha_in_repo():
     assert sha == "unknown" or re.fullmatch(r"[0-9a-f]{7,40}", sha)
 
 
-def test_git_sha_fallback_outside_repo(tmp_path):
+def test_git_sha_fallback_outside_repo(tmp_path, monkeypatch):
+    monkeypatch.delenv("LOCAL_ARB_GIT_SHA", raising=False)
+    monkeypatch.delenv("GIT_SHA", raising=False)
     assert git_sha(tmp_path) == "unknown"
+
+
+def test_git_sha_prefers_container_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("LOCAL_ARB_GIT_SHA", "abcdef1234567890")
+    assert git_sha(tmp_path) == "abcdef1"
 
 
 def test_report_thesis_states():

@@ -3,7 +3,7 @@
 Faithful port of research/options_study/run_shortvol2.simulate2 (hedged
 straddle), with two upgrades the live feed makes possible:
   * entry at the REAL best bid (research modeled last-trade minus haircut);
-  * daily marks and hedge deltas from REAL Deribit tickers (research modeled
+  * daily marks and hedge deltas from REAL venue tickers (research modeled
     the IV path from DVOL).
 Accounting in USD over INITIAL_CAPITAL, fractional contracts (paper).
 """
@@ -15,22 +15,15 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from trading.vrp_paper import config as C
-from trading.vrp_paper import deribit as D
+from trading.vrp_paper import market as M
 
 log = logging.getLogger("vrp_paper")
 
 
-def _parse_expiry(instrument: str) -> datetime:
-    # BTC-6FEB26-83000-C -> 2026-02-06 08:00 UTC
-    part = instrument.split("-")[1]
-    dt = datetime.strptime(part, "%d%b%y").replace(hour=8, tzinfo=timezone.utc)
-    return dt
-
-
 def select_straddle(now: datetime) -> Optional[dict]:
     """Pick the ATM straddle expiring next Friday with live bids on both legs."""
-    S = D.index_price()
-    inst = D.option_instruments()
+    S = M.index_price()
+    inst = M.option_instruments()
     cands = {}
     for i in inst:
         exp = datetime.fromtimestamp(i["expiration_timestamp"] / 1000, tz=timezone.utc)
@@ -39,26 +32,30 @@ def select_straddle(now: datetime) -> Optional[dict]:
             continue
         if abs(i["strike"] / S - 1) > C.MAX_STRIKE_DIST:
             continue
-        cands.setdefault(i["strike"], {})[i["option_type"]] = i["instrument_name"]
+        cands.setdefault(i["strike"], {})[i["option_type"]] = i
     strikes = sorted((k for k, v in cands.items() if len(v) == 2), key=lambda k: abs(k - S))
     for K in strikes:
         legs = []
         for otype in ("call", "put"):
-            tk = D.ticker(cands[K][otype])
-            bid = tk.get("best_bid_price") or 0.0
+            ins = cands[K][otype]
+            tk = M.ticker(ins["instrument_name"])
+            bid = tk.get("best_bid_usd") or 0.0
             if bid <= 0:
                 legs = []
                 break
             legs.append({
-                "instrument": cands[K][otype], "strike": float(K),
-                "is_call": otype == "call", "bid_btc": float(bid),
-                "mark_btc": float(tk.get("mark_price") or 0.0),
-                "iv": float((tk.get("mark_iv") or 0.0)) / 100.0,
-                "delta": float((tk.get("greeks") or {}).get("delta") or 0.0),
+                "instrument": ins["instrument_name"], "strike": float(K),
+                "is_call": otype == "call", "bid_usd": float(bid),
+                "mark_usd": float(tk.get("mark_usd") or 0.0),
+                "iv": float(tk.get("mark_iv") or 0.0),
+                "delta": float(tk.get("delta") or 0.0),
+                "min_qty": float(ins["min_qty"]), "qty_step": float(ins["qty_step"]),
             })
         if legs:
             return {"S": S, "legs": legs,
-                    "expiry": _parse_expiry(legs[0]["instrument"])}
+                    "expiry": datetime.fromtimestamp(
+                        cands[K]["call"]["expiration_timestamp"] / 1000,
+                        tz=timezone.utc)}
     return None
 
 
@@ -97,18 +94,24 @@ class Book:
             return None
         S = sel["S"]
         try:
-            dv = D.dvol_now()
+            dv = M.dvol_now()
         except Exception:
             dv = C.DVOL_REF
         mult = 1.0
         if vol_signal and C.SLOPE_SIZING:
             mult = float(vol_signal.get("mult_slope") or 1.0)
-        contracts = (mult * C.SIZE_MULT * self.equity / S
-                     * min(C.DVOL_REF / max(dv, 0.05), C.VOL_SCALE_CAP))
+        raw_contracts = (mult * C.SIZE_MULT * self.equity / S
+                         * min(C.DVOL_REF / max(dv, 0.05), C.VOL_SCALE_CAP))
+        min_qty = max(lg["min_qty"] for lg in sel["legs"])
+        qty_step = max(lg["qty_step"] for lg in sel["legs"])
+        contracts = M.quantize_contracts(raw_contracts, min_qty, qty_step)
+        if contracts <= 0:
+            log.warning("sizing %.6f below venue minimum %.6f", raw_contracts, min_qty)
+            return None
         legs = []
         for lg in sel["legs"]:
-            prem_btc = lg["bid_btc"] - D.fees_trade_btc(lg["bid_btc"])
-            legs.append({**lg, "prem_usd": prem_btc * S})
+            prem_usd = lg["bid_usd"] - M.entry_fee_usd(lg["bid_usd"], S)
+            legs.append({**lg, "prem_usd": prem_usd})
         self.position = Position(
             entry_ts=now.strftime("%Y-%m-%d %H:%M"),
             expiry_ts=sel["expiry"].strftime("%Y-%m-%d %H:%M"),
@@ -124,14 +127,14 @@ class Book:
     # ── daily hedge + mark (real tickers) ────────────────────────────────────
     def hedge_and_mark(self, do_hedge: bool) -> dict:
         p = self.position
-        S = D.index_price()
+        S = M.index_price()
         mtm = 0.0
         net_delta = 0.0
         marks = []
         for lg in p.legs:
-            tk = D.ticker(lg["instrument"])
-            mark = float(tk.get("mark_price") or 0.0) * S      # USD
-            dlt = float((tk.get("greeks") or {}).get("delta") or 0.0)
+            tk = M.ticker(lg["instrument"])
+            mark = float(tk.get("mark_usd") or 0.0)
+            dlt = float(tk.get("delta") or 0.0)
             mtm += lg["prem_usd"] - mark                        # short legs
             net_delta -= dlt
             marks.append({"instrument": lg["instrument"], "mark_usd": mark, "delta": dlt})
@@ -154,18 +157,18 @@ class Book:
     def settle(self, now: datetime) -> Optional[dict]:
         p = self.position
         expiry = datetime.strptime(p.expiry_ts, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
-        px = D.delivery_price(expiry)
+        px = M.delivery_price(expiry)
         source = "delivery"
         if px is None:
             if (now - expiry).total_seconds() < 3 * 3600:
                 return None                     # not published yet — retry next cycle
-            px = D.index_price()
+            px = M.index_price()
             source = "index-fallback"
         pnl = 0.0
         for lg in p.legs:
             intr = max(px - lg["strike"], 0) if lg["is_call"] else max(lg["strike"] - px, 0)
             pnl += (lg["prem_usd"] - intr) * p.contracts
-            pnl -= C.FEE_SETTLE_BTC * px * p.contracts
+            pnl -= M.settlement_fee_usd(px, intr) * p.contracts
         # close hedge at the settlement print
         pnl += p.hedge_qty * (px - p.hedge_px) * p.contracts
         pnl -= abs(p.hedge_qty) * px * p.contracts * C.HEDGE_COST

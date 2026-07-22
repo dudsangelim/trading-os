@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import csv
 import heapq
+import json
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -38,6 +39,7 @@ OBSERVER_SYNTHETIC_DIR = "observer_synthetic"
 SNAPSHOT_FILE = "observer_snapshots.csv"
 SPREAD_FILE = "observer_spread_windows.csv"
 LIFECYCLE_PREFIX = "observer_candidate_lifecycle_"
+DAY_COUNTS_PREFIX = "observer_day_counts_"
 
 SNAPSHOT_FIELDS = [
     "timestamp_local", "exchange", "pair", "best_bid", "best_ask", "mid",
@@ -267,15 +269,18 @@ def _hour_bucket(ts: float) -> str:
 
 
 def iter_spread_rows_for_date(data_dir: Path, date_str: str, mode: str = "rest") -> Iterator[dict]:
-    """Streaming das janelas do dia: arquivo diário novo + monólito legado filtrado.
+    """Streaming das janelas do dia: arquivo diário novo ou fallback legado.
 
     O monólito legado (pré-rotação, potencialmente centenas de MB) é lido linha a
-    linha com filtro de data — nunca materializado inteiro em memória.
+    linha com filtro de data — nunca materializado inteiro em memória. Quando o
+    arquivo diário existe, ele é a fonte canônica e o monólito não é varrido:
+    além de caro, somar ambos duplicaria as linhas do período de migração.
     """
     daily = spread_daily_path(data_dir, date_str, mode)
     if daily.exists():
         with daily.open(encoding="utf-8") as fh:
             yield from csv.DictReader(fh)
+        return
     legacy = observer_dir(data_dir, mode) / SPREAD_FILE
     if legacy.exists():
         with legacy.open(encoding="utf-8") as fh:
@@ -420,8 +425,75 @@ def _observed_daily_dates(data_dir: Path, mode: str = "rest") -> list[str]:
     return sorted(dates)
 
 
+def _day_counts_path(data_dir: Path, date_str: str, mode: str) -> Path:
+    return observer_dir(data_dir, mode) / f"{DAY_COUNTS_PREFIX}{date_str}.json"
+
+
+def _count_day_for_thesis(data_dir: Path, date_str: str,
+                          mode: str = "rest") -> dict[str, int]:
+    """Conta os gates multi-dia e cacheia dias imutáveis por tamanho/mtime.
+
+    O relatório diário antes relia todos os CSVs históricos (vários GB) em cada
+    execução. O sidecar é invalidado automaticamente se o CSV mudar. Uma escrita
+    concorrente durante a leitura impede a gravação do cache, preservando a
+    correção para o dia UTC ainda aberto.
+    """
+    daily = spread_daily_path(data_dir, date_str, mode)
+    cache = _day_counts_path(data_dir, date_str, mode)
+    before = daily.stat() if daily.exists() else None
+    if before and cache.exists():
+        try:
+            payload = json.loads(cache.read_text(encoding="utf-8"))
+            if (
+                payload.get("schema") == 1
+                and payload.get("source_size") == before.st_size
+                and payload.get("source_mtime_ns") == before.st_mtime_ns
+            ):
+                return {key: int(payload[key])
+                        for key in ("n_valid", "positive", "above_10", "above_20")}
+        except (OSError, ValueError, KeyError, TypeError):
+            pass
+
+    counts = {"n_valid": 0, "positive": 0, "above_10": 0, "above_20": 0}
+    for row in iter_spread_rows_for_date(data_dir, date_str, mode):
+        if (row.get("source") or "rest").strip() not in ("", "rest"):
+            continue
+        counts["n_valid"] += 1
+        net = _float(row, "net_bps")
+        if net > 0:
+            counts["positive"] += 1
+        if net >= 10:
+            counts["above_10"] += 1
+        if net >= 20:
+            counts["above_20"] += 1
+
+    after = daily.stat() if daily.exists() else None
+    if before and after and (
+        before.st_size == after.st_size and before.st_mtime_ns == after.st_mtime_ns
+    ):
+        payload = {
+            "schema": 1,
+            "date": date_str,
+            "source_size": after.st_size,
+            "source_mtime_ns": after.st_mtime_ns,
+            **counts,
+        }
+        tmp = cache.with_suffix(".json.tmp")
+        try:
+            tmp.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+            tmp.replace(cache)
+        except OSError:
+            try:
+                tmp.unlink(missing_ok=True)
+            except OSError:
+                pass
+    return counts
+
+
 def multi_day_thesis_decision(data_dir: Path, cfg: dict | None = None,
-                              mode: str = "rest") -> ThesisVerdict:
+                              mode: str = "rest",
+                              precomputed: dict[str, dict[str, int]] | None = None
+                              ) -> ThesisVerdict:
     """Decisão terminal da tese sobre a janela de dias observados (PRD §18).
 
     Só esta função pode ADVANCE/KILL. Regras:
@@ -444,20 +516,9 @@ def multi_day_thesis_decision(data_dir: Path, cfg: dict | None = None,
     valid_days = 0
     tot = {"positive": 0, "above_10": 0, "above_20": 0}
     for date_str in _observed_daily_dates(data_dir, mode):
-        n_valid = 0
-        day = {"positive": 0, "above_10": 0, "above_20": 0}
-        for row in iter_spread_rows_for_date(data_dir, date_str, mode):
-            if (row.get("source") or "rest").strip() not in ("", "rest"):
-                continue
-            n_valid += 1
-            net = _float(row, "net_bps")
-            if net > 0:
-                day["positive"] += 1
-            if net >= 10:
-                day["above_10"] += 1
-            if net >= 20:
-                day["above_20"] += 1
-        if n_valid >= min_valid:
+        day = ((precomputed or {}).get(date_str)
+               or _count_day_for_thesis(data_dir, date_str, mode))
+        if day["n_valid"] >= min_valid:
             valid_days += 1
             for k in tot:
                 tot[k] += day[k]
@@ -489,6 +550,9 @@ def _aggregate_rows(rows: Iterator[dict]) -> dict:
         "n_watch": 0,
         "n_execution": 0,
         "n_skew_rejected": 0,
+        "positive": 0,
+        "above_10": 0,
+        "above_20": 0,
         "reasons": Counter(),
         "by_hour": defaultdict(lambda: {"n": 0, "max_net": None, "n_pos": 0}),
     }
@@ -511,6 +575,12 @@ def _aggregate_rows(rows: Iterator[dict]) -> dict:
             agg["n_skew_rejected"] += 1
 
         net = _float(row, "net_bps")
+        if net > 0:
+            agg["positive"] += 1
+        if net >= 10:
+            agg["above_10"] += 1
+        if net >= 20:
+            agg["above_20"] += 1
         bucket = agg["by_hour"][_hour_bucket(_float(row, "timestamp_local"))]
         bucket["n"] += 1
         bucket["max_net"] = net if bucket["max_net"] is None else max(bucket["max_net"], net)
@@ -532,12 +602,21 @@ def generate_observer_report(data_dir: Path, date_str: str,
     agg = _aggregate_rows(iter_spread_rows_for_date(data_dir, date_str, mode))
     verdict = observer_verdict(agg["n_valid"], agg["n_execution"], cfg)
     # ciclos de vida das janelas candidate do dia (segunda passada pelos CSVs do dia)
-    lifecycles = build_candidate_lifecycles(
-        iter_spread_rows_for_date(data_dir, date_str, mode), cfg)
+    lifecycles = (
+        build_candidate_lifecycles(iter_spread_rows_for_date(data_dir, date_str, mode), cfg)
+        if agg["n_candidate"] else []
+    )
     write_lifecycles(data_dir, date_str, lifecycles, mode)
     reached = sum(1 for lc in lifecycles if lc["status_final"] == "reached_execution")
     # decisão terminal só na agregação multi-dia (PRD §18) — um dia nunca decide
-    thesis = multi_day_thesis_decision(data_dir, cfg, mode)
+    current_counts = {
+        "n_valid": agg["n_valid"],
+        "positive": agg["positive"],
+        "above_10": agg["above_10"],
+        "above_20": agg["above_20"],
+    }
+    thesis = multi_day_thesis_decision(
+        data_dir, cfg, mode, precomputed={date_str: current_counts})
     reports_dir = Path(data_dir) / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if mode == "rest" else f"_{mode}"

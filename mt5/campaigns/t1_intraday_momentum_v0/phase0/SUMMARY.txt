@@ -1,0 +1,264 @@
+==============================================================================
+t1_intraday_momentum_v0 -- Fase 0 (mapa descritivo)
+IS: 2021-01-01 -> 2024-12-31 (OOS >= 2025-01-01 REMOVIDO logo apos load)
+==============================================================================
+
+### WIN ###
+Arquivo bruto: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WIN_cont_N_M15.parquet
+Range bruto completo: 2021-07-19 09:00:00 -> 2026-07-17 18:30:00 (46535 linhas)
+Apos filtro OOS sagrado (IS only): 31938 linhas
+
+--- Grade horaria real (WIN, IS 2021-2024) ---
+n dias no IS: 863
+Primeira barra do dia (top 10):
+    09:00:00  860 dias (99.7%)
+    13:00:00  3 dias (0.3%)
+Ultima barra do dia (top 10):
+    18:15:00  459 dias (53.2%)
+    17:45:00  404 dias (46.8%)
+
+--- Construcao tabela diaria (WIN) ---
+dias totais no IS (grupos de data): 863
+dias validos (usados nas estatisticas): 859
+dias descartados (sessao curta / dados faltantes): 3
+  -- faltando barra 09:00 ou 09:15: 3
+  -- ret_last impossivel de calcular mesmo com fallback: 0
+dias sem dia anterior no IS (primeiro dia da serie): 1
+dias em que ret_last usou fallback (nao 18:15/17:45 padrao): 403
+Salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\t1_intraday_momentum_v0\phase0\daily_win.csv (859 linhas)
+
+### WDO ###
+Arquivo bruto: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WDO_cont_N_M15.parquet
+Range bruto completo: 2021-07-19 09:00:00 -> 2026-07-17 18:15:00 (46534 linhas)
+Apos filtro OOS sagrado (IS only): 31935 linhas
+
+--- Grade horaria real (WDO, IS 2021-2024) ---
+n dias no IS: 863
+Primeira barra do dia (top 10):
+    09:00:00  860 dias (99.7%)
+    13:00:00  3 dias (0.3%)
+Ultima barra do dia (top 10):
+    18:15:00  458 dias (53.1%)
+    17:45:00  401 dias (46.5%)
+    18:00:00  3 dias (0.3%)
+    17:30:00  1 dias (0.1%)
+
+--- Construcao tabela diaria (WDO) ---
+dias totais no IS (grupos de data): 863
+dias validos (usados nas estatisticas): 859
+dias descartados (sessao curta / dados faltantes): 3
+  -- faltando barra 09:00 ou 09:15: 3
+  -- ret_last impossivel de calcular mesmo com fallback: 0
+dias sem dia anterior no IS (primeiro dia da serie): 1
+dias em que ret_last usou fallback (nao 18:15/17:45 padrao): 401
+Salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\t1_intraday_momentum_v0\phase0\daily_wdo.csv (859 linhas)
+
+------------------------------------------------------------------------------
+WIN / A: ret_first (close_0930/open_0900 - 1, intraday puro)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=0.033445  intercept=0.000078  t_NW=1.625  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 51.11%  IC95=[47.96%, 54.48%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): 0.70  IC95=[-0.52, 1.91]
+Breakdown por ano:
+    2021: n=113  slope=-0.016518  t_NW=-0.296  hit_rate=41.59%
+    2022: n=249  slope=0.041417  t_NW=1.069  hit_rate=56.22%
+    2023: n=247  slope=0.030064  t_NW=0.920  hit_rate=50.20%
+    2024: n=250  slope=0.057310  t_NW=2.249  hit_rate=51.20%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=0.042779  t_NW=1.614  hit_rate=53.31%
+    mid: n=286  slope=0.049357  t_NW=1.881  hit_rate=47.90%
+    high: n=286  slope=0.017405  t_NW=0.460  hit_rate=52.10%
+Breakdown por dia da semana:
+    Monday: n=173  slope=0.041250  t_NW=0.726  hit_rate=54.91%
+    Tuesday: n=172  slope=0.050556  t_NW=1.423  hit_rate=52.33%
+    Wednesday: n=170  slope=0.009015  t_NW=0.235  hit_rate=43.53%
+    Thursday: n=173  slope=0.001062  t_NW=0.024  hit_rate=54.34%
+    Friday: n=171  slope=0.061816  t_NW=2.125  hit_rate=50.29%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=0.054750  t_NW=2.960  hit_rate=51.13% IC95=[47.68%,54.46%]  cond_mean_bps=0.83 IC95=[-0.40,2.03]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): PASS (3/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+------------------------------------------------------------------------------
+WIN / B: ret_on_first (close_0930/close_prev_day - 1, Gao original)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=0.005306  intercept=0.000073  t_NW=0.470  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 50.64%  IC95=[47.49%, 53.90%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): 0.43  IC95=[-0.73, 1.56]
+Breakdown por ano:
+    2021: n=113  slope=-0.029722  t_NW=-1.043  hit_rate=45.13%
+    2022: n=249  slope=0.004837  t_NW=0.253  hit_rate=52.21%
+    2023: n=247  slope=0.022327  t_NW=1.362  hit_rate=54.66%
+    2024: n=250  slope=0.020204  t_NW=1.096  hit_rate=47.60%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=-0.001847  t_NW=-0.108  hit_rate=49.48%
+    mid: n=286  slope=0.002012  t_NW=0.098  hit_rate=50.00%
+    high: n=286  slope=0.009748  t_NW=0.525  hit_rate=52.45%
+Breakdown por dia da semana:
+    Monday: n=173  slope=-0.028884  t_NW=-1.161  hit_rate=46.24%
+    Tuesday: n=172  slope=0.024577  t_NW=1.143  hit_rate=51.16%
+    Wednesday: n=170  slope=0.030361  t_NW=1.743  hit_rate=51.76%
+    Thursday: n=173  slope=-0.018201  t_NW=-0.712  hit_rate=49.71%
+    Friday: n=171  slope=0.016993  t_NW=0.610  hit_rate=54.39%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=0.013615  t_NW=1.345  hit_rate=50.65% IC95=[47.32%,53.75%]  cond_mean_bps=0.54 IC95=[-0.62,1.86]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): PASS (3/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+------------------------------------------------------------------------------
+WIN / C: ret_on (open_0900/close_prev_day - 1, Liu & Tse)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=-0.004238  intercept=0.000075  t_NW=-0.338  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 46.33%  IC95=[43.19%, 49.48%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): -0.56  IC95=[-1.76, 0.62]
+Breakdown por ano:
+    2021: n=113  slope=-0.032301  t_NW=-1.098  hit_rate=43.36%
+    2022: n=249  slope=-0.006627  t_NW=-0.312  hit_rate=46.99%
+    2023: n=247  slope=0.020642  t_NW=1.022  hit_rate=51.42%
+    2024: n=250  slope=0.005058  t_NW=0.212  hit_rate=42.00%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=-0.021645  t_NW=-0.918  hit_rate=42.16%
+    mid: n=286  slope=-0.016001  t_NW=-0.603  hit_rate=50.35%
+    high: n=286  slope=0.006962  t_NW=0.378  hit_rate=46.50%
+Breakdown por dia da semana:
+    Monday: n=173  slope=-0.046250  t_NW=-1.726  hit_rate=38.73%
+    Tuesday: n=172  slope=0.012539  t_NW=0.418  hit_rate=46.51%
+    Wednesday: n=170  slope=0.035225  t_NW=1.810  hit_rate=48.82%
+    Thursday: n=173  slope=-0.026993  t_NW=-0.989  hit_rate=47.40%
+    Friday: n=171  slope=-0.002501  t_NW=-0.072  hit_rate=50.29%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=-0.000033  t_NW=-0.003  hit_rate=46.37% IC95=[42.69%,50.06%]  cond_mean_bps=-0.50 IC95=[-1.72,0.77]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): FAIL (2/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+------------------------------------------------------------------------------
+WDO / A: ret_first (close_0930/open_0900 - 1, intraday puro)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=0.008814  intercept=0.000063  t_NW=0.449  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 48.66%  IC95=[45.29%, 51.80%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): 0.39  IC95=[-0.44, 1.22]
+Breakdown por ano:
+    2021: n=113  slope=-0.011772  t_NW=-0.350  hit_rate=38.94%
+    2022: n=249  slope=0.001160  t_NW=0.029  hit_rate=51.00%
+    2023: n=247  slope=0.003192  t_NW=0.105  hit_rate=44.53%
+    2024: n=250  slope=0.050704  t_NW=2.025  hit_rate=54.80%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=0.004821  t_NW=0.180  hit_rate=48.43%
+    mid: n=286  slope=0.008016  t_NW=0.253  hit_rate=49.30%
+    high: n=286  slope=0.012157  t_NW=0.430  hit_rate=48.25%
+Breakdown por dia da semana:
+    Monday: n=173  slope=-0.041403  t_NW=-1.564  hit_rate=42.77%
+    Tuesday: n=172  slope=0.073748  t_NW=2.172  hit_rate=54.65%
+    Wednesday: n=170  slope=0.093339  t_NW=2.429  hit_rate=52.35%
+    Thursday: n=173  slope=-0.003850  t_NW=-0.088  hit_rate=47.40%
+    Friday: n=171  slope=-0.039935  t_NW=-1.073  hit_rate=46.20%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=0.027134  t_NW=1.718  hit_rate=48.87% IC95=[45.54%,52.32%]  cond_mean_bps=0.51 IC95=[-0.33,1.35]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): PASS (3/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+------------------------------------------------------------------------------
+WDO / B: ret_on_first (close_0930/close_prev_day - 1, Gao original)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=0.009411  intercept=0.000063  t_NW=0.798  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 50.41%  IC95=[47.26%, 53.55%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): 0.73  IC95=[-0.09, 1.55]
+Breakdown por ano:
+    2021: n=113  slope=-0.010365  t_NW=-0.463  hit_rate=42.48%
+    2022: n=249  slope=0.016649  t_NW=0.818  hit_rate=55.02%
+    2023: n=247  slope=-0.007227  t_NW=-0.304  hit_rate=44.13%
+    2024: n=250  slope=0.019788  t_NW=1.435  hit_rate=55.60%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=0.004360  t_NW=0.253  hit_rate=45.64%
+    mid: n=286  slope=0.001406  t_NW=0.059  hit_rate=52.45%
+    high: n=286  slope=0.015869  t_NW=1.126  hit_rate=53.15%
+Breakdown por dia da semana:
+    Monday: n=173  slope=-0.018845  t_NW=-1.343  hit_rate=42.77%
+    Tuesday: n=172  slope=0.057342  t_NW=2.812  hit_rate=53.49%
+    Wednesday: n=170  slope=0.030713  t_NW=1.336  hit_rate=54.12%
+    Thursday: n=173  slope=-0.015076  t_NW=-0.720  hit_rate=49.71%
+    Friday: n=171  slope=0.014762  t_NW=0.627  hit_rate=52.05%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=0.017349  t_NW=1.878  hit_rate=50.42% IC95=[46.85%,53.87%]  cond_mean_bps=0.79 IC95=[-0.11,1.64]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): FAIL (2/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+------------------------------------------------------------------------------
+WDO / C: ret_on (open_0900/close_prev_day - 1, Liu & Tse)
+------------------------------------------------------------------------------
+n = 859 dias validos
+OLS: slope=0.008662  intercept=0.000064  t_NW=0.769  lag_NW=6
+Hit rate sign(pred)==sign(ret_last): 49.94%  IC95=[46.68%, 53.20%]  (n=859)
+Media condicional ret_last (bps, sinal alinhado ao predictor): 0.70  IC95=[-0.16, 1.53]
+Breakdown por ano:
+    2021: n=113  slope=-0.006710  t_NW=-0.211  hit_rate=49.56%
+    2022: n=249  slope=0.024615  t_NW=1.401  hit_rate=51.41%
+    2023: n=247  slope=-0.014021  t_NW=-0.509  hit_rate=46.15%
+    2024: n=250  slope=-0.006081  t_NW=-0.390  hit_rate=52.40%
+Breakdown por tercil de vol (D-1 range/open):
+    low: n=287  slope=0.002921  t_NW=0.120  hit_rate=46.69%
+    mid: n=286  slope=-0.003299  t_NW=-0.142  hit_rate=51.40%
+    high: n=286  slope=0.016132  t_NW=1.098  hit_rate=51.75%
+Breakdown por dia da semana:
+    Monday: n=173  slope=0.002066  t_NW=0.134  hit_rate=41.62%
+    Tuesday: n=172  slope=0.046160  t_NW=1.965  hit_rate=48.84%
+    Wednesday: n=170  slope=-0.016884  t_NW=-0.603  hit_rate=51.18%
+    Thursday: n=173  slope=-0.020477  t_NW=-0.828  hit_rate=53.18%
+    Friday: n=171  slope=0.050405  t_NW=1.972  hit_rate=54.97%
+Robustez (excluindo top/bottom 1% do predictor, n=841):
+    slope=-0.001765  t_NW=-0.115  hit_rate=49.46% IC95=[46.25%,52.79%]  cond_mean_bps=0.60 IC95=[-0.25,1.43]
+Gates:
+    G1 (t_NW>=2.0 & slope>0): FAIL
+    G2 (hit_rate>=52% & IC_lo>50%): FAIL
+    G3 (|cond_mean|>=4bps): FAIL
+    G4 (slope>0 em >=3/4 anos): FAIL (1/4)
+    G5 (sobrevive exclusao outliers): FAIL
+    >>> PREMISE_REFUTED_OR_WEAK <<<
+
+==============================================================================
+TABELA FINAL DE GATES (G1-G5) POR VARIANTE x MERCADO
+==============================================================================
+Mercado Variante        G1    G2    G3    G4    G5    STATUS                  
+------------------------------------------------------------------------------
+WIN     ret_first       FAIL  FAIL  FAIL  PASS  FAIL  premise_refuted_or_weak 
+WIN     ret_on_first    FAIL  FAIL  FAIL  PASS  FAIL  premise_refuted_or_weak 
+WIN     ret_on          FAIL  FAIL  FAIL  FAIL  FAIL  premise_refuted_or_weak 
+WDO     ret_first       FAIL  FAIL  FAIL  PASS  FAIL  premise_refuted_or_weak 
+WDO     ret_on_first    FAIL  FAIL  FAIL  FAIL  FAIL  premise_refuted_or_weak 
+WDO     ret_on          FAIL  FAIL  FAIL  FAIL  FAIL  premise_refuted_or_weak 
+
+Regra de decisao: >=1 variante passa G1-G5 em WIN -> Fase 1 (mecanica) so nessa(s) variante(s).
+RESULTADO: Nenhuma variante passou G1-G5 em WIN (WDO confirma em: nenhuma).
+-> Campanha fecha como premise_refuted. NAO tentar variantes novas post-hoc.
+
+Salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\t1_intraday_momentum_v0\phase0\t1_map_summary.json

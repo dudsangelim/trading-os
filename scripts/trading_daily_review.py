@@ -63,8 +63,6 @@ _TRADING_OS_ROOT = Path(__file__).resolve().parent.parent
 PAPER_TRADER_CSV = [
     # NY Open 2C APOSENTADO 2026-07-13 — removido da review.
     # DOW 3-Legs APOSENTADO 2026-06-14 — removido da review 2026-07-11.
-    ("RSI Reversion", "trading/rsi_reversion_paper/data/trades.csv",
-     "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  None),
     ("Asian DEMA",    "trading/asian_dema_paper/data/trades.csv",
      "exit_ts",  "side",      {},                        "pnl_usd",     "usd",  "pnl_total_after"),
     ("SOL Burst",     "trading/sol_burst_paper/data/trades.csv",
@@ -75,7 +73,6 @@ PAPER_TRADER_CSV = [
 PAPER_TRADER_ENDPOINTS = [
     # NY Open 2C APOSENTADO 2026-07-13 — removido da review.
     # DOW 3-Legs APOSENTADO 2026-06-14 — removido da review 2026-07-11.
-    ("RSI Reversion",  "http://127.0.0.1:8093/healthz"),
     ("Asian DEMA",     "http://127.0.0.1:8095/healthz"),
     ("BW Jawcross",    "http://127.0.0.1:8097/healthz"),
     ("SOL Burst",      "http://127.0.0.1:8101/healthz"),

@@ -1,0 +1,46 @@
+{
+  "grid_L": [
+    63,
+    126
+  ],
+  "grid_F": [
+    5,
+    21
+  ],
+  "grid_vol_targeting": [
+    false,
+    true
+  ],
+  "rt_bps_sensitivity": [
+    1.0,
+    1.5,
+    2.0
+  ],
+  "rollover_bps_per_month": 1.2,
+  "windows": {
+    "discovery": [
+      "2000-01-01",
+      "2018-12-31"
+    ],
+    "confirm": [
+      "2019-01-01",
+      "2024-12-31"
+    ],
+    "real_check": [
+      "2021-07-01",
+      "2024-12-31"
+    ]
+  },
+  "best_cell": {
+    "L": 63,
+    "F": 21,
+    "vol_targeting": true,
+    "selection_rule": "maior Sharpe liquido 1.5bps em proxy_CONFIRM_2019_2024"
+  },
+  "n_cells": 8,
+  "output_files": {
+    "grid_results_csv": "C:/Users/Notebook/Documents/Claude/Projects/Finan\u00e7as/mt5/campaigns/b3_factory_v0/W0_tsm_wdo\\grid_results.csv",
+    "yearly_L126_F5_csv": "C:/Users/Notebook/Documents/Claude/Projects/Finan\u00e7as/mt5/campaigns/b3_factory_v0/W0_tsm_wdo\\L126_F5_yearly_returns.csv",
+    "best_cell_daily_returns_csv": "C:/Users/Notebook/Documents/Claude/Projects/Finan\u00e7as/mt5/campaigns/b3_factory_v0/W0_tsm_wdo\\best_cell_daily_net_returns.csv"
+  }
+}

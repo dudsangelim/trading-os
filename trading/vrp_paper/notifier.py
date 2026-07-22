@@ -37,7 +37,7 @@ def _tag(kind: str) -> str:
 def notify_startup(equity: float) -> None:
     _send("\n".join([
         f"{_tag('startup')}",
-        "*VRP PAPER ONLINE* (Deribit, paper-only)",
+        f"*VRP PAPER ONLINE* ({C.VENUE_LABEL}, paper-only)",
         "straddle ATM semanal short, hedge de delta diário via perp",
         f"capital: `${equity:.2f}` | size: `{C.SIZE_MULT:g}x` vol-scaled (ref DVOL {C.DVOL_REF:.0%})",
         "validado: `2,56%/mês` · PFtrade `1.80` · Sharpe `1.73` · DD `-17.9%` (2022-26, pós-fix)",

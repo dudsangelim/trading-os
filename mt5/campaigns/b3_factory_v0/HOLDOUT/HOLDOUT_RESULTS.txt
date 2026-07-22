@@ -1,0 +1,93 @@
+==============================================================================
+HOLDOUT b3_factory_v0 -- avaliacao unica, gates pre-registrados
+Holdout window: 2025-01-01 .. 2026-07-17
+==============================================================================
+
+proxy_raw.parquet range: 2000-01-03 .. 2026-07-21 (6578 linhas)
+  proxy_raw cobre o periodo do holdout integralmente -- fetch novo NAO necessario.
+
+==============================================================================
+ETAPA 1 -- VALIDACAO (reproducao dos numeros conhecidos, <=2024-12-31)
+==============================================================================
+
+--- E1: Carteira TSM multi-ativos (L=63, L=126) ---
+  L126 portfolio: net_ann=6.1%  Sharpe=1.292  maxDD=-5.81%  n_days=863
+  L63  portfolio: net_ann=6.87%  Sharpe=1.371  maxDD=-5.88%  n_days=863
+  Alvos pre-reg (L=126): net~6.2% aa, Sharpe~1.29, maxDD~-5.8%
+    net_ann_pct (L126): obtido=6.1  alvo=6.2  diff_rel=1.6%  -> OK
+    sharpe (L126): obtido=1.292  alvo=1.29  diff_rel=0.2%  -> OK
+    maxdd_pct (L126): obtido=-5.81  alvo=-5.8  diff_rel=0.2%  -> OK
+  E1 validacao: PASS
+
+--- E2a: TSM WDO L=126/F=21 vt (real-check) ---
+  WDO L126: net_ann=6.67%  Sharpe=0.71  maxDD=-8.8%  n_days=863
+  Alvos pre-reg: net~+6.7%, Sharpe~0.66 (maxDD referencia ~-9.7% no FACTORY_REPORT)
+    net_ann_pct (WDO L126): obtido=6.67  alvo=6.7  diff_rel=0.4%  -> OK
+    sharpe (WDO L126): obtido=0.71  alvo=0.66  diff_rel=7.6%  -> OK
+  E2a validacao: PASS
+
+--- E2b: Carry condicional WDO diff>6pp / vol<median252 (real-check) ---
+  real-check: net_ann=5.65%  Sharpe=0.767  maxDD=-6.49%  PF=2.73  n_trades=20
+  Alvo pre-reg: net~+5.7%
+    net_ann_pct (real-check): obtido=5.65  alvo=5.7  diff_rel=0.9%  -> OK
+  E2b validacao: PASS
+
+--- E3: Fade PDH/PDL WIN M5 S=25/T=10 (discovery 2023 / confirm 2024) ---
+  discovery 2023: PF=1.77  n=230  win_rate=0.8435
+  confirm   2024: PF=1.48  n=235  win_rate=0.7957
+  Alvos pre-reg: PF disc 2023 ~1.77, PF confirm 2024 ~1.48
+    PF discovery 2023: obtido=1.77  alvo=1.77  diff_rel=0.0%  -> OK
+    PF confirm 2024: obtido=1.48  alvo=1.48  diff_rel=0.0%  -> OK
+  E3 validacao: PASS
+
+------------------------------------------------------------------------------
+RESUMO ETAPA 1:
+  E1: PASS -> prossegue p/ holdout
+  E2a: PASS -> prossegue p/ holdout
+  E2b: PASS -> prossegue p/ holdout
+  E3: PASS -> prossegue p/ holdout
+------------------------------------------------------------------------------
+
+==============================================================================
+ETAPA 2 -- HOLDOUT (2025-01-01 .. 2026-07-17)
+==============================================================================
+
+--- E1 holdout: Carteira TSM multi-ativos (L=63, L=126) ---
+  L63 portfolio: net_ann=-0.14%  Sharpe=0.003  maxDD=-4.89%  PF_month=1.0  n_days=385  n_pos_changes=112  monthly_mean=0.001%  worst_month=-3.46%
+  L126 portfolio: net_ann=-3.7%  Sharpe=-0.666  maxDD=-7.8%  PF_month=0.56  n_days=385  n_pos_changes=112  monthly_mean=-0.294%  worst_month=-3.46%
+  E1 veredito: FAIL  (net>0 nos 2 L: False, best_sharpe=0.003, worst_maxDD=-7.8%)
+
+--- E2a holdout: TSM WDO L=126/F=21 vt ---
+  WDO L126: net_ann=3.32%  Sharpe=0.355  maxDD=-8.5%  PF_month=1.32  n_days=385  n_pos_changes=18
+  E2a veredito: PASS  (net>0: True, maxDD<=15%: True)
+
+--- E2b holdout: Carry condicional WDO diff>6pp / vol<median252 ---
+  net_ann=6.95%  Sharpe=0.77  maxDD=-6.6%  PF=2.68  n_trades=12  n_days=385  monthly_mean=0.571%  worst_month=-3.23%
+  E2b veredito: PASS  (net>0: True, maxDD<=10%: True)
+
+--- E3 holdout: Fade PDH/PDL WIN M5 S=25/T=10 ---
+  n=350  win_rate=0.8171  PF=1.511  expectancy_bps=2.335  exit_breakdown={'tp': 284, 'stop': 59, 'time': 7}
+  breakdown por ano:
+    2025: n=225  PF=1.729  win_rate=0.8311  expectancy_bps=2.954
+    2026: n=125  PF=1.221  win_rate=0.792  expectancy_bps=1.22
+  E3 veredito: PASS  (n esperado ~380+; n obtido=350)
+
+==============================================================================
+ETAPA 3 -- TABELA FINAL (PASS / PARTIAL / FAIL por estrutura)
+==============================================================================
+Estrutura  Veredito     net_ann%   Sharpe   maxDD%      PF  mens_mean%  pior_mes%      n
+----------------------------------------------------------------------------------------
+E1 (L126)  FAIL             -3.7   -0.666     -7.8    0.56      -0.294      -3.46    385
+E1 (L63)   (ver acima)      -0.14    0.003    -4.89     1.0       0.001      -3.46    385
+E2a        PASS             3.32    0.355     -8.5    1.32       0.294      -3.61    385
+E2b        PASS             6.95     0.77     -6.6    2.68       0.571      -3.23     12
+E3         PASS              n/a      n/a      n/a   1.511         n/a        n/a    350
+  E3 win_rate=0.8171  expectancy_bps=2.335
+    E3 ano 2025: n=225 PF=1.729 win_rate=0.8311
+    E3 ano 2026: n=125 PF=1.221 win_rate=0.792
+
+Anomalias / observacoes:
+  - E1 FAIL no holdout: a carteira depende de commodities agro (BGI/CCM/ICF), que viraram negativas em 2025+ (ICF L126 holdout net_ann=-18.07%, maxDD=-34.57%), enquanto WDO (net_ann=3.32%) e DI1 (net_ann=-0.28%) seguraram melhor. Motor real (DI1+agro) citado no FACTORY_REPORT nao se sustentou fora da amostra -- carteira like-for-like com E1 FALHA, mas os componentes individuais WDO (E2a) e carry WDO (E2b) PASSAM isoladamente.
+  - E2b holdout com amostra pequena (n_trades=12), consistente com a ressalva ja registrada no FACTORY_REPORT ('n pequeno nas duas pernas'). PF/net_ann favoraveis, mas erro-padrao alto dado n baixo.
+
+metrics JSON salvo em C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\b3_factory_v0\HOLDOUT\holdout_metrics.json

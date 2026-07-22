@@ -1,0 +1,110 @@
+win_flow_v0 -- Fase 0a -- build_flow_bars.py
+WINSN_DIR=C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\tick_history\WINSN
+WINQ26_DIR=C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\tick_history\WINQ26
+OUT_PARQUET=C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\win_flow_v0\phase0\flow_bars_1min.parquet
+
+==============================================================================
+ETAPA 1 -- QA cobertura bid/ask (WINSN, amostra de dias espalhados)
+==============================================================================
+n arquivos WINSN totais: 256
+amostra QA: 20 dias
+
+dia                         n_trades   cov_bidask_ok
+2025-07-14                    229702           0.0%
+2025-07-31                   1437091           0.0%
+2025-08-19                   1510444           0.0%
+2025-09-08                   1380012           0.0%
+2025-09-25                   1483657           0.0%
+2025-10-15                   1612992           0.0%
+2025-11-03                   1359787           0.0%
+2025-11-21                   1643070           0.0%
+2025-12-11                   1717109           0.0%
+2026-01-05                   1662208           0.0%
+2026-01-23                   2047736           0.0%
+2026-02-11                   2127744           0.0%
+2026-03-05                   2775964           0.0%
+2026-03-24                   2551431           0.0%
+2026-04-13                   2044274           0.0%
+2026-05-05                   1892537           0.0%
+2026-05-22                   1757695           0.0%
+2026-06-12                   1927683           0.0%
+2026-07-01                   1914581           0.0%
+2026-07-21                   1357752           0.0%
+
+cobertura pooled (soma ticks validos / soma ticks amostra): 0.00%
+threshold de decisao: 90%
+>>> CLASSIFICADOR ESCOLHIDO: tick-rule puro
+
+==============================================================================
+ETAPA 2 -- Validacao contra verdade (WINQ26, flags reais de agressor)
+==============================================================================
+classificador aplicado (mesmo da etapa 1, ignorando flags): tick-rule puro
+
+n arquivos WINQ26: 9
+
+dia              n_valid   n_ambig  n_unclass  acc_trade    acc_vol
+2026-07-09       1629661    117845         27     81.5%      85.5%
+2026-07-10       1793419    143102         44     78.9%      83.5%
+2026-07-13       1744395    115877         59     80.8%      84.9%
+2026-07-14       1725124    129196         65     79.4%      84.1%
+2026-07-15       1649814    110836         55     81.6%      85.5%
+2026-07-16       1747207    108999         50     80.4%      84.9%
+2026-07-17       1627199    127965         67     80.6%      85.0%
+2026-07-20       1593428    106429         45     81.7%      85.1%
+2026-07-21       1333263     81218         25     82.6%      86.0%
+
+total ticks excluidos por flag ambigua/ausente (ambos ou nenhum): 1041467
+total ticks excluidos por classificador nao-classificado (tie sem historico): 437
+
+acuracia media por trade (media simples dos 9 dias): 80.85%
+acuracia media ponderada por volume (media simples dos dias): 84.95%
+acuracia pooled por trade (todos os ticks juntos): 80.78%
+acuracia pooled ponderada por volume: 84.91%
+
+GATE G4 (acuracia media por trade >= 70%): PASSOU  (obtido: 80.85%)
+
+==============================================================================
+ETAPA 3 -- Construcao das flow-bars 1min (WINSN, 256 dias)
+==============================================================================
+n arquivos WINSN: 256
+
+[25/256] processados (13s decorridos)...
+[50/256] processados (26s decorridos)...
+[75/256] processados (41s decorridos)...
+[100/256] processados (55s decorridos)...
+[125/256] processados (71s decorridos)...
+[150/256] processados (89s decorridos)...
+[175/256] processados (109s decorridos)...
+[200/256] processados (128s decorridos)...
+[225/256] processados (146s decorridos)...
+[250/256] processados (163s decorridos)...
+[256/256] processados (167s decorridos)...
+
+tempo total etapa 3: 167s
+parquet salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\win_flow_v0\phase0\flow_bars_1min.parquet
+shape final: (143664, 9)
+
+==============================================================================
+ETAPA 4 -- QA final de sanidade
+==============================================================================
+dias processados com sucesso: 256 / 256
+dias com problemas/anomalias: 0
+
+distribuicao de n_bars/dia:
+  min=233  p25=562  mediana=565  p75=565  max=566  media=561.2
+
+total de minutos (barras) no parquet: 143664
+% minutos com ofi NaN (buy_vol+sell_vol==0): 0.00%
+% minutos com large_ofi NaN: 0.00%
+
+  manha (09:00-13:00): n_validos=60560  mediana=-0.0004  Q1=-0.1389  Q3=0.1366  mean=-0.0014
+  tarde (13:00-18:30): n_validos=83104  mediana=0.0020  Q1=-0.1733  Q3=0.1734  mean=0.0002
+
+==============================================================================
+RESUMO FINAL
+==============================================================================
+cobertura bid/ask (amostra 20 dias, pooled): 0.00%
+classificador escolhido: tick-rule puro
+GATE G4: PASSOU  (acuracia media por trade = 80.85%, threshold=70%)
+flow-bars: 143664 barras, 256 dias unicos
+

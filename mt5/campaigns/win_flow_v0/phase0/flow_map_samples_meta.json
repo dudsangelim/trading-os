@@ -1,0 +1,158 @@
+{
+  "n_tests_total": 36,
+  "grid": "09:05-17:30 every 5min",
+  "holdout_excluded_rows": 42812,
+  "holdout_excluded_days": 76,
+  "h1_days": 99,
+  "h2_days": 81,
+  "decision": "premise_refuted",
+  "g1_pass_combos": [],
+  "g2_pass_combos": [],
+  "g3_pass_combos": [],
+  "samples_by_combo": {
+    "OFI_k5_h5_H1": {
+      "n_samples": 9974,
+      "n_days": 99
+    },
+    "OFI_k5_h5_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "OFI_k5_h15_H1": {
+      "n_samples": 9970,
+      "n_days": 99
+    },
+    "OFI_k5_h15_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "OFI_k5_h30_H1": {
+      "n_samples": 9967,
+      "n_days": 99
+    },
+    "OFI_k5_h30_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "OFI_k15_h5_H1": {
+      "n_samples": 9776,
+      "n_days": 99
+    },
+    "OFI_k15_h5_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "OFI_k15_h15_H1": {
+      "n_samples": 9774,
+      "n_days": 99
+    },
+    "OFI_k15_h15_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "OFI_k15_h30_H1": {
+      "n_samples": 9772,
+      "n_days": 99
+    },
+    "OFI_k15_h30_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "OFI_k30_h5_H1": {
+      "n_samples": 9479,
+      "n_days": 99
+    },
+    "OFI_k30_h5_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    },
+    "OFI_k30_h15_H1": {
+      "n_samples": 9478,
+      "n_days": 99
+    },
+    "OFI_k30_h15_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    },
+    "OFI_k30_h30_H1": {
+      "n_samples": 9478,
+      "n_days": 99
+    },
+    "OFI_k30_h30_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    },
+    "LARGE_OFI_k5_h5_H1": {
+      "n_samples": 9973,
+      "n_days": 99
+    },
+    "LARGE_OFI_k5_h5_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "LARGE_OFI_k5_h15_H1": {
+      "n_samples": 9969,
+      "n_days": 99
+    },
+    "LARGE_OFI_k5_h15_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "LARGE_OFI_k5_h30_H1": {
+      "n_samples": 9966,
+      "n_days": 99
+    },
+    "LARGE_OFI_k5_h30_H2": {
+      "n_samples": 8186,
+      "n_days": 81
+    },
+    "LARGE_OFI_k15_h5_H1": {
+      "n_samples": 9773,
+      "n_days": 99
+    },
+    "LARGE_OFI_k15_h5_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "LARGE_OFI_k15_h15_H1": {
+      "n_samples": 9771,
+      "n_days": 99
+    },
+    "LARGE_OFI_k15_h15_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "LARGE_OFI_k15_h30_H1": {
+      "n_samples": 9769,
+      "n_days": 99
+    },
+    "LARGE_OFI_k15_h30_H2": {
+      "n_samples": 8024,
+      "n_days": 81
+    },
+    "LARGE_OFI_k30_h5_H1": {
+      "n_samples": 9476,
+      "n_days": 99
+    },
+    "LARGE_OFI_k30_h5_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    },
+    "LARGE_OFI_k30_h15_H1": {
+      "n_samples": 9475,
+      "n_days": 99
+    },
+    "LARGE_OFI_k30_h15_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    },
+    "LARGE_OFI_k30_h30_H1": {
+      "n_samples": 9475,
+      "n_days": 99
+    },
+    "LARGE_OFI_k30_h30_H2": {
+      "n_samples": 7781,
+      "n_days": 81
+    }
+  }
+}

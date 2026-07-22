@@ -1,0 +1,142 @@
+t3_b3_ny_open_v0 -- Fase 0 (mapa probabilistico)
+seed=42 n_boot=1000 OOS_CUTOFF=2025-01-01
+
+==============================================================================
+MERCADO: WIN
+==============================================================================
+[M5] arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WIN_cont_N_M5.parquet
+[M5] linhas brutas=100000, removidas OOS(>=2025-01-01)=43389, removidas fim-de-semana(anomalia)=0
+[M5] range apos filtro: 2022-12-14 13:45:00 -> 2024-12-30 18:20:00
+[M5] dias no calendario de dados=511, validos=508, descartados=3
+[M5] motivos de descarte: {'vol_pre_missing': 3, 'vol_post_missing': 3, 'ret_pre_missing': 3, 'ret_post_missing': 3, 'vol_pre_zero': 0}
+[M5] distribuicao EDT/EST: EDT=330, EST=178
+
+--- Analise 1: V-gate (estrutura, mediana vol_ratio) ---
+V1 mediana vol_ratio (todo IS M5): 1.0416 IC95=[1.0043, 1.0946] n=508
+    ano=2022 n=11 (<60, nao entra no V2)
+V2  ano=2023 n=247 mediana=1.0486 IC95=[1.0032, 1.1299]
+V2  ano=2024 n=250 mediana=1.0287 IC95=[0.9530, 1.0795]
+    EST n=178 mediana vol_ratio=1.1344 IC95=[1.0425, 1.2610]
+    EDT n=330 mediana vol_ratio=1.0073 IC95=[0.9491, 1.0488]
+
+--- V3: NY open vs placebo 14:30 ---
+dias com placebo valido: 508 (sem placebo: 0)
+mediana vol_ratio NY-open  = 1.0416 IC95=[1.0043,1.0946]
+mediana vol_ratio placebo  = 0.9358 IC95=[0.8788,0.9833]
+
+--- V4: perfil event-time (pico pos-T0 em EDT e EST?) ---
+    EDT: offset de pico |ret5m| = 5min (valor=0.001251)
+    EST: offset de pico |ret5m| = -55min (valor=0.001331)
+
+--- Perfil event-time completo (offset: media|ret5m| EDT / EST / n) ---
+    offset= -60min  EDT=0.000595(n=330)  EST=0.000850(n=178)
+    offset= -55min  EDT=0.001062(n=330)  EST=0.001331(n=178)
+    offset= -50min  EDT=0.000624(n=330)  EST=0.001086(n=178)
+    offset= -45min  EDT=0.000656(n=330)  EST=0.001039(n=178)
+    offset= -40min  EDT=0.000612(n=330)  EST=0.000787(n=178)
+    offset= -35min  EDT=0.000598(n=330)  EST=0.000784(n=178)
+    offset= -30min  EDT=0.000577(n=330)  EST=0.000799(n=178)
+    offset= -25min  EDT=0.000875(n=330)  EST=0.000857(n=178)
+    offset= -20min  EDT=0.001026(n=330)  EST=0.000830(n=178)
+    offset= -15min  EDT=0.001015(n=330)  EST=0.000875(n=178)
+    offset= -10min  EDT=0.001241(n=330)  EST=0.000875(n=178)
+    offset=  -5min  EDT=0.001047(n=330)  EST=0.000722(n=178)
+    offset=  +0min  EDT=0.001010(n=330)  EST=0.000878(n=178)
+    offset=  +5min  EDT=0.001251(n=330)  EST=0.001226(n=178)
+    offset= +10min  EDT=0.001109(n=330)  EST=0.000889(n=178)
+    offset= +15min  EDT=0.001061(n=330)  EST=0.001003(n=178)
+    offset= +20min  EDT=0.001030(n=330)  EST=0.000798(n=178)
+    offset= +25min  EDT=0.000954(n=330)  EST=0.000878(n=178)
+    offset= +30min  EDT=0.000837(n=330)  EST=0.000733(n=178)
+    offset= +35min  EDT=0.001013(n=330)  EST=0.001039(n=178)
+    offset= +40min  EDT=0.000862(n=330)  EST=0.000722(n=178)
+    offset= +45min  EDT=0.000856(n=330)  EST=0.000747(n=178)
+    offset= +50min  EDT=0.000794(n=330)  EST=0.000640(n=178)
+    offset= +55min  EDT=0.000802(n=330)  EST=0.000731(n=178)
+    offset= +60min  EDT=0.000788(n=330)  EST=0.000648(n=178)
+    offset= +65min  EDT=0.000817(n=330)  EST=0.000668(n=178)
+    offset= +70min  EDT=0.000699(n=330)  EST=0.000684(n=178)
+    offset= +75min  EDT=0.000703(n=330)  EST=0.000714(n=178)
+    offset= +80min  EDT=0.000666(n=330)  EST=0.000590(n=178)
+    offset= +85min  EDT=0.000674(n=330)  EST=0.000574(n=178)
+    offset= +90min  EDT=0.000649(n=330)  EST=0.000580(n=178)
+
+V-GATE [WIN]: V1=False V2=False V3=True V4=False  ->  V_PASS=False
+
+V-gate falhou -> P-gate NAO avaliado (regra pre-registrada).
+
+>>> DECISAO [WIN]: premise_refuted
+
+==============================================================================
+MERCADO: WDO
+==============================================================================
+[M5] arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WDO_cont_N_M5.parquet
+[M5] linhas brutas=100000, removidas OOS(>=2025-01-01)=43794, removidas fim-de-semana(anomalia)=0
+[M5] range apos filtro: 2022-12-26 13:00:00 -> 2024-12-30 18:25:00
+[M5] dias no calendario de dados=503, validos=500, descartados=3
+[M5] motivos de descarte: {'vol_pre_missing': 3, 'vol_post_missing': 3, 'ret_pre_missing': 3, 'ret_post_missing': 3, 'vol_pre_zero': 0}
+[M5] distribuicao EDT/EST: EDT=330, EST=170
+
+--- Analise 1: V-gate (estrutura, mediana vol_ratio) ---
+V1 mediana vol_ratio (todo IS M5): 1.0041 IC95=[0.9624, 1.0559] n=500
+    ano=2022 n=3 (<60, nao entra no V2)
+V2  ano=2023 n=247 mediana=1.0545 IC95=[0.9782, 1.1148]
+V2  ano=2024 n=250 mediana=0.9528 IC95=[0.9178, 1.0270]
+    EST n=170 mediana vol_ratio=1.0573 IC95=[0.9653, 1.1455]
+    EDT n=330 mediana vol_ratio=0.9975 IC95=[0.9322, 1.0449]
+
+--- V3: NY open vs placebo 14:30 ---
+dias com placebo valido: 500 (sem placebo: 0)
+mediana vol_ratio NY-open  = 1.0041 IC95=[0.9624,1.0559]
+mediana vol_ratio placebo  = 1.0009 IC95=[0.9428,1.0736]
+
+--- V4: perfil event-time (pico pos-T0 em EDT e EST?) ---
+    EDT: offset de pico |ret5m| = -55min (valor=0.001103)
+    EST: offset de pico |ret5m| = -55min (valor=0.000878)
+
+--- Perfil event-time completo (offset: media|ret5m| EDT / EST / n) ---
+    offset= -60min  EDT=0.000664(n=330)  EST=0.000573(n=170)
+    offset= -55min  EDT=0.001103(n=330)  EST=0.000878(n=170)
+    offset= -50min  EDT=0.000754(n=330)  EST=0.000748(n=170)
+    offset= -45min  EDT=0.000875(n=330)  EST=0.000736(n=170)
+    offset= -40min  EDT=0.000769(n=330)  EST=0.000706(n=170)
+    offset= -35min  EDT=0.000688(n=330)  EST=0.000673(n=170)
+    offset= -30min  EDT=0.000779(n=330)  EST=0.000573(n=170)
+    offset= -25min  EDT=0.000783(n=330)  EST=0.000688(n=170)
+    offset= -20min  EDT=0.000635(n=330)  EST=0.000583(n=170)
+    offset= -15min  EDT=0.000657(n=330)  EST=0.000647(n=170)
+    offset= -10min  EDT=0.000651(n=330)  EST=0.000628(n=170)
+    offset=  -5min  EDT=0.000680(n=330)  EST=0.000555(n=170)
+    offset=  +0min  EDT=0.000594(n=330)  EST=0.000555(n=170)
+    offset=  +5min  EDT=0.000689(n=330)  EST=0.000684(n=170)
+    offset= +10min  EDT=0.000679(n=330)  EST=0.000631(n=170)
+    offset= +15min  EDT=0.000727(n=330)  EST=0.000658(n=170)
+    offset= +20min  EDT=0.000645(n=330)  EST=0.000617(n=170)
+    offset= +25min  EDT=0.000645(n=330)  EST=0.000585(n=170)
+    offset= +30min  EDT=0.000582(n=330)  EST=0.000556(n=170)
+    offset= +35min  EDT=0.000768(n=330)  EST=0.000804(n=170)
+    offset= +40min  EDT=0.000653(n=330)  EST=0.000586(n=170)
+    offset= +45min  EDT=0.000631(n=330)  EST=0.000623(n=170)
+    offset= +50min  EDT=0.000609(n=330)  EST=0.000597(n=170)
+    offset= +55min  EDT=0.000612(n=330)  EST=0.000596(n=170)
+    offset= +60min  EDT=0.000567(n=330)  EST=0.000514(n=170)
+    offset= +65min  EDT=0.000626(n=330)  EST=0.000546(n=170)
+    offset= +70min  EDT=0.000567(n=330)  EST=0.000518(n=170)
+    offset= +75min  EDT=0.000543(n=330)  EST=0.000567(n=170)
+    offset= +80min  EDT=0.000567(n=330)  EST=0.000493(n=170)
+    offset= +85min  EDT=0.000515(n=330)  EST=0.000486(n=170)
+    offset= +90min  EDT=0.000500(n=330)  EST=0.000545(n=170)
+
+V-GATE [WDO]: V1=False V2=False V3=True V4=False  ->  V_PASS=False
+
+V-gate falhou -> P-gate NAO avaliado (regra pre-registrada).
+
+>>> DECISAO [WDO]: premise_refuted
+
+==============================================================================
+RESUMO FINAL
+==============================================================================
+WIN: premise_refuted
+WDO: premise_refuted
+
+DECISAO GERAL DA CAMPANHA: PREMISE_REFUTED (V-gate falhou em ambos os mercados)

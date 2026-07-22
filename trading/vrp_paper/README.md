@@ -1,9 +1,13 @@
-# vrp_paper — short-vol semanal Deribit (PAPER)
+# vrp_paper — short-vol semanal Deribit/Binance (PAPER)
 
 Vende **1 straddle ATM BTC** toda sexta ~08:05 UTC (vencimento na sexta seguinte, 08:00),
 no **best bid real** da Deribit (API pública, sem chave), com **hedge de delta diário**
 via perp paper ao index price (custo 6bps/ajuste). Settle no **delivery price oficial**
 (fallback: index, se não publicado em 3h). Marca a mercado toda hora com tickers reais.
+
+A variante Binance usa o mesmo motor e sinal DVOL, mas lê opções BTC/USDT da API
+pública Binance, contabiliza prêmio/taxas em USDT e arredonda o paper para o lote
+executável de 0,01 BTC. O estado fica isolado em `data_binance/`.
 
 - Capital: $1000 paper, contratos fracionários (real exige mín. 0,1 contrato ≈ US$13k+).
 - Sizing: `contratos = capital/S × min(0,55/DVOL, 2)` (escala por vol).
@@ -20,10 +24,27 @@ curl localhost:8108/healthz            # health
 curl localhost:8108/status             # estado completo
 docker exec trading_vrp_paper python -m trading.vrp_paper.main --status
 docker logs trading_vrp_paper --tail=30
+
+# Binance (porta/estado próprios)
+curl localhost:8112/healthz
+docker exec trading_vrp_binance_paper python -m trading.vrp_paper.main --status
+docker logs trading_vrp_binance_paper --tail=30
 ```
 
 Estado em `data/state.json`; `trades.csv` (open/settle) e `equity.csv` (MtM horário).
 Telegram tag `VRP` (startup/open/settle/daily 08:05/DD>15%/4 losses).
+Na variante Binance, a tag é `VRPBINANCE`.
+
+## Diferenças da variante Binance
+
+- Ative com `VRP_VENUE=binance`; default continua `deribit`.
+- Contrato BTC tem unidade 1 e lote/step de 0,01; com US$2 mil o sizing varia
+  aproximadamente entre 0,01 e 0,06 BTC conforme DVOL (0,04 no smoke de 18/07).
+- Prêmio, mark e liquidação são em USDT, não BTC.
+- Entrada: 0,03% do underlying, limitada a 10% do prêmio por perna.
+- Exercício: 0,015% do settlement apenas na perna ITM.
+- O DVOL e o slope de superfície continuam vindo da Deribit como sinal externo;
+  a execução e toda a marcação da posição vêm da Binance.
 
 ## Slope conditioning (2026-07-05 — research/options_edge2)
 

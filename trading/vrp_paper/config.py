@@ -1,7 +1,8 @@
 """VRP paper trader — configuration.
 
-Weekly short ATM straddle on Deribit BTC options, delta-hedged daily via a
-paper perp at the Deribit index price. PAPER ONLY — public API, no keys.
+Weekly short ATM straddle on BTC options (Deribit or Binance), delta-hedged
+daily via a paper perp at the venue index price. PAPER ONLY — public API,
+no keys.
 
 Cycle: every Friday ~08:05 UTC sells the ATM straddle expiring next Friday at
 the REAL best bid; every day ~08:05 UTC re-hedges net delta; at expiry settles
@@ -18,6 +19,10 @@ from pathlib import Path
 
 DATA_DIR = Path(os.environ.get("VRP_DATA_DIR", "/data"))
 LOG_DIR = Path(os.environ.get("VRP_LOG_DIR", "/logs"))
+VENUE = os.environ.get("VRP_VENUE", "deribit").strip().lower()
+if VENUE not in ("deribit", "binance"):
+    raise ValueError(f"VRP_VENUE must be deribit or binance, got {VENUE!r}")
+VENUE_LABEL = VENUE.capitalize()
 
 # ── capital / sizing ─────────────────────────────────────────────────────────
 INITIAL_CAPITAL = float(os.environ.get("VRP_CAPITAL", "1000.0"))
@@ -61,3 +66,12 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 TELEGRAM_TAG = os.environ.get("VRP_TELEGRAM_TAG", "VRP").strip()
 
 DERIBIT_BASE = os.environ.get("VRP_DERIBIT_BASE", "https://www.deribit.com/api/v2")
+BINANCE_BASE = os.environ.get("VRP_BINANCE_BASE", "https://eapi.binance.com")
+
+# Binance Options: premium/settlement are USDT. The transaction fee is 3 bps
+# of underlying, capped at 10% of premium; exercise is 1.5 bps of settlement
+# value and only applies to an exercised (ITM) option. Contract unit is 1 BTC,
+# with a 0.01 BTC minimum/step for the weekly BTC contracts observed in 07/2026.
+BINANCE_FEE_TRADE_RATE = float(os.environ.get("VRP_BINANCE_FEE_TRADE_RATE", "0.0003"))
+BINANCE_FEE_TRADE_CAP = float(os.environ.get("VRP_BINANCE_FEE_TRADE_CAP", "0.10"))
+BINANCE_FEE_EXERCISE_RATE = float(os.environ.get("VRP_BINANCE_FEE_EXERCISE_RATE", "0.00015"))

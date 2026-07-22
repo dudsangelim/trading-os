@@ -1,7 +1,7 @@
 """VRP paper trader — main loop.
 
 Cycle every hour at :05 UTC (marks + health). On the 08:05 cycle:
-  1. settle an expired straddle (official delivery price; retries if unpublished);
+  1. settle an expired straddle (official venue price; retries if unpublished);
   2. re-hedge net delta via paper perp;
   3. Fridays, if flat: sell the next-Friday ATM straddle at the real best bid.
 
@@ -158,6 +158,7 @@ def run_cycle(book: E.Book, first_run: bool = False) -> None:
         N.notify_daily(equity_mtm, book, hedge_info, max_dd)
 
     _health.update({"status": "ok", "equity": round(equity_mtm, 2),
+                    "venue": C.VENUE,
                     "pnl_total": round(equity_mtm - C.INITIAL_CAPITAL, 2),
                     "max_dd": round(max_dd, 4),
                     "position": bool(book.position),

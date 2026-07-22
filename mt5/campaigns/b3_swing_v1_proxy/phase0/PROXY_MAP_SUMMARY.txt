@@ -1,0 +1,279 @@
+b3_swing_v1_proxy -- Fase 0 (mapa das teses S1-S4 sobre proxies publicas)
+seed=42 n_boot=1000
+DISCOVERY=2000-01-01->2018-12-31 (H1<=2009-12-31, H2 ate 2018-12-31)
+CONFIRM=2019-01-01->2024-12-31
+REAL-CHECK (futuros reais ADJprop)=2021-07-19->2024-12-31
+HARD_CUTOFF (nada alem disso, nenhuma serie)=2024-12-31
+
+proxy_raw.parquet: linhas brutas=6578 removidas(>2024-12-31)=387 removidas_fim_de_semana=0
+range apos filtro: 2000-01-03 -> 2024-12-30
+DISCOVERY n=4699 (H1 n=2476, H2 n=2223)  CONFIRM n=1492
+real WIN: linhas brutas=1248 removidas(fora REAL-CHECK window)=385 n_final=863 range=2021-07-19->2024-12-30
+real WDO: linhas brutas=1248 removidas(fora REAL-CHECK window)=385 n_final=863 range=2021-07-19->2024-12-30
+
+##############################################################################
+# S1 -- CARRY (WDO apenas, per pre-registro)
+##############################################################################
+
+==============================================================================
+S1 -- CARRY ESTRUTURAL [WDO] (tese e FX-especifica; WIN nao avaliado, per pre-registro)
+==============================================================================
+DISCOVERY: media=-2.176 bps/dia IC95=[-4.956,0.586] n=4698
+H1: media=-4.375 bps/dia IC95=[-8.410,-0.374] n=2475
+H2: media=0.273 bps/dia IC95=[-3.445,3.823] n=2223
+por decada:
+  2000s: n=2475 media=-4.375 bps/dia IC95=[-8.410,-0.374]
+  2010s: n=2223 media=0.273 bps/dia IC95=[-3.445,3.823]
+GATE DISCOVERY S1 [WDO]: media<=-1.5bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+CASCATA S1 [WDO]: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED
+S1 [WDO] ADVANCE_CANDIDATE=False
+##############################################################################
+# MERCADO: WIN
+##############################################################################
+
+==============================================================================
+S2 -- TIME-SERIES MOMENTUM [WIN]
+==============================================================================
+L= 21 F= 5 n_grid= 935 n_up= 465 n_down= 470 | up=0.687 down=-0.509 spread=1.197 bps/dia IC95=[-8.117,11.293]
+         H1: spread=2.597 bps/dia (n=491) | H2: spread=-0.947 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=21 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L= 21 F=21 n_grid= 222 n_up= 114 n_down= 108 | up=2.668 down=-2.845 spread=5.513 bps/dia IC95=[-4.618,14.796]
+         H1: spread=7.676 bps/dia (n=117) | H2: spread=2.652 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA L=21 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L= 63 F= 5 n_grid= 927 n_up= 479 n_down= 448 | up=2.212 down=-2.271 spread=4.483 bps/dia IC95=[-4.728,14.748]
+         H1: spread=10.041 bps/dia (n=483) | H2: spread=-2.159 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=63 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L= 63 F=21 n_grid= 220 n_up= 115 n_down= 105 | up=1.497 down=-1.533 spread=3.029 bps/dia IC95=[-5.854,12.097]
+         H1: spread=9.954 bps/dia (n=115) | H2: spread=-5.272 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=63 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=126 F= 5 n_grid= 914 n_up= 413 n_down= 501 | up=-0.279 down=0.440 spread=-0.718 bps/dia IC95=[-10.067,8.676]
+         H1: spread=4.586 bps/dia (n=470) | H2: spread=-7.660 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=126 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=126 F=21 n_grid= 217 n_up= 102 n_down= 115 | up=0.908 down=-0.660 spread=1.569 bps/dia IC95=[-7.825,11.150]
+         H1: spread=9.558 bps/dia (n=112) | H2: spread=-7.929 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=126 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=252 F= 5 n_grid= 889 n_up= 423 n_down= 466 | up=3.215 down=-2.433 spread=5.647 bps/dia IC95=[-4.494,15.431]
+         H1: spread=8.106 bps/dia (n=445) | H2: spread=1.944 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA L=252 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=252 F=21 n_grid= 211 n_up= 103 n_down= 108 | up=4.947 down=-4.186 spread=9.132 bps/dia IC95=[-1.038,18.388]
+         H1: spread=10.528 bps/dia (n=106) | H2: spread=6.674 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA L=252 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+S2 [WIN]: any_combo_advance=False
+
+==============================================================================
+S3 -- REVERSAO CURTO PRAZO [WIN]
+==============================================================================
+P=3 F=1 n_grid=4695 n_Q1= 939 n_Q5= 939 | Q1=12.683 Q5=-0.778 spread(Q1-Q5)=13.460 bps/dia IC95=[-4.449,30.613]
+         H1: spread=18.871 bps/dia (n=990) | H2: spread=16.880 bps/dia (n=890)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=3 F=1: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=3 F=3 n_grid=1565 n_Q1= 313 n_Q5= 313 | Q1=8.981 Q5=-4.228 spread(Q1-Q5)=13.209 bps/dia IC95=[-2.523,28.383]
+         H1: spread=24.066 bps/dia (n=330) | H2: spread=5.612 bps/dia (n=296)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=3 F=3: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=3 F=5 n_grid= 939 n_Q1= 188 n_Q5= 188 | Q1=9.665 Q5=-2.674 spread(Q1-Q5)=12.339 bps/dia IC95=[-3.780,29.160]
+         H1: spread=19.662 bps/dia (n=198) | H2: spread=6.765 bps/dia (n=178)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=3 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=5 F=1 n_grid=4693 n_Q1= 939 n_Q5= 939 | Q1=8.562 Q5=-3.951 spread(Q1-Q5)=12.513 bps/dia IC95=[-4.167,31.836]
+         H1: spread=17.290 bps/dia (n=989) | H2: spread=6.651 bps/dia (n=890)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=5 F=1: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=5 F=3 n_grid=1564 n_Q1= 313 n_Q5= 313 | Q1=21.094 Q5=-6.838 spread(Q1-Q5)=27.933 bps/dia IC95=[9.995,46.344]
+         H1: spread=36.469 bps/dia (n=330) | H2: spread=17.781 bps/dia (n=296)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=495 spread=7.031 bps/dia IC95=[-16.002,30.544] -> PASS=True
+         G3 (n_removed=31): spread=19.793 bps/dia IC95=[6.276,33.688] -> mag>=2.0bps=True
+         REAL-CHECK: n_grid=285 spread=13.238 bps/dia (magnitude reportada, sem exigencia de IC) -> mesmo_sinal_discovery=True
+         CASCATA P=5 F=3: DISCOVERY=PASS CONFIRM=PASS G3=PASS REAL_CHECK=PASS -> ADVANCE_CANDIDATE=True
+P=5 F=5 n_grid= 938 n_Q1= 188 n_Q5= 188 | Q1=13.434 Q5=-1.276 spread(Q1-Q5)=14.709 bps/dia IC95=[-2.081,29.977]
+         H1: spread=18.278 bps/dia (n=198) | H2: spread=7.100 bps/dia (n=178)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=5 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+S3 [WIN]: any_combo_advance=True
+
+==============================================================================
+S4-TOM -- TURN OF MONTH [WIN]
+==============================================================================
+dias TOM=912 dias nao-TOM=3786 (total=4698)
+DISCOVERY: mean_TOM=18.598 mean_nonTOM=-4.336 diff=22.934 bps/dia IC95=[10.672,34.405]
+H1: diff=29.436 bps/dia n_tom=480 n_nontom=1995
+H2: diff=15.711 bps/dia n_tom=432 n_nontom=1791
+GATE DISCOVERY S4-TOM [WIN]: diff>=5.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+CONFIRM: diff=-2.355 bps/dia IC95=[-19.402,14.698] n_tom=288 n_nontom=1204 -> PASS=False
+CASCATA S4-TOM [WIN]: DISCOVERY=PASS CONFIRM=FAIL G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED
+S4-TOM [WIN] ADVANCE_CANDIDATE=False
+
+==============================================================================
+S4-DOW -- DIA DA SEMANA [WIN]
+==============================================================================
+  Mon: n=935 media=-11.984 bps IC95=[-24.572,0.668]
+  Tue: n=937 media=2.730 bps IC95=[-8.845,13.578]
+  Wed: n=957 media=5.646 bps IC95=[-5.726,17.107]
+  Thu: n=935 media=-1.069 bps IC95=[-12.926,10.093]
+  Fri: n=934 media=5.126 bps IC95=[-4.555,14.838]
+melhor dia (DISCOVERY) = Wed (5.646 bps); pior dia = Mon (-11.984 bps)
+spread(melhor-pior) DISCOVERY = 17.630 bps IC95=[1.592,33.088]
+  H1: melhor=Fri (12.634 bps) pior=Mon (-16.474 bps)
+  H2: melhor=Wed (3.927 bps) pior=Mon (-6.996 bps)
+GATE DISCOVERY S4-DOW [WIN]: |spread|>=8.0bps=True IC_excl_0_ambos_extremos=False mesmo_ranking_H1H2=False -> PASS=False
+CASCATA S4-DOW [WIN]: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED
+S4-DOW [WIN] ADVANCE_CANDIDATE=False
+
+##############################################################################
+# MERCADO: WDO
+##############################################################################
+
+==============================================================================
+S2 -- TIME-SERIES MOMENTUM [WDO]
+==============================================================================
+L= 21 F= 5 n_grid= 935 n_up= 372 n_down= 563 | up=2.924 down=-5.417 spread=8.341 bps/dia IC95=[2.043,15.149]
+         H1: spread=10.129 bps/dia (n=491) | H2: spread=5.588 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=294 spread=-3.460 bps/dia IC95=[-13.412,6.454] -> mesmo_sinal=False mag>=1.0bps=True -> PASS=False
+         CASCATA L=21 F=5: DISCOVERY=PASS CONFIRM=FAIL G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L= 21 F=21 n_grid= 222 n_up=  88 n_down= 134 | up=2.938 down=-5.483 spread=8.420 bps/dia IC95=[2.198,14.952]
+         H1: spread=9.551 bps/dia (n=117) | H2: spread=6.391 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=70 spread=-1.756 bps/dia IC95=[-12.177,7.841] -> mesmo_sinal=False mag>=1.0bps=True -> PASS=False
+         CASCATA L=21 F=21: DISCOVERY=PASS CONFIRM=FAIL G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L= 63 F= 5 n_grid= 927 n_up= 325 n_down= 602 | up=5.794 down=-6.259 spread=12.053 bps/dia IC95=[4.891,19.831]
+         H1: spread=16.288 bps/dia (n=483) | H2: spread=7.406 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=285 spread=1.297 bps/dia IC95=[-8.558,11.658] -> mesmo_sinal=True mag>=1.0bps=True -> PASS=True
+         G3 (n_removed=46): spread=6.202 bps/dia IC95=[1.449,11.194] -> mag>=2.0bps=True
+         REAL-CHECK: n_grid=159 spread=1.543 bps/dia (magnitude reportada, sem exigencia de IC) -> mesmo_sinal_discovery=True
+         CASCATA L=63 F=5: DISCOVERY=PASS CONFIRM=PASS G3=PASS REAL_CHECK=PASS -> ADVANCE_CANDIDATE=True
+L= 63 F=21 n_grid= 220 n_up=  78 n_down= 142 | up=1.204 down=-3.862 spread=5.065 bps/dia IC95=[-1.211,11.930]
+         H1: spread=11.580 bps/dia (n=115) | H2: spread=-2.002 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=63 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=126 F= 5 n_grid= 914 n_up= 328 n_down= 586 | up=4.500 down=-5.745 spread=10.245 bps/dia IC95=[3.921,17.320]
+         H1: spread=12.606 bps/dia (n=470) | H2: spread=7.162 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=273 spread=3.551 bps/dia IC95=[-7.879,14.415] -> mesmo_sinal=True mag>=1.0bps=True -> PASS=True
+         G3 (n_removed=46): spread=7.950 bps/dia IC95=[3.003,13.358] -> mag>=2.0bps=True
+         REAL-CHECK: n_grid=147 spread=5.764 bps/dia (magnitude reportada, sem exigencia de IC) -> mesmo_sinal_discovery=True
+         CASCATA L=126 F=5: DISCOVERY=PASS CONFIRM=PASS G3=PASS REAL_CHECK=PASS -> ADVANCE_CANDIDATE=True
+L=126 F=21 n_grid= 217 n_up=  80 n_down= 137 | up=4.368 down=-5.900 spread=10.267 bps/dia IC95=[4.287,16.973]
+         H1: spread=12.005 bps/dia (n=112) | H2: spread=7.718 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=True mesmo_sinal_H1H2=True -> PASS=True
+         CONFIRM: n_grid=65 spread=8.343 bps/dia IC95=[-1.551,18.916] -> mesmo_sinal=True mag>=1.0bps=True -> PASS=True
+         G3 (n_removed=11): spread=6.558 bps/dia IC95=[1.785,11.502] -> mag>=2.0bps=True
+         REAL-CHECK: n_grid=35 spread=6.932 bps/dia (magnitude reportada, sem exigencia de IC) -> mesmo_sinal_discovery=True
+         CASCATA L=126 F=21: DISCOVERY=PASS CONFIRM=PASS G3=PASS REAL_CHECK=PASS -> ADVANCE_CANDIDATE=True
+L=252 F= 5 n_grid= 889 n_up= 355 n_down= 534 | up=-2.020 down=-2.300 spread=0.279 bps/dia IC95=[-6.159,6.836]
+         H1: spread=-2.750 bps/dia (n=445) | H2: spread=1.486 bps/dia (n=444)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=252 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+L=252 F=21 n_grid= 211 n_up=  84 n_down= 127 | up=-2.003 down=-2.419 spread=0.416 bps/dia IC95=[-6.301,7.144]
+         H1: spread=-2.566 bps/dia (n=106) | H2: spread=1.720 bps/dia (n=105)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA L=252 F=21: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+S2 [WDO]: any_combo_advance=True
+
+==============================================================================
+S3 -- REVERSAO CURTO PRAZO [WDO]
+==============================================================================
+P=3 F=1: pulado (restricao pre-registrada WDO F>=3)
+P=3 F=3 n_grid=1565 n_Q1= 313 n_Q5= 313 | Q1=-2.721 Q5=-0.449 spread(Q1-Q5)=-2.272 bps/dia IC95=[-13.866,9.293]
+         H1: spread=-7.324 bps/dia (n=330) | H2: spread=7.753 bps/dia (n=296)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA P=3 F=3: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=3 F=5 n_grid= 939 n_Q1= 188 n_Q5= 188 | Q1=-3.728 Q5=-2.480 spread(Q1-Q5)=-1.248 bps/dia IC95=[-12.677,10.345]
+         H1: spread=5.774 bps/dia (n=198) | H2: spread=-6.759 bps/dia (n=178)
+         GATE DISCOVERY: mag>=2.0bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA P=3 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=5 F=1: pulado (restricao pre-registrada WDO F>=3)
+P=5 F=3 n_grid=1564 n_Q1= 313 n_Q5= 313 | Q1=1.184 Q5=-2.463 spread(Q1-Q5)=3.647 bps/dia IC95=[-8.070,15.328]
+         H1: spread=-1.035 bps/dia (n=330) | H2: spread=9.181 bps/dia (n=296)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+         CASCATA P=5 F=3: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+P=5 F=5 n_grid= 938 n_Q1= 188 n_Q5= 188 | Q1=-2.565 Q5=3.730 spread(Q1-Q5)=-6.295 bps/dia IC95=[-15.849,4.209]
+         H1: spread=-11.412 bps/dia (n=198) | H2: spread=-2.711 bps/dia (n=178)
+         GATE DISCOVERY: mag>=2.0bps=True IC_excl_0=False mesmo_sinal_H1H2=True -> PASS=False
+         CASCATA P=5 F=5: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+S3 [WDO]: any_combo_advance=False
+
+==============================================================================
+S4-TOM -- TURN OF MONTH [WDO]
+==============================================================================
+dias TOM=912 dias nao-TOM=3786 (total=4698)
+DISCOVERY: mean_TOM=-9.259 mean_nonTOM=-0.469 diff=-8.789 bps/dia IC95=[-16.260,-2.192]
+H1: diff=-18.157 bps/dia n_tom=480 n_nontom=1995
+H2: diff=1.619 bps/dia n_tom=432 n_nontom=1791
+GATE DISCOVERY S4-TOM [WDO]: diff>=5.0bps=False IC_excl_0=True mesmo_sinal_H1H2=False -> PASS=False
+CASCATA S4-TOM [WDO]: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED
+S4-TOM [WDO] ADVANCE_CANDIDATE=False
+
+==============================================================================
+S4-DOW -- DIA DA SEMANA [WDO]
+==============================================================================
+  Mon: n=935 media=-3.754 bps IC95=[-9.845,2.288]
+  Tue: n=937 media=-2.123 bps IC95=[-7.914,3.346]
+  Wed: n=957 media=1.946 bps IC95=[-4.192,8.465]
+  Thu: n=935 media=-1.722 bps IC95=[-7.749,5.431]
+  Fri: n=934 media=-5.325 bps IC95=[-11.654,1.049]
+melhor dia (DISCOVERY) = Wed (1.946 bps); pior dia = Fri (-5.325 bps)
+spread(melhor-pior) DISCOVERY = 7.271 bps IC95=[-1.581,17.184]
+  H1: melhor=Wed (3.985 bps) pior=Thu (-8.495 bps)
+  H2: melhor=Thu (5.769 bps) pior=Fri (-3.436 bps)
+GATE DISCOVERY S4-DOW [WDO]: |spread|>=8.0bps=False IC_excl_0_ambos_extremos=False mesmo_ranking_H1H2=False -> PASS=False
+CASCATA S4-DOW [WDO]: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED
+S4-DOW [WDO] ADVANCE_CANDIDATE=False
+
+==============================================================================
+TABELA-RESUMO DE GATES (por tese x mercado)
+==============================================================================
+
+--- S1 (WDO apenas) ---
+S1 [WDO]: DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+--- WIN ---
+S2  (TSM):          0/8 combos avaliados (de 8 definidos) advance -> ANY_PASS=False
+S3  (reversao):     1/6 combos avaliados (de 6 definidos) advance -> ANY_PASS=True
+S4-TOM:             DISCOVERY=PASS CONFIRM=FAIL G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+S4-DOW:             DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+--- WDO ---
+S2  (TSM):          3/8 combos avaliados (de 8 definidos) advance -> ANY_PASS=True
+S3  (reversao):     0/4 combos avaliados (de 6 definidos) advance -> ANY_PASS=False
+S4-TOM:             DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+S4-DOW:             DISCOVERY=FAIL CONFIRM=NOT_EVALUATED G3=NOT_EVALUATED REAL_CHECK=NOT_EVALUATED -> ADVANCE_CANDIDATE=False
+
+==============================================================================
+CONTAGEM DE TESTES (etapa DISCOVERY) E FALSOS POSITIVOS ESPERADOS
+==============================================================================
+S1:      1 teste (WDO apenas)
+S2:      16 testes (combos L x F validos x mercado, de 16 definidos)
+S3:      10 testes (combos P x F validos x mercado, de 10 definidos com restricao WDO F>=3)
+S4-TOM:  2 testes (1 gate/mercado)
+S4-DOW:  2 testes (1 gate/mercado)
+TOTAL DISCOVERY:   31 testes com IC (contador em runtime: 31)
+Falsos positivos esperados a 5% na etapa DISCOVERY (sem nenhum efeito real): ~1.6 (~2)
+NOTA: cada combo que passa DISCOVERY ainda precisa passar CONFIRM + G3 + REAL-CHECK antes de virar candidato -- a cascata de 4 etapas e a defesa contra os falsos positivos esperados do multiple-comparisons acima. S2/S3 usam regra 'passa se >=1 combo passar a cascata inteira' -- qualquer PASS isolado ainda deve ser lido com ceticismo proporcional ao numero de combos testados.
+
+==============================================================================
+DECISAO MECANICA POR TESE
+==============================================================================
+S1: PREMISE_REFUTED (WDO nao passou a cascata completa)
+S2: ADVANCE_TO_PHASE1 (mercado(s): WDO)
+S3: ADVANCE_TO_PHASE1 (mercado(s): WIN)
+S4_TOM: PREMISE_REFUTED (nenhum mercado passou a cascata completa)
+S4_DOW: PREMISE_REFUTED (nenhum mercado passou a cascata completa)
+
+DECISAO GERAL DA CAMPANHA: ADVANCE_TO_PHASE1 (>=1 tese com >=1 mercado passando a cascata DISCOVERY+CONFIRM+G3+REAL-CHECK completa)
+
+proxy_map_results.csv: 141 linhas salvas em C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\b3_swing_v1_proxy\phase0

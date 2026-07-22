@@ -1,0 +1,193 @@
+{
+  "WIN": {
+    "market": "WIN",
+    "m5_data_meta": {
+      "n_raw": 100000,
+      "n_oos_dropped": 43389,
+      "n_weekend_dropped": 0,
+      "date_min": "2022-12-14 13:45:00",
+      "date_max": "2024-12-30 18:20:00"
+    },
+    "m5_daily_meta": {
+      "total_days": 511,
+      "kept": 508,
+      "discarded": 3,
+      "discard_reasons": {
+        "vol_pre_missing": 3,
+        "vol_post_missing": 3,
+        "ret_pre_missing": 3,
+        "ret_post_missing": 3,
+        "vol_pre_zero": 0
+      }
+    },
+    "m5_edt_est": {
+      "n_edt": 330,
+      "n_est": 178
+    },
+    "V": {
+      "V1": false,
+      "V2": false,
+      "V3": true,
+      "V4": false,
+      "V_pass": false,
+      "v_overall": {
+        "point": 1.0416449321573824,
+        "lo": 1.0043348638067213,
+        "hi": 1.094609473948739,
+        "n": 508
+      },
+      "v_by_year": {
+        "2023": {
+          "point": 1.0485515488952462,
+          "lo": 1.0031668131558087,
+          "hi": 1.129899883206583,
+          "n": 247
+        },
+        "2024": {
+          "point": 1.0287065981883852,
+          "lo": 0.9529516690971475,
+          "hi": 1.0794989076544719,
+          "n": 250
+        }
+      },
+      "v_by_dst": {
+        "EST": {
+          "point": 1.1343669968743444,
+          "lo": 1.0424806507770268,
+          "hi": 1.2610054895207035,
+          "n": 178
+        },
+        "EDT": {
+          "point": 1.00729157398293,
+          "lo": 0.9491446782633011,
+          "hi": 1.048804851179004,
+          "n": 330
+        }
+      },
+      "ny_vs_placebo": {
+        "ny": {
+          "point": 1.0416449321573824,
+          "lo": 1.0043348638067213,
+          "hi": 1.094609473948739,
+          "n": 508
+        },
+        "placebo": {
+          "point": 0.9357607527146472,
+          "lo": 0.8787806316418928,
+          "hi": 0.9832762121365034,
+          "n": 508
+        },
+        "n_matched": 508,
+        "n_placebo_missing": 0
+      },
+      "v4_detail": {
+        "EDT": {
+          "peak_offset": 5,
+          "peak_val": 0.0012513017593266422
+        },
+        "EST": {
+          "peak_offset": -55,
+          "peak_val": 0.0013314456025874317
+        }
+      }
+    },
+    "P": null,
+    "decision": "premise_refuted"
+  },
+  "WDO": {
+    "market": "WDO",
+    "m5_data_meta": {
+      "n_raw": 100000,
+      "n_oos_dropped": 43794,
+      "n_weekend_dropped": 0,
+      "date_min": "2022-12-26 13:00:00",
+      "date_max": "2024-12-30 18:25:00"
+    },
+    "m5_daily_meta": {
+      "total_days": 503,
+      "kept": 500,
+      "discarded": 3,
+      "discard_reasons": {
+        "vol_pre_missing": 3,
+        "vol_post_missing": 3,
+        "ret_pre_missing": 3,
+        "ret_post_missing": 3,
+        "vol_pre_zero": 0
+      }
+    },
+    "m5_edt_est": {
+      "n_edt": 330,
+      "n_est": 170
+    },
+    "V": {
+      "V1": false,
+      "V2": false,
+      "V3": true,
+      "V4": false,
+      "V_pass": false,
+      "v_overall": {
+        "point": 1.0040895716666673,
+        "lo": 0.9623854259287725,
+        "hi": 1.0558523901639307,
+        "n": 500
+      },
+      "v_by_year": {
+        "2023": {
+          "point": 1.0545014104249117,
+          "lo": 0.9782248437230984,
+          "hi": 1.11476957572034,
+          "n": 247
+        },
+        "2024": {
+          "point": 0.9528289449790341,
+          "lo": 0.9178307243842455,
+          "hi": 1.0270282325438795,
+          "n": 250
+        }
+      },
+      "v_by_dst": {
+        "EST": {
+          "point": 1.057263429241532,
+          "lo": 0.9653097371543405,
+          "hi": 1.145483550395174,
+          "n": 170
+        },
+        "EDT": {
+          "point": 0.9974647903019659,
+          "lo": 0.9322113273771652,
+          "hi": 1.0449261209104697,
+          "n": 330
+        }
+      },
+      "ny_vs_placebo": {
+        "ny": {
+          "point": 1.0040895716666673,
+          "lo": 0.9623854259287725,
+          "hi": 1.0558523901639307,
+          "n": 500
+        },
+        "placebo": {
+          "point": 1.000866973096922,
+          "lo": 0.9427705777276683,
+          "hi": 1.07362743861566,
+          "n": 500
+        },
+        "n_matched": 500,
+        "n_placebo_missing": 0
+      },
+      "v4_detail": {
+        "EDT": {
+          "peak_offset": -55,
+          "peak_val": 0.0011030299918336195
+        },
+        "EST": {
+          "peak_offset": -55,
+          "peak_val": 0.0008781017961668224
+        }
+      }
+    },
+    "P": null,
+    "decision": "premise_refuted"
+  },
+  "overall_decision": "PREMISE_REFUTED (V-gate falhou em ambos os mercados)"
+}

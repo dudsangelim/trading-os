@@ -32,12 +32,12 @@ DOW_3LEGS_API   = "http://127.0.0.1:8096"
 
 # Paper traders monitored via generic check (name, port, health_path, label)
 PAPER_TRADERS = [
-    ("rsi_reversion_paper",  8093, "/healthz", "RSI Reversion"),
     ("asian_dema_paper",     8095, "/healthz", "Asian DEMA"),
     ("sol_burst_paper",      8101, "/healthz", "SOL Burst"),
     ("btc_lead_paper",       8106, "/healthz", "BTC-Lead ETH 4h"),
     ("taker_cap_paper",      8107, "/healthz", "Taker-Cap H3"),
     ("vrp_paper",            8108, "/healthz", "VRP Straddle"),
+    ("vrp_binance_paper",    8112, "/healthz", "VRP Binance"),
 ]
 BOT_TOKEN       = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not BOT_TOKEN:

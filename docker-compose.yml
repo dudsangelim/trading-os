@@ -267,50 +267,6 @@ services:
   #     retries: 3
   #     start_period: 30s
 
-  # rsi_reversion_paper: R021-A C1 RSI Extreme Reversion 5m paper trader (SOLUSDT, $1000 / 1x)
-  # Phase 0 watcher: RSI(14)<10 LONG / >85 SHORT, exit RSI=50. Blacklist: 13-16h UTC + Tuesdays.
-  # Data via asyncpg → jarvis_postgres (candle_collector el_candles_1m → resample 5m).
-  # Stop with: docker compose stop trading-rsi-reversion-paper
-  trading-rsi-reversion-paper:
-    build:
-      context: .
-      dockerfile: trading/Dockerfile.rsi_reversion_paper
-    container_name: trading_rsi_reversion_paper
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8093:8093"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
-      - RSI_SYMBOL=SOLUSDT
-      - RSI_NOTIONAL=1000.0
-      - RSI_FEE_RT=0.0013
-      - RSI_PERIOD=14
-      - RSI_OVERSOLD=10
-      - RSI_OVERBOUGHT=85
-      - RSI_EXIT_LEVEL=50
-      - RSI_DB_HOST=jarvis_postgres
-      - RSI_DB_PORT=5432
-      - RSI_DB_USER=jarvis
-      - RSI_DB_PASS=${DB_PASS:-CHANGE_ME}
-      - RSI_DB_NAME=jarvis
-      - RSI_HEALTH_PORT=8093
-      - RSI_DATA_DIR=/data
-      - RSI_LOG_DIR=/logs
-      - TZ=UTC
-    volumes:
-      - ./trading/rsi_reversion_paper/data:/data
-      - ./trading/rsi_reversion_paper/logs:/logs
-    networks:
-      - trading_net
-      - jarvis_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8093/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
   # asian_dema_paper: R021-B Asian Session DEMA 1h paper trader (SOLUSDT, $1000 / 1x)
   # Phase 0 watcher: DEMA(13)/DEMA(34) crossover + slope filter, Asian hours 00-07h UTC.
   # Data via asyncpg → jarvis_postgres (candle_collector el_candles_1m).
@@ -550,6 +506,39 @@ services:
       - trading_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8108/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Binance variant of the same audited VRP engine. Public market data only;
+  # realistic 0.01 BTC quantity step, USDT premiums/fees, isolated paper state.
+  vrp-binance-paper:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile.vrp_paper
+    container_name: trading_vrp_binance_paper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8112:8112"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TRADING_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TRADING_ALLOWED_USERS:-}
+      - VRP_TELEGRAM_TAG=VRPBINANCE
+      - VRP_VENUE=binance
+      - VRP_CAPITAL=2000.0
+      - VRP_SIZE_MULT=1.0
+      - VRP_HEALTH_PORT=8112
+      - VRP_DATA_DIR=/data
+      - VRP_LOG_DIR=/logs
+      - TZ=UTC
+    volumes:
+      - ./trading/vrp_paper/data_binance:/data
+      - ./trading/vrp_paper/logs_binance:/logs
+    networks:
+      - trading_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8112/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
