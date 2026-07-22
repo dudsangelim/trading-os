@@ -1,0 +1,6 @@
+{"event": "session_start", "front": "WINQ26", "pdh": 175345.0, "pdl": 173500.0, "ts": "2026-07-22T12:08:56.660264+00:00"}
+{"event": "limit_reject", "side": "sell", "price": 175345.0, "retcode": 10027, "comment": "AutoTrading disabled by client", "ts": "2026-07-22T12:08:56.660264+00:00"}
+{"event": "limit_reject", "side": "buy", "price": 173500.0, "retcode": 10027, "comment": "AutoTrading disabled by client", "ts": "2026-07-22T12:08:56.660264+00:00"}
+{"event": "session_start", "front": "WINQ26", "pdh": 175345.0, "pdl": 173500.0, "ts": "2026-07-22T16:23:10.672727+00:00"}
+{"event": "limit_placed", "side": "sell", "price": 175345.0, "sl": 175785.0, "tp": 175170.0, "ticket": 2485370308, "ts": "2026-07-22T16:23:10.744305+00:00"}
+{"event": "limit_placed", "side": "buy", "price": 173500.0, "sl": 173065.0, "tp": 173675.0, "ticket": 2485370313, "ts": "2026-07-22T16:23:10.815144+00:00"}

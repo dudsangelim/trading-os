@@ -18,3 +18,8 @@
 {"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T11:21:15.307789+00:00"}
 {"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T11:21:15.808872+00:00"}
 {"event": "run_done", "targets": {"WDO": -2}, "had": {}, "carry": true, "ts": "2026-07-22T11:21:16.313350+00:00"}
+{"event": "order_error", "root": "WDO", "side": "sell", "error": "RuntimeError(\"order_send falhou: OrderSendResult(retcode=10027, deal=0, order=0, volume=0.0, price=0.0, bid=0.0, ask=0.0, comment='AutoTrading disabled by client', request_id=0, retcode_external=0, request=TradeRequest(action=1, magic=0, order=0, symbol='WDOQ26', volume=1.0, price=5091.0, stoplimit=0.0, sl=0.0, tp=0.0, deviation=5, type=1, type_filling=2, type_time=0, expiration=0, comment='E1E2P', position=0, position_by=0))\")", "ts": "2026-07-22T12:05:10.344910+00:00"}
+{"event": "run_done", "targets": {"WDO": -2}, "had": {}, "carry": true, "ts": "2026-07-22T12:05:10.344910+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": 5070.5, "deal": 1809113904, "ts": "2026-07-22T16:22:32.137399+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": 5070.5, "deal": 1809113909, "ts": "2026-07-22T16:22:32.714655+00:00"}
+{"event": "run_done", "targets": {"WDO": -2}, "had": {}, "carry": true, "ts": "2026-07-22T16:22:33.226887+00:00"}

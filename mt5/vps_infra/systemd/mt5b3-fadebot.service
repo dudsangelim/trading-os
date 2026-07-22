@@ -1,0 +1,9 @@
+[Unit]
+Description=Bot paper E3 (fade PDH/PDL WIN) via mt5_b3 - roda ate 17:35
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mt5b3/venv/bin/python /opt/mt5b3/bots/fade_win_paper.py
+TimeoutStartSec=12h

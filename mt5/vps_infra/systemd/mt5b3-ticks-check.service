@@ -1,0 +1,6 @@
+[Unit]
+Description=Watchdog: verifica se a coleta de ticks B3 de hoje aconteceu
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'f=/opt/mt5b3/data/tick_history/WINSN/WINSN_$(date +%%Y-%%m-%%d).parquet; if [ -f "$f" ]; then echo "coleta OK: $f"; rm -f /opt/mt5b3/data/ALERT_COLETA; else echo "FALHA: sem parquet de hoje ($f)" | tee /opt/mt5b3/data/ALERT_COLETA; exit 1; fi'

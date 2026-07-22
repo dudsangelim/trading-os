@@ -1,0 +1,9 @@
+[Unit]
+Description=Bot paper E2a+E2b (TSM WDO + carry) via mt5_b3
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mt5b3/venv/bin/python /opt/mt5b3/bots/eod_tsm_carry_paper.py
+TimeoutStartSec=1800

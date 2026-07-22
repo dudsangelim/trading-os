@@ -1,0 +1,9 @@
+[Unit]
+Description=Coleta diaria de ticks B3 (WIN/WDO) via container mt5_b3
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mt5b3/venv/bin/python /opt/mt5b3/collect_ticks_daily.py
+TimeoutStartSec=3600

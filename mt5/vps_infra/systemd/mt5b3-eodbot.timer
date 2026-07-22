@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer 09:05 BRT dias uteis - bot EOD TSM+carry
+
+[Timer]
+OnCalendar=Mon..Fri 09:05 America/Sao_Paulo
+Persistent=false
+
+[Install]
+WantedBy=timers.target

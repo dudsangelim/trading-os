@@ -1,0 +1,13 @@
+{
+  "sleeves": {
+    "WDO": {
+      "state": -1,
+      "last_rebal_date": "2026-07-21"
+    }
+  },
+  "carry": {
+    "on": true
+  },
+  "created": "2026-07-22",
+  "last_run": "2026-07-22"
+}

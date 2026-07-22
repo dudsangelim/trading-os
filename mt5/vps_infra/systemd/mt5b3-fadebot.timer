@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer 08:55 BRT dias uteis - bot fade E3
+
+[Timer]
+OnCalendar=Mon..Fri 08:55 America/Sao_Paulo
+Persistent=false
+
+[Install]
+WantedBy=timers.target
