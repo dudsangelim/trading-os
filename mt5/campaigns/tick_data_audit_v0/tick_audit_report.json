@@ -1,0 +1,651 @@
+{
+  "probed_at": "2026-07-22T00:26:16.283294+00:00",
+  "symbols": {
+    "WIN$N": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 899351,
+          "n_last_nonzero": 899351,
+          "n_volume_nonzero": 899351,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 936978,
+          "n_last_nonzero": 936978,
+          "n_volume_nonzero": 936978,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 956420,
+          "n_last_nonzero": 956420,
+          "n_volume_nonzero": 956420,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 952837,
+          "n_last_nonzero": 952837,
+          "n_volume_nonzero": 952837,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 1026839,
+          "n_last_nonzero": 1026839,
+          "n_volume_nonzero": 1026839,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 1408608,
+          "n_last_nonzero": 1408608,
+          "n_volume_nonzero": 1408608,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 1688104,
+          "n_last_nonzero": 1688104,
+          "n_volume_nonzero": 1688104,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 1413053,
+          "n_last_nonzero": 1413053,
+          "n_volume_nonzero": 1413053,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 607318,
+          "n_last_nonzero": 607318,
+          "n_volume_nonzero": 607318,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 792466,
+          "n_last_nonzero": 792466,
+          "n_volume_nonzero": 792466,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2025-07-22"
+    },
+    "WDO$N": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 59906,
+          "n_last_nonzero": 59906,
+          "n_volume_nonzero": 59906,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 75725,
+          "n_last_nonzero": 75725,
+          "n_volume_nonzero": 75725,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 71951,
+          "n_last_nonzero": 71951,
+          "n_volume_nonzero": 71951,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 131944,
+          "n_last_nonzero": 131944,
+          "n_volume_nonzero": 131944,
+          "pct_flag_BID": 0.0,
+          "pct_flag_ASK": 0.0,
+          "pct_flag_LAST": 100.0,
+          "pct_flag_VOLUME": 100.0,
+          "pct_flag_BUY": 100.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2025-07-22"
+    },
+    "WINQ26": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 941841,
+          "n_last_nonzero": 941841,
+          "n_volume_nonzero": 941841,
+          "pct_flag_BID": 2.3,
+          "pct_flag_ASK": 2.3,
+          "pct_flag_LAST": 95.5,
+          "pct_flag_VOLUME": 95.5,
+          "pct_flag_BUY": 48.4,
+          "pct_flag_SELL": 49.1
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 979006,
+          "n_last_nonzero": 979006,
+          "n_volume_nonzero": 979006,
+          "pct_flag_BID": 2.1,
+          "pct_flag_ASK": 2.1,
+          "pct_flag_LAST": 95.7,
+          "pct_flag_VOLUME": 95.7,
+          "pct_flag_BUY": 48.6,
+          "pct_flag_SELL": 48.9
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 1006577,
+          "n_last_nonzero": 1006577,
+          "n_volume_nonzero": 1006577,
+          "pct_flag_BID": 2.5,
+          "pct_flag_ASK": 2.5,
+          "pct_flag_LAST": 95.0,
+          "pct_flag_VOLUME": 95.0,
+          "pct_flag_BUY": 48.9,
+          "pct_flag_SELL": 48.1
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 998026,
+          "n_last_nonzero": 998026,
+          "n_volume_nonzero": 998026,
+          "pct_flag_BID": 2.3,
+          "pct_flag_ASK": 2.2,
+          "pct_flag_LAST": 95.5,
+          "pct_flag_VOLUME": 95.5,
+          "pct_flag_BUY": 47.5,
+          "pct_flag_SELL": 49.9
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 26758,
+          "n_last_nonzero": 26758,
+          "n_volume_nonzero": 26758,
+          "pct_flag_BID": 41.2,
+          "pct_flag_ASK": 50.6,
+          "pct_flag_LAST": 8.4,
+          "pct_flag_VOLUME": 8.4,
+          "pct_flag_BUY": 4.8,
+          "pct_flag_SELL": 4.4
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 58410,
+          "n_last_nonzero": 58410,
+          "n_volume_nonzero": 58410,
+          "pct_flag_BID": 46.8,
+          "pct_flag_ASK": 49.3,
+          "pct_flag_LAST": 4.0,
+          "pct_flag_VOLUME": 4.0,
+          "pct_flag_BUY": 1.7,
+          "pct_flag_SELL": 2.7
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 31347,
+          "n_last_nonzero": 31347,
+          "n_volume_nonzero": 31347,
+          "pct_flag_BID": 54.3,
+          "pct_flag_ASK": 45.8,
+          "pct_flag_LAST": 0.1,
+          "pct_flag_VOLUME": 0.1,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 535,
+          "n_last_nonzero": 0,
+          "n_volume_nonzero": 0,
+          "pct_flag_BID": 72.7,
+          "pct_flag_ASK": 52.7,
+          "pct_flag_LAST": 0.0,
+          "pct_flag_VOLUME": 0.0,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2026-01-23"
+    },
+    "WDOQ26": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 64920,
+          "n_last_nonzero": 64920,
+          "n_volume_nonzero": 64920,
+          "pct_flag_BID": 4.1,
+          "pct_flag_ASK": 3.6,
+          "pct_flag_LAST": 92.3,
+          "pct_flag_VOLUME": 92.3,
+          "pct_flag_BUY": 44.0,
+          "pct_flag_SELL": 48.3
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 82021,
+          "n_last_nonzero": 82021,
+          "n_volume_nonzero": 82021,
+          "pct_flag_BID": 4.1,
+          "pct_flag_ASK": 3.6,
+          "pct_flag_LAST": 92.3,
+          "pct_flag_VOLUME": 92.3,
+          "pct_flag_BUY": 43.1,
+          "pct_flag_SELL": 49.4
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 85099,
+          "n_last_nonzero": 85099,
+          "n_volume_nonzero": 85099,
+          "pct_flag_BID": 4.5,
+          "pct_flag_ASK": 4.1,
+          "pct_flag_LAST": 91.4,
+          "pct_flag_VOLUME": 91.4,
+          "pct_flag_BUY": 44.9,
+          "pct_flag_SELL": 46.8
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 6272,
+          "n_last_nonzero": 6272,
+          "n_volume_nonzero": 6272,
+          "pct_flag_BID": 49.2,
+          "pct_flag_ASK": 42.6,
+          "pct_flag_LAST": 9.6,
+          "pct_flag_VOLUME": 9.6,
+          "pct_flag_BUY": 5.3,
+          "pct_flag_SELL": 4.6
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 6499,
+          "n_last_nonzero": 6499,
+          "n_volume_nonzero": 6499,
+          "pct_flag_BID": 50.9,
+          "pct_flag_ASK": 50.2,
+          "pct_flag_LAST": 0.7,
+          "pct_flag_VOLUME": 0.7,
+          "pct_flag_BUY": 0.5,
+          "pct_flag_SELL": 0.2
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 3420,
+          "n_last_nonzero": 3420,
+          "n_volume_nonzero": 3420,
+          "pct_flag_BID": 75.4,
+          "pct_flag_ASK": 25.5,
+          "pct_flag_LAST": 4.2,
+          "pct_flag_VOLUME": 4.2,
+          "pct_flag_BUY": 3.1,
+          "pct_flag_SELL": 1.9
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2026-04-23"
+    },
+    "WINV26": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 20575,
+          "n_last_nonzero": 20575,
+          "n_volume_nonzero": 20575,
+          "pct_flag_BID": 39.0,
+          "pct_flag_ASK": 55.9,
+          "pct_flag_LAST": 5.4,
+          "pct_flag_VOLUME": 5.4,
+          "pct_flag_BUY": 3.0,
+          "pct_flag_SELL": 2.7
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 19204,
+          "n_last_nonzero": 19204,
+          "n_volume_nonzero": 19204,
+          "pct_flag_BID": 28.4,
+          "pct_flag_ASK": 62.5,
+          "pct_flag_LAST": 9.6,
+          "pct_flag_VOLUME": 9.6,
+          "pct_flag_BUY": 4.5,
+          "pct_flag_SELL": 6.0
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 42766,
+          "n_last_nonzero": 42766,
+          "n_volume_nonzero": 42766,
+          "pct_flag_BID": 50.3,
+          "pct_flag_ASK": 45.6,
+          "pct_flag_LAST": 4.3,
+          "pct_flag_VOLUME": 4.3,
+          "pct_flag_BUY": 2.8,
+          "pct_flag_SELL": 2.2
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 45790,
+          "n_last_nonzero": 45790,
+          "n_volume_nonzero": 45790,
+          "pct_flag_BID": 49.8,
+          "pct_flag_ASK": 48.5,
+          "pct_flag_LAST": 1.8,
+          "pct_flag_VOLUME": 1.8,
+          "pct_flag_BUY": 0.8,
+          "pct_flag_SELL": 1.1
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 11542,
+          "n_last_nonzero": 11542,
+          "n_volume_nonzero": 11542,
+          "pct_flag_BID": 70.0,
+          "pct_flag_ASK": 30.8,
+          "pct_flag_LAST": 0.1,
+          "pct_flag_VOLUME": 0.1,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 43049,
+          "n_last_nonzero": 43049,
+          "n_volume_nonzero": 43049,
+          "pct_flag_BID": 35.5,
+          "pct_flag_ASK": 64.7,
+          "pct_flag_LAST": 0.0,
+          "pct_flag_VOLUME": 0.0,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 196,
+          "n_last_nonzero": 0,
+          "n_volume_nonzero": 0,
+          "pct_flag_BID": 100.0,
+          "pct_flag_ASK": 16.8,
+          "pct_flag_LAST": 0.0,
+          "pct_flag_VOLUME": 0.0,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2026-03-24"
+    },
+    "WDOU26": {
+      "probes": [
+        {
+          "date": "2026-07-20",
+          "n_ticks": 3871,
+          "n_last_nonzero": 3871,
+          "n_volume_nonzero": 3871,
+          "pct_flag_BID": 55.9,
+          "pct_flag_ASK": 42.6,
+          "pct_flag_LAST": 4.6,
+          "pct_flag_VOLUME": 4.6,
+          "pct_flag_BUY": 2.6,
+          "pct_flag_SELL": 2.2
+        },
+        {
+          "date": "2026-07-15",
+          "n_ticks": 5349,
+          "n_last_nonzero": 5349,
+          "n_volume_nonzero": 5349,
+          "pct_flag_BID": 55.1,
+          "pct_flag_ASK": 41.3,
+          "pct_flag_LAST": 5.7,
+          "pct_flag_VOLUME": 5.7,
+          "pct_flag_BUY": 3.4,
+          "pct_flag_SELL": 2.7
+        },
+        {
+          "date": "2026-07-08",
+          "n_ticks": 5526,
+          "n_last_nonzero": 5526,
+          "n_volume_nonzero": 5526,
+          "pct_flag_BID": 50.4,
+          "pct_flag_ASK": 45.1,
+          "pct_flag_LAST": 6.2,
+          "pct_flag_VOLUME": 6.2,
+          "pct_flag_BUY": 3.3,
+          "pct_flag_SELL": 3.1
+        },
+        {
+          "date": "2026-06-22",
+          "n_ticks": 3770,
+          "n_last_nonzero": 3770,
+          "n_volume_nonzero": 3770,
+          "pct_flag_BID": 33.4,
+          "pct_flag_ASK": 73.1,
+          "pct_flag_LAST": 1.0,
+          "pct_flag_VOLUME": 1.0,
+          "pct_flag_BUY": 0.9,
+          "pct_flag_SELL": 0.2
+        },
+        {
+          "date": "2026-05-22",
+          "n_ticks": 544,
+          "n_last_nonzero": 544,
+          "n_volume_nonzero": 544,
+          "pct_flag_BID": 62.1,
+          "pct_flag_ASK": 61.2,
+          "pct_flag_LAST": 0.4,
+          "pct_flag_VOLUME": 0.4,
+          "pct_flag_BUY": 0.4,
+          "pct_flag_SELL": 0.4
+        },
+        {
+          "date": "2026-04-23",
+          "n_ticks": 126,
+          "n_last_nonzero": 0,
+          "n_volume_nonzero": 0,
+          "pct_flag_BID": 92.1,
+          "pct_flag_ASK": 86.5,
+          "pct_flag_LAST": 0.0,
+          "pct_flag_VOLUME": 0.0,
+          "pct_flag_BUY": 0.0,
+          "pct_flag_SELL": 0.0
+        },
+        {
+          "date": "2026-03-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2026-01-23",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-10-24",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-07-22",
+          "n_ticks": 0
+        },
+        {
+          "date": "2025-01-28",
+          "n_ticks": 0
+        },
+        {
+          "date": "2024-07-22",
+          "n_ticks": 0
+        }
+      ],
+      "earliest_probe_with_ticks": "2026-04-23"
+    }
+  }
+}

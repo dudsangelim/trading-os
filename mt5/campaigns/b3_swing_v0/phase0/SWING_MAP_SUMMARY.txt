@@ -1,0 +1,293 @@
+b3_swing_v0 -- Fase 0 (mapa das teses S1-S4)
+seed=42 n_boot=1000 OOS_CUTOFF=2025-01-01 H1_END=2023-03-31 DISCOVERY_END=2024-12-31
+
+##############################################################################
+# MERCADO: WIN
+##############################################################################
+arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WIN_cont_ADJprop_D1.parquet
+linhas brutas=1248 removidas_OOS(>=2025-01-01)=385 removidas_fim_de_semana=0
+range apos filtro: 2021-07-19 -> 2024-12-30
+DISCOVERY n=863 (H1 n=427, H2 n=436)
+
+==============================================================================
+S1 -- CARRY ESTRUTURAL [WIN]
+==============================================================================
+DISCOVERY: media=-3.579 bps/dia IC95=[-11.733,4.203] n=862
+  ano=2021 n=113 media=-16.813 bps/dia IC95=[-42.966,9.905]
+  ano=2022 n=250 media=-1.355 bps/dia IC95=[-18.857,15.877]
+  ano=2023 n=248 media=4.545 bps/dia IC95=[-10.913,18.623]
+  ano=2024 n=251 media=-7.864 bps/dia IC95=[-17.687,2.238]
+H1: media=-7.484 bps/dia IC95=[-20.908,5.663] n=426
+H2: media=0.236 bps/dia IC95=[-8.694,8.469] n=436
+skewness (DISCOVERY, ret bps): -0.0234
+5 piores dias (ret mais negativo):
+    2021-09-08  -383.5 bps
+    2021-11-26  -382.9 bps
+    2022-06-17  -361.9 bps
+    2022-10-24  -353.0 bps
+    2022-11-10  -330.4 bps
+5 melhores dias (ret mais positivo):
+    2022-10-03  547.3 bps
+    2023-04-11  446.1 bps
+    2021-12-02  391.9 bps
+    2022-11-24  351.9 bps
+    2022-10-21  287.5 bps
+GATE S1 [WIN]: media<=-1.5bps=True IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+
+==============================================================================
+S2 -- TIME-SERIES MOMENTUM [WIN]
+==============================================================================
+L= 21 F= 5 n_grid= 168 n_up=  70 n_down=  98 | up_mean=-8.108 down_mean=0.844 spread=-8.952 bps/dia IC95=[-26.244,7.396]
+         H1: n_up=30 n_down=52 spread=-10.718 bps/dia  |  H2: n_up=40 n_down=46 spread=-8.795 bps/dia
+         G3 (remove top5% |contrib|, n_removed=8): spread=-6.159 bps/dia IC95=[-21.443,8.356]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L= 21 F=21 n_grid=  40 n_up=  17 n_down=  23 | up_mean=0.600 down_mean=-5.656 spread=6.256 bps/dia IC95=[-7.993,20.590]
+         H1: n_up=8 n_down=12 spread=1.376 bps/dia  |  H2: n_up=9 n_down=11 spread=10.442 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=6.702 bps/dia IC95=[-7.007,21.641]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L= 63 F= 5 n_grid= 159 n_up=  60 n_down=  99 | up_mean=-8.201 down_mean=0.843 spread=-9.043 bps/dia IC95=[-24.046,5.505]
+         H1: n_up=21 n_down=52 spread=-16.290 bps/dia  |  H2: n_up=39 n_down=47 spread=-6.469 bps/dia
+         G3 (remove top5% |contrib|, n_removed=8): spread=-7.876 bps/dia IC95=[-19.959,4.467]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L= 63 F=21 n_grid=  38 n_up=  16 n_down=  22 | up_mean=-4.754 down_mean=-1.221 spread=-3.532 bps/dia IC95=[-19.227,11.584]
+         H1: n_up=5 n_down=13 spread=-4.602 bps/dia  |  H2: n_up=11 n_down=9 spread=-6.076 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=-3.508 bps/dia IC95=[-18.536,12.126]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L=126 F= 5 n_grid= 147 n_up=  67 n_down=  80 | up_mean=-6.669 down_mean=2.028 spread=-8.697 bps/dia IC95=[-26.198,9.591]
+         H1: n_up=15 n_down=46 spread=-10.729 bps/dia  |  H2: n_up=52 n_down=34 spread=-12.765 bps/dia
+         G3 (remove top5% |contrib|, n_removed=7): spread=-10.559 bps/dia IC95=[-26.772,4.356]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L=126 F=21 n_grid=  35 n_up=  15 n_down=  20 | up_mean=-9.896 down_mean=3.861 spread=-13.757 bps/dia IC95=[-29.270,3.823]
+         H1: n_up=3 n_down=12 spread=-21.088 bps/dia  |  H2: n_up=12 n_down=8 spread=-17.178 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=-14.566 bps/dia IC95=[-28.801,0.518]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L=252 F= 5 n_grid= 122 n_up=  48 n_down=  74 | up_mean=-8.945 down_mean=4.969 spread=-13.915 bps/dia IC95=[-27.701,0.799]
+         H1: n_up=1 n_down=34 spread=-126.209 bps/dia  |  H2: n_up=47 n_down=40 spread=-14.490 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=-10.518 bps/dia IC95=[-23.630,2.715]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L=252 F=21 n_grid=  29 n_up=  12 n_down=  17 | up_mean=-6.317 down_mean=3.790 spread=-10.107 bps/dia IC95=[-25.909,7.249]
+         H1: n_up=0 n_down=9 spread=nan bps/dia  |  H2: n_up=12 n_down=8 spread=-15.438 bps/dia
+         G3 (remove top5% |contrib|, n_removed=1): spread=-7.079 bps/dia IC95=[-22.449,9.212]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+
+S2 [WIN]: any_combo_pass=False
+
+==============================================================================
+S3 -- REVERSAO CURTO PRAZO [WIN]
+==============================================================================
+P=3 F=1 n_grid= 859 n_Q1= 172 n_Q5= 172 | Q1_mean=2.942 Q5_mean=-9.292 spread(Q1-Q5)=12.234 bps/dia IC95=[-15.200,39.989]
+         H1: n_Q1=85 n_Q5=85 spread=17.633 bps/dia  |  H2: n_Q1=87 n_Q5=87 spread=12.070 bps/dia
+         G3 (remove top5% |contrib|, n_removed=17): spread=12.467 bps/dia IC95=[-11.381,36.893]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=3 F=3 n_grid= 286 n_Q1=  58 n_Q5=  57 | Q1_mean=-7.786 Q5_mean=-5.418 spread(Q1-Q5)=-2.368 bps/dia IC95=[-27.087,21.780]
+         H1: n_Q1=29 n_Q5=29 spread=15.443 bps/dia  |  H2: n_Q1=29 n_Q5=29 spread=-11.594 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=-4.133 bps/dia IC95=[-25.182,17.128]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+P=3 F=5 n_grid= 171 n_Q1=  35 n_Q5=  34 | Q1_mean=-3.811 Q5_mean=4.643 spread(Q1-Q5)=-8.454 bps/dia IC95=[-33.529,15.639]
+         H1: n_Q1=17 n_Q5=17 spread=-0.282 bps/dia  |  H2: n_Q1=18 n_Q5=17 spread=-13.147 bps/dia
+         G3 (remove top5% |contrib|, n_removed=3): spread=-13.271 bps/dia IC95=[-33.747,6.249]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=5 F=1 n_grid= 857 n_Q1= 172 n_Q5= 172 | Q1_mean=2.508 Q5_mean=-11.886 spread(Q1-Q5)=14.394 bps/dia IC95=[-11.933,42.738]
+         H1: n_Q1=85 n_Q5=85 spread=32.399 bps/dia  |  H2: n_Q1=87 n_Q5=87 spread=7.475 bps/dia
+         G3 (remove top5% |contrib|, n_removed=17): spread=4.878 bps/dia IC95=[-17.120,29.961]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=5 F=3 n_grid= 285 n_Q1=  57 n_Q5=  57 | Q1_mean=4.266 Q5_mean=-8.972 spread(Q1-Q5)=13.238 bps/dia IC95=[-13.624,40.383]
+         H1: n_Q1=29 n_Q5=28 spread=33.933 bps/dia  |  H2: n_Q1=29 n_Q5=29 spread=0.097 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=0.988 bps/dia IC95=[-24.233,24.342]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=False -> PASS=False
+P=5 F=5 n_grid= 171 n_Q1=  35 n_Q5=  34 | Q1_mean=14.138 Q5_mean=-6.075 spread(Q1-Q5)=20.213 bps/dia IC95=[-6.850,48.115]
+         H1: n_Q1=17 n_Q5=17 spread=36.914 bps/dia  |  H2: n_Q1=18 n_Q5=17 spread=11.706 bps/dia
+         G3 (remove top5% |contrib|, n_removed=3): spread=7.769 bps/dia IC95=[-15.929,33.222]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+
+S3 [WIN]: any_combo_pass=False
+
+==============================================================================
+S4-TOM -- TURN OF MONTH [WIN]
+==============================================================================
+dias TOM=168 dias nao-TOM=694 (total=862)
+DISCOVERY: mean_TOM=-4.865 mean_nonTOM=-3.268 diff=-1.597 bps/dia IC95=[-22.450,19.225]
+H1: mean_TOM=-11.617 mean_nonTOM=-6.468 diff=-5.149 bps/dia IC95=[-38.752,30.003] n_tom=84 n_nontom=342
+H2: mean_TOM=1.888 mean_nonTOM=-0.159 diff=2.046 bps/dia IC95=[-19.425,25.823] n_tom=84 n_nontom=352
+GATE S4-TOM [WIN]: diff>=5bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+
+==============================================================================
+S4-DOW -- DIA DA SEMANA [WIN]
+==============================================================================
+  Mon: n=173 media=-4.004 bps IC95=[-21.641,14.296]
+  Tue: n=172 media=2.348 bps IC95=[-14.482,18.395]
+  Wed: n=173 media=-3.033 bps IC95=[-20.882,14.298]
+  Thu: n=173 media=-4.456 bps IC95=[-22.292,13.233]
+  Fri: n=171 media=-8.776 bps IC95=[-27.943,10.380]
+melhor dia (DISCOVERY) = Tue (2.348 bps); pior dia = Fri (-8.776 bps)
+spread(melhor-pior) DISCOVERY = 11.124 bps IC95=[-15.453,36.641]
+  H1: melhor=Wed (5.814 bps) pior=Mon (-16.473 bps)
+  H2: melhor=Tue (10.191 bps) pior=Wed (-11.777 bps)
+GATE S4-DOW [WIN]: |spread|>=8bps=True IC_excl_0_ambos_extremos=False mesmo_ranking_H1H2=False -> PASS=False
+
+##############################################################################
+# MERCADO: WDO
+##############################################################################
+arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WDO_cont_ADJprop_D1.parquet
+linhas brutas=1248 removidas_OOS(>=2025-01-01)=385 removidas_fim_de_semana=0
+range apos filtro: 2021-07-19 -> 2024-12-30
+DISCOVERY n=863 (H1 n=427, H2 n=436)
+
+==============================================================================
+S1 -- CARRY ESTRUTURAL [WDO]
+==============================================================================
+DISCOVERY: media=-0.167 bps/dia IC95=[-6.176,6.413] n=862
+  ano=2021 n=113 media=3.347 bps/dia IC95=[-14.929,21.200]
+  ano=2022 n=250 media=-5.020 bps/dia IC95=[-19.249,8.996]
+  ano=2023 n=248 media=-5.542 bps/dia IC95=[-15.013,4.733]
+  ano=2024 n=251 media=8.396 bps/dia IC95=[-1.600,18.166]
+H1: media=-3.428 bps/dia IC95=[-12.889,6.583] n=426
+H2: media=3.020 bps/dia IC95=[-4.293,9.720] n=436
+skewness (DISCOVERY, ret bps): 0.1535
+5 piores dias (ret mais negativo):
+    2022-10-03  -444.3 bps
+    2022-07-25  -262.3 bps
+    2022-05-03  -253.3 bps
+    2022-05-17  -246.9 bps
+    2021-08-24  -242.2 bps
+5 melhores dias (ret mais positivo):
+    2022-04-22  369.0 bps
+    2022-11-10  318.0 bps
+    2021-09-08  281.4 bps
+    2022-09-23  278.0 bps
+    2024-11-27  262.4 bps
+GATE S1 [WDO]: media<=-1.5bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+
+==============================================================================
+S2 -- TIME-SERIES MOMENTUM [WDO]
+==============================================================================
+L= 21 F= 5 n_grid= 168 n_up=  87 n_down=  81 | up_mean=-4.903 down_mean=4.874 spread=-9.777 bps/dia IC95=[-21.856,2.760]
+         H1: n_up=37 n_down=45 spread=-22.835 bps/dia  |  H2: n_up=50 n_down=36 spread=0.758 bps/dia
+         G3 (remove top5% |contrib|, n_removed=8): spread=-9.423 bps/dia IC95=[-19.475,1.485]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+L= 21 F=21 n_grid=  40 n_up=  21 n_down=  19 | up_mean=1.136 down_mean=-1.989 spread=3.125 bps/dia IC95=[-7.384,13.277]
+         H1: n_up=9 n_down=11 spread=-5.005 bps/dia  |  H2: n_up=12 n_down=8 spread=9.410 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=3.436 bps/dia IC95=[-5.739,12.396]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+L= 63 F= 5 n_grid= 159 n_up=  69 n_down=  90 | up_mean=0.018 down_mean=-1.525 spread=1.543 bps/dia IC95=[-11.416,13.898]
+         H1: n_up=24 n_down=49 spread=-7.357 bps/dia  |  H2: n_up=45 n_down=41 spread=5.547 bps/dia
+         G3 (remove top5% |contrib|, n_removed=8): spread=7.308 bps/dia IC95=[-3.908,18.441]
+         GATE: mag>=2bps=False IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+L= 63 F=21 n_grid=  38 n_up=  18 n_down=  20 | up_mean=-0.574 down_mean=-0.945 spread=0.371 bps/dia IC95=[-9.841,11.159]
+         H1: n_up=8 n_down=10 spread=-6.509 bps/dia  |  H2: n_up=10 n_down=10 spread=5.596 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=0.201 bps/dia IC95=[-9.663,9.531]
+         GATE: mag>=2bps=False IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=False -> PASS=False
+L=126 F= 5 n_grid= 147 n_up=  49 n_down=  98 | up_mean=3.596 down_mean=-2.169 spread=5.764 bps/dia IC95=[-8.973,20.485]
+         H1: n_up=11 n_down=50 spread=1.476 bps/dia  |  H2: n_up=38 n_down=48 spread=4.619 bps/dia
+         G3 (remove top5% |contrib|, n_removed=7): spread=5.920 bps/dia IC95=[-6.766,18.137]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+L=126 F=21 n_grid=  35 n_up=  12 n_down=  23 | up_mean=4.135 down_mean=-2.797 spread=6.932 bps/dia IC95=[-3.980,18.414]
+         H1: n_up=3 n_down=12 spread=-7.712 bps/dia  |  H2: n_up=9 n_down=11 spread=11.078 bps/dia
+         G3 (remove top5% |contrib|, n_removed=2): spread=1.384 bps/dia IC95=[-9.552,11.327]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=False -> PASS=False
+L=252 F= 5 n_grid= 122 n_up=  30 n_down=  92 | up_mean=7.965 down_mean=-2.553 spread=10.518 bps/dia IC95=[-5.487,26.400]
+         H1: n_up=0 n_down=35 spread=nan bps/dia  |  H2: n_up=30 n_down=57 spread=7.626 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=13.469 bps/dia IC95=[1.727,24.240]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+L=252 F=21 n_grid=  29 n_up=   6 n_down=  23 | up_mean=6.744 down_mean=-1.764 spread=8.508 bps/dia IC95=[-3.371,20.824]
+         H1: n_up=0 n_down=9 spread=nan bps/dia  |  H2: n_up=6 n_down=14 spread=4.995 bps/dia
+         G3 (remove top5% |contrib|, n_removed=1): spread=3.909 bps/dia IC95=[-6.216,13.612]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=False G3>=2bps=True -> PASS=False
+
+S2 [WDO]: any_combo_pass=False
+
+==============================================================================
+S3 -- REVERSAO CURTO PRAZO [WDO]
+==============================================================================
+P=3 F=1 n_grid= 859 n_Q1= 172 n_Q5= 172 | Q1_mean=4.701 Q5_mean=-3.856 spread(Q1-Q5)=8.557 bps/dia IC95=[-12.450,28.804]
+         H1: n_Q1=85 n_Q5=85 spread=21.160 bps/dia  |  H2: n_Q1=87 n_Q5=87 spread=2.750 bps/dia
+         G3 (remove top5% |contrib|, n_removed=17): spread=4.421 bps/dia IC95=[-14.066,22.801]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=3 F=3 n_grid= 286 n_Q1=  58 n_Q5=  57 | Q1_mean=7.751 Q5_mean=-11.237 spread(Q1-Q5)=18.988 bps/dia IC95=[-0.794,40.539]
+         H1: n_Q1=29 n_Q5=29 spread=29.893 bps/dia  |  H2: n_Q1=29 n_Q5=29 spread=5.874 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=24.299 bps/dia IC95=[4.343,43.704]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=3 F=5 n_grid= 171 n_Q1=  35 n_Q5=  34 | Q1_mean=1.316 Q5_mean=-15.150 spread(Q1-Q5)=16.466 bps/dia IC95=[-6.370,36.459]
+         H1: n_Q1=17 n_Q5=17 spread=15.722 bps/dia  |  H2: n_Q1=18 n_Q5=17 spread=1.288 bps/dia
+         G3 (remove top5% |contrib|, n_removed=3): spread=6.530 bps/dia IC95=[-16.257,24.709]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=5 F=1 n_grid= 857 n_Q1= 172 n_Q5= 172 | Q1_mean=3.722 Q5_mean=-12.583 spread(Q1-Q5)=16.305 bps/dia IC95=[-3.353,36.263]
+         H1: n_Q1=85 n_Q5=85 spread=28.746 bps/dia  |  H2: n_Q1=87 n_Q5=87 spread=7.570 bps/dia
+         G3 (remove top5% |contrib|, n_removed=17): spread=5.852 bps/dia IC95=[-12.120,23.884]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=5 F=3 n_grid= 285 n_Q1=  57 n_Q5=  57 | Q1_mean=3.180 Q5_mean=-15.363 spread(Q1-Q5)=18.543 bps/dia IC95=[-1.625,39.410]
+         H1: n_Q1=29 n_Q5=28 spread=35.391 bps/dia  |  H2: n_Q1=29 n_Q5=29 spread=12.131 bps/dia
+         G3 (remove top5% |contrib|, n_removed=6): spread=4.290 bps/dia IC95=[-12.505,22.497]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+P=5 F=5 n_grid= 171 n_Q1=  35 n_Q5=  34 | Q1_mean=-3.733 Q5_mean=-8.555 spread(Q1-Q5)=4.822 bps/dia IC95=[-14.804,25.462]
+         H1: n_Q1=17 n_Q5=17 spread=9.068 bps/dia  |  H2: n_Q1=18 n_Q5=17 spread=7.187 bps/dia
+         G3 (remove top5% |contrib|, n_removed=3): spread=-4.436 bps/dia IC95=[-22.991,13.570]
+         GATE: mag>=2bps=True IC_excl_0=False mesmo_sinal_H1H2=True G3>=2bps=True -> PASS=False
+
+S3 [WDO]: any_combo_pass=False
+
+==============================================================================
+S4-TOM -- TURN OF MONTH [WDO]
+==============================================================================
+dias TOM=168 dias nao-TOM=694 (total=862)
+DISCOVERY: mean_TOM=3.428 mean_nonTOM=-1.037 diff=4.466 bps/dia IC95=[-11.844,21.200]
+H1: mean_TOM=-3.784 mean_nonTOM=-3.341 diff=-0.444 bps/dia IC95=[-29.649,28.170] n_tom=84 n_nontom=342
+H2: mean_TOM=10.641 mean_nonTOM=1.201 diff=9.440 bps/dia IC95=[-11.329,28.709] n_tom=84 n_nontom=352
+GATE S4-TOM [WDO]: diff>=5bps=False IC_excl_0=False mesmo_sinal_H1H2=False -> PASS=False
+
+==============================================================================
+S4-DOW -- DIA DA SEMANA [WDO]
+==============================================================================
+  Mon: n=173 media=2.387 bps IC95=[-13.208,17.485]
+  Tue: n=172 media=0.754 bps IC95=[-12.790,14.085]
+  Wed: n=173 media=-4.262 bps IC95=[-17.879,10.059]
+  Thu: n=173 media=2.892 bps IC95=[-10.028,16.143]
+  Fri: n=171 media=-2.628 bps IC95=[-17.036,12.121]
+melhor dia (DISCOVERY) = Thu (2.892 bps); pior dia = Wed (-4.262 bps)
+spread(melhor-pior) DISCOVERY = 7.154 bps IC95=[-11.714,27.445]
+  H1: melhor=Mon (4.284 bps) pior=Wed (-14.630 bps)
+  H2: melhor=Tue (7.481 bps) pior=Fri (-3.192 bps)
+GATE S4-DOW [WDO]: |spread|>=8bps=False IC_excl_0_ambos_extremos=False mesmo_ranking_H1H2=False -> PASS=False
+
+==============================================================================
+TABELA-RESUMO DE GATES (por tese x mercado)
+==============================================================================
+
+--- WIN ---
+S1  (carry):        mag=True ci=False sign_H1H2=False  -> PASS=False
+S2  (TSM):          0/8 combos (L,F) passaram -> PASS=False
+S3  (reversao):     0/6 combos (P,F) passaram -> PASS=False
+S4-TOM:             mag=False ci=False sign_H1H2=False  -> PASS=False
+S4-DOW:             mag=True ci_extremos=False ranking_H1H2=False  -> PASS=False
+
+--- WDO ---
+S1  (carry):        mag=False ci=False sign_H1H2=False  -> PASS=False
+S2  (TSM):          0/8 combos (L,F) passaram -> PASS=False
+S3  (reversao):     0/6 combos (P,F) passaram -> PASS=False
+S4-TOM:             mag=False ci=False sign_H1H2=False  -> PASS=False
+S4-DOW:             mag=False ci_extremos=False ranking_H1H2=False  -> PASS=False
+
+==============================================================================
+CONTAGEM DE TESTES E FALSOS POSITIVOS ESPERADOS
+==============================================================================
+S1:      2 testes (1 gate/mercado)
+S2:      16 testes (combos L x F validos x mercado)
+S3:      12 testes (combos P x F validos x mercado)
+S4-TOM:  2 testes (1 gate/mercado)
+S4-DOW:  2 testes (1 gate/mercado)
+TOTAL:   34 testes com IC
+Falsos positivos esperados a 5% (sem nenhum efeito real): ~1.7 (arredondando, 2)
+NOTA: S2 e S3 usam regra 'passa se >=1 combo passar' -- design vulneravel a multiple comparisons. Qualquer PASS isolado nessas duas teses deve ser lido com ceticismo adicional proporcional ao numero de combos testados, nao como confirmacao definitiva.
+
+==============================================================================
+DECISAO MECANICA POR TESE
+==============================================================================
+S1: PREMISE_REFUTED (nenhum mercado passou o gate)
+S2: PREMISE_REFUTED (nenhum mercado passou o gate)
+S3: PREMISE_REFUTED (nenhum mercado passou o gate)
+S4_TOM: PREMISE_REFUTED (nenhum mercado passou o gate)
+S4_DOW: PREMISE_REFUTED (nenhum mercado passou o gate)
+
+DECISAO GERAL DA CAMPANHA: PREMISE_REFUTED (nenhuma tese passou o gate em nenhum mercado -- fechar campanha como premise_refuted, sem post-hoc)
+
+swing_map_results.csv: 152 linhas salvas em C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\b3_swing_v0\phase0

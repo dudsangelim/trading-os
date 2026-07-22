@@ -1,0 +1,188 @@
+==============================================================================
+win_intraday_atlas_v0 -- Baterias B (gaps/niveis D-1) e C (preditores)
+==============================================================================
+
+Dados: WIN_cont_N_M15.parquet (principal), WIN_cont_N_M5.parquet (first-touch fino B3/B4)
+OOS 2025+ excluido no load. Splits: DISCOVERY <= 2023-12-31 ; CONFIRM = 2024-01-01..2024-12-31
+Dias validos (abrem 09:00): discovery=610, confirm=250, total=860
+Dias flagados como rolagem (|gap|>3*std60 OU |gap|>80bps): 105
+Grade B3/B4: N_bps=[10, 20, 30], M_bps=[5, 10] (6 combos) | break confirmado B4 usa M=10.0bps fixo
+Bootstrap: 1000x, seed=42, IC percentil 2.5/97.5
+
+------------------------------------------------------------------------------
+B1 -- GAPS (resumo ALL days, discovery vs confirm)
+------------------------------------------------------------------------------
+  discovery  n=  609  mediana=   +2.7bps  q25/q75=[-32.7,+37.2]  %pos=51.4%
+  confirm    n=  250  mediana=   +2.9bps  q25/q75=[-17.2,+23.0]  %pos=52.4%
+  Buckets (discovery, all_days):
+    (-inf,-40]     n= 126  20.7%
+    (-40,-15]      n= 106  17.4%
+    (-15,0)        n=  60  9.9%
+    {0}            n=   4  0.7%
+    (0,15]         n=  53  8.7%
+    (15,40]        n= 118  19.4%
+    (40,inf)       n= 142  23.3%
+
+------------------------------------------------------------------------------
+B2 -- GAP FILL / CONTINUATION-FADE (por bucket x split, all_days; excl_rollover no CSV)
+------------------------------------------------------------------------------
+  [discovery ] (-inf,-40]     n= 126 fill=54.8% med_min=105.0  ret_o->11=-2.1bps [-16.4,+11.7]  ret_o->c=+1.6bps [-22.6,+25.8]
+  [discovery ] (-40,-15]      n= 106 fill=77.4% med_min=22.5  ret_o->11=+4.7bps [-7.5,+16.2]  ret_o->c=+4.7bps [-16.1,+25.4]
+  [discovery ] (-15,0)        n=  60 fill=93.3% med_min=0.0  ret_o->11=+13.5bps [-5.0,+32.3]  ret_o->c=+3.0bps [-26.0,+30.4]
+  [discovery ] {0}            n=   4 fill=100.0% med_min=0.0  ret_o->11=+45.1bps [-17.6,+107.0]  ret_o->c=+24.6bps [-63.2,+100.1]
+  [discovery ] (0,15]         n=  53 fill=94.3% med_min=0.0  ret_o->11=-18.6bps [-38.8,+1.3]  ret_o->c=-5.8bps [-40.3,+30.4]
+  [discovery ] (15,40]        n= 118 fill=78.8% med_min=15.0  ret_o->11=-7.0bps [-18.9,+5.7]  ret_o->c=-15.7bps [-35.2,+4.0]
+  [discovery ] (40,inf)       n= 142 fill=50.0% med_min=105.0  ret_o->11=+10.8bps [+0.1,+20.6]  ret_o->c=+3.9bps [-14.2,+23.8]
+  [confirm   ] (-inf,-40]     n=  19 fill=36.8% med_min=90.0  ret_o->11=-7.7bps [-26.5,+11.8]  ret_o->c=+15.3bps [-23.4,+52.9]
+  [confirm   ] (-40,-15]      n=  54 fill=75.9% med_min=30.0  ret_o->11=+2.5bps [-10.4,+16.8]  ret_o->c=-1.7bps [-22.8,+22.6]
+  [confirm   ] (-15,0)        n=  43 fill=90.7% med_min=0.0  ret_o->11=-9.5bps [-24.8,+7.6]  ret_o->c=-9.7bps [-32.7,+12.0]
+  [confirm   ] {0}            n=   3 fill=100.0% med_min=0.0  ret_o->11=-25.0bps [-83.5,+54.0]  ret_o->c=-30.4bps [-93.1,+52.8]
+  [confirm   ] (0,15]         n=  43 fill=90.7% med_min=0.0  ret_o->11=+0.3bps [-14.8,+18.1]  ret_o->c=+4.1bps [-22.3,+32.5]
+  [confirm   ] (15,40]        n=  60 fill=78.3% med_min=15.0  ret_o->11=-15.8bps [-30.4,-1.5]  ret_o->c=-19.2bps [-40.3,+2.6]
+  [confirm   ] (40,inf)       n=  28 fill=46.4% med_min=120.0  ret_o->11=+0.9bps [-17.3,+20.1]  ret_o->c=-25.0bps [-58.8,+8.7]
+
+------------------------------------------------------------------------------
+B3 -- TOQUE PDH/PDL (% dias) e FIRST-TOUCH BOUNCE/BREAK
+------------------------------------------------------------------------------
+  [discovery ] n=609  touch_PDH=47.0%  touch_PDL=46.3%  ambos=10.3%  nenhum=17.1%
+  [confirm   ] n=250  touch_PDH=43.2%  touch_PDL=52.8%  ambos=11.2%  nenhum=15.2%
+  Grid N x M (pct entre decididos, exclui censura/empate):
+    PDH  [discovery ] N=10 M= 5  n= 286  bounce=46.9%  break=53.1%  censored=0.0%
+    PDH  [discovery ] N=10 M=10  n= 286  bounce=58.7%  break=41.3%  censored=0.0%
+    PDH  [discovery ] N=20 M= 5  n= 286  bounce=35.4%  break=64.6%  censored=0.3%
+    PDH  [discovery ] N=20 M=10  n= 286  bounce=45.1%  break=54.9%  censored=0.7%
+    PDH  [discovery ] N=30 M= 5  n= 286  bounce=25.3%  break=74.7%  censored=0.3%
+    PDH  [discovery ] N=30 M=10  n= 286  bounce=34.8%  break=65.2%  censored=1.4%
+    PDH  [confirm   ] N=10 M= 5  n= 108  bounce=50.0%  break=50.0%  censored=0.0%
+    PDH  [confirm   ] N=10 M=10  n= 108  bounce=63.0%  break=37.0%  censored=0.0%
+    PDH  [confirm   ] N=20 M= 5  n= 108  bounce=27.1%  break=72.9%  censored=0.9%
+    PDH  [confirm   ] N=20 M=10  n= 108  bounce=40.6%  break=59.4%  censored=1.9%
+    PDH  [confirm   ] N=30 M= 5  n= 108  bounce=13.1%  break=86.9%  censored=0.9%
+    PDH  [confirm   ] N=30 M=10  n= 108  bounce=21.0%  break=79.0%  censored=2.8%
+    PDL  [discovery ] N=10 M= 5  n= 282  bounce=50.5%  break=49.5%  censored=0.4%
+    PDL  [discovery ] N=10 M=10  n= 282  bounce=58.4%  break=41.6%  censored=0.4%
+    PDL  [discovery ] N=20 M= 5  n= 282  bounce=41.4%  break=58.6%  censored=0.7%
+    PDL  [discovery ] N=20 M=10  n= 282  bounce=48.6%  break=51.4%  censored=0.7%
+    PDL  [discovery ] N=30 M= 5  n= 282  bounce=28.1%  break=71.9%  censored=1.4%
+    PDL  [discovery ] N=30 M=10  n= 282  bounce=36.0%  break=64.0%  censored=1.4%
+    PDL  [confirm   ] N=10 M= 5  n= 132  bounce=56.1%  break=43.9%  censored=0.0%
+    PDL  [confirm   ] N=10 M=10  n= 132  bounce=68.9%  break=31.1%  censored=0.0%
+    PDL  [confirm   ] N=20 M= 5  n= 132  bounce=36.4%  break=63.6%  censored=0.0%
+    PDL  [confirm   ] N=20 M=10  n= 132  bounce=47.0%  break=53.0%  censored=0.0%
+    PDL  [confirm   ] N=30 M= 5  n= 132  bounce=21.2%  break=78.8%  censored=0.0%
+    PDL  [confirm   ] N=30 M=10  n= 132  bounce=31.8%  break=68.2%  censored=0.0%
+
+------------------------------------------------------------------------------
+B4 -- POS-BREAK (follow-through, MFE/MAE, retest)
+------------------------------------------------------------------------------
+  PDH  [discovery ] n_breaks=262  ft15=+0.1bps  ft30=-0.3bps  ft60=-0.6bps  MFE=+36.9  MAE=+41.7  retest60=92.4%
+  PDH  [confirm   ] n_breaks=95  ft15=+0.5bps  ft30=+0.2bps  ft60=-0.9bps  MFE=+26.3  MAE=+28.0  retest60=81.7%
+  PDL  [discovery ] n_breaks=262  ft15=-1.4bps  ft30=-1.0bps  ft60=+0.9bps  MFE=+40.6  MAE=+46.1  retest60=94.3%
+  PDL  [confirm   ] n_breaks=113  ft15=+2.5bps  ft30=+2.3bps  ft60=+3.0bps  MFE=+27.3  MAE=+25.3  retest60=81.2%
+
+------------------------------------------------------------------------------
+B5 -- CLOSE D-1 / MID D-1 COMO IMAS
+------------------------------------------------------------------------------
+  close_D-1  [discovery ] n=609  touch=69.8%  ret30=-0.9bps [-4.8,+3.2]
+  close_D-1  [confirm   ] n=250  touch=75.6%  ret30=-0.6bps [-4.6,+3.6]
+  mid_D-1    [discovery ] n=609  touch=61.9%  ret30=-4.2bps [-8.3,-0.1]
+  mid_D-1    [confirm   ] n=250  touch=62.4%  ret30=-2.3bps [-6.9,+2.4]
+
+------------------------------------------------------------------------------
+C1 -- MATRIZ CONDICIONAL DE DIRECAO (celulas com |efeito|>=4bps, discovery, p/ leitura rapida)
+------------------------------------------------------------------------------
+  d1_sign         =zero     target=ret_open_close_bps n=   3  +45.7bps [-138.0,+174.3]  hit_match=nan
+  hour1_sign      =neg      target=ret_open_close_bps n= 292  -34.6bps [-49.2,-20.7]  hit_match=61.64383561643836
+  hour1_sign      =pos      target=ret_open_close_bps n= 314  +29.9bps [+16.9,+42.8]  hit_match=64.64968152866241
+  hour1_sign      =zero     target=ret_10_close_bps   n=   4  +26.4bps [+2.6,+47.9]  hit_match=nan
+  hour1_sign      =zero     target=ret_open_close_bps n=   4  +26.4bps [+2.6,+47.9]  hit_match=nan
+  gap_sign        =zero     target=ret_open_close_bps n=   4  +24.6bps [-63.2,+100.1]  hit_match=nan
+  bar1_sign       =neg      target=ret_open_close_bps n= 310  -23.1bps [-35.5,-10.3]  hit_match=56.12903225806451
+  bar1_sign       =zero     target=ret_open_close_bps n=   2  +21.9bps [+20.3,+23.5]  hit_match=nan
+  bar1_sign       =pos      target=ret_open_close_bps n= 298  +21.8bps [+8.2,+34.6]  hit_match=60.40268456375839
+  inside_day_d1   =True     target=ret_open_close_bps n=  67  +14.0bps [-15.6,+40.7]  hit_match=nan
+  weekday         =Tuesday  target=ret_open_close_bps n= 122  -8.5bps [-30.6,+13.8]  hit_match=nan
+  open_tercile_d1 =meio     target=ret_open_close_bps n= 162  -7.7bps [-25.7,+10.4]  hit_match=nan
+  gap_sign        =pos      target=ret_open_close_bps n= 313  -5.1bps [-18.1,+8.3]  hit_match=50.159744408945684
+  d1_sign         =pos      target=ret_open_close_bps n= 315  -4.5bps [-19.0,+9.6]  hit_match=49.2063492063492
+
+------------------------------------------------------------------------------
+C2 -- INTERACOES (discovery, n_discovery>=30)
+------------------------------------------------------------------------------
+  weekday_x_hour1  (Wednesday,neg)  n=  58  +33.6bps [+4.3,+63.6]
+  weekday_x_hour1  (Monday,pos)  n=  57  +30.8bps [+6.5,+56.9]
+  weekday_x_hour1  (Monday,neg)  n=  65  -27.3bps [-52.8,+0.3]
+  weekday_x_hour1  (Tuesday,pos)  n=  55  -26.9bps [-59.5,+5.4]
+  weekday_x_hour1  (Wednesday,pos)  n=  63  -25.3bps [-52.1,-0.2]
+  d1_x_gap         (pos,pos)  n= 135  -17.9bps [-36.3,+2.8]
+  gap_x_hour1      (pos,pos)  n= 165  -13.5bps [-30.2,+3.4]
+  weekday_x_hour1  (Thursday,pos)  n=  68  +13.4bps [-13.7,+42.6]
+  weekday_x_hour1  (Friday,pos)  n=  71  -11.1bps [-43.0,+18.5]
+  weekday_x_hour1  (Tuesday,neg)  n=  66  +7.5bps [-20.7,+35.2]
+  gap_x_hour1      (neg,pos)  n= 147  +7.4bps [-15.2,+27.5]
+  gap_x_hour1      (pos,neg)  n= 146  +6.0bps [-13.5,+24.4]
+  d1_x_gap         (neg,pos)  n= 177  +5.4bps [-12.5,+22.8]
+  d1_x_gap         (pos,neg)  n= 176  +5.2bps [-13.1,+23.3]
+  gap_x_hour1      (neg,neg)  n= 143  -4.2bps [-20.6,+14.1]
+  weekday_x_hour1  (Thursday,neg)  n=  54  -4.0bps [-33.3,+24.5]
+  d1_x_gap         (neg,neg)  n= 114  -2.8bps [-25.1,+18.9]
+  weekday_x_hour1  (Friday,neg)  n=  49  -0.1bps [-29.9,+32.4]
+
+==============================================================================
+CANDIDATOS (criterio protocolo: |efeito|>=6bps E IC95 excl. 0 no DISCOVERY)
+==============================================================================
+  B4 PDL MAE 60min
+      DISCOVERY: n=262  +46.1bps  IC[+41.6,+51.1]
+      CONFIRM  : n=112  +25.3bps  IC[+21.9,+29.1]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  B4 PDH MAE 60min
+      DISCOVERY: n=262  +41.7bps  IC[+38.1,+45.5]
+      CONFIRM  : n=93  +28.0bps  IC[+23.3,+33.9]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  B4 PDL MFE 60min
+      DISCOVERY: n=262  +40.6bps  IC[+37.1,+44.2]
+      CONFIRM  : n=112  +27.3bps  IC[+23.8,+30.8]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  B4 PDH MFE 60min
+      DISCOVERY: n=262  +36.9bps  IC[+33.6,+40.5]
+      CONFIRM  : n=93  +26.3bps  IC[+21.9,+30.9]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C1 hour1_sign=neg: ret open->close
+      DISCOVERY: n=292  -34.6bps  IC[-49.2,-20.7]
+      CONFIRM  : n=138  -40.2bps  IC[-52.7,-28.1]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C2 weekday_x_hour1=(Wednesday,neg) target=ret_10_close_bps
+      DISCOVERY: n=58  +33.6bps  IC[+4.3,+63.6]
+      CONFIRM  : n=25  -12.7bps  IC[-48.7,+19.1]  (nao replica em CONFIRM)
+  C2 weekday_x_hour1=(Monday,pos) target=ret_10_close_bps
+      DISCOVERY: n=57  +30.8bps  IC[+6.5,+56.9]
+      CONFIRM  : n=21  +16.6bps  IC[-13.4,+43.0]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C1 hour1_sign=pos: ret open->close
+      DISCOVERY: n=314  +29.9bps  IC[+16.9,+42.8]
+      CONFIRM  : n=112  +31.9bps  IC[+17.7,+46.2]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C1 hour1_sign=zero: ret 10:00->close
+      DISCOVERY: n=4  +26.4bps  IC[+2.6,+47.9]
+      CONFIRM  : n=nan  +nanbps  IC[+nan,+nan]  (nao replica em CONFIRM)
+  C1 hour1_sign=zero: ret open->close
+      DISCOVERY: n=4  +26.4bps  IC[+2.6,+47.9]
+      CONFIRM  : n=nan  +nanbps  IC[+nan,+nan]  (nao replica em CONFIRM)
+  C2 weekday_x_hour1=(Wednesday,pos) target=ret_10_close_bps
+      DISCOVERY: n=63  -25.3bps  IC[-52.1,-0.2]
+      CONFIRM  : n=23  +2.0bps  IC[-30.9,+31.3]  (nao replica em CONFIRM)
+  C1 bar1_sign=neg: ret open->close
+      DISCOVERY: n=310  -23.1bps  IC[-35.5,-10.3]
+      CONFIRM  : n=141  -30.5bps  IC[-43.0,-18.2]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C1 bar1_sign=zero: ret open->close
+      DISCOVERY: n=2  +21.9bps  IC[+20.3,+23.5]
+      CONFIRM  : n=2  +82.5bps  IC[+32.3,+132.7]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  C1 bar1_sign=pos: ret open->close
+      DISCOVERY: n=298  +21.8bps  IC[+8.2,+34.6]
+      CONFIRM  : n=107  +20.1bps  IC[+4.3,+35.6]  ** mesmo sinal e |efeito|>=3bps no CONFIRM **
+  B2 gap bucket (40,inf): ret open->11:00
+      DISCOVERY: n=142  +10.8bps  IC[+0.1,+20.6]
+      CONFIRM  : n=28  +0.9bps  IC[-17.3,+20.1]  (nao replica em CONFIRM)
+
+==============================================================================
+CONTAGEM DE TESTES (contexto de comparacoes multiplas)
+==============================================================================
+  Testes de efeito com bootstrap IC (bps) registrados: 135
+    discovery: 69   confirm: 66
+  Total de CELULAS reportadas em todos os CSVs (linhas de tabela, inclui contagens sem IC): 390
+  Candidatos que passaram o filtro |efeito|>=6bps + IC95 excl 0 no discovery: 15
+
+NOTA: com ~135 testes de efeito, a 5% de significancia nominal esperar-se-iam ~7 'falsos positivos' por acaso. O criterio de promocao exige tambem replicacao em CONFIRM 2024 (mesmo sinal, |efeito|>=3bps) e n>=100 -- ainda assim, candidatos aqui sao HIPOTESES, nao edges validados.

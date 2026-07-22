@@ -1,0 +1,24 @@
+{
+  "n_cells": 96,
+  "window": "2021-07-19..2024-12-31",
+  "grid_params": {
+    "x_bps": [
+      5,
+      10
+    ],
+    "h_days": [
+      1,
+      3
+    ],
+    "side": [
+      "long_sweep_low",
+      "short_sweep_high"
+    ],
+    "rt_cost_bps_sens": [
+      1.0,
+      1.5,
+      2.0
+    ]
+  },
+  "note": "Amostra pequena (~870 dias uteis por mercado); ver bootstrap CI de expectancy por celula no CSV. Sharpe/maxDD/net_ann calculados via equity diaria com alocacao igual por dia de trades sobrepostos (simplificacao)."
+}

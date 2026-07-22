@@ -1,0 +1,468 @@
+{
+  "validation": {
+    "E1": {
+      "L63": {
+        "sleeves": {
+          "WDO": {
+            "n_days": 863,
+            "net_ann_pct": 1.52,
+            "sharpe": 0.198,
+            "maxdd_pct": -16.31,
+            "monthly_mean_pct": 0.158,
+            "worst_month_pct": -5.01,
+            "pf_month_blocks": 1.17,
+            "n_position_changes": 39,
+            "date_min": "2021-07-19",
+            "date_max": "2024-12-30"
+          },
+          "DI1": {
+            "n_days": 861,
+            "net_ann_pct": 15.5,
+            "sharpe": 1.331,
+            "maxdd_pct": -18.01,
+            "monthly_mean_pct": 1.235,
+            "worst_month_pct": -9.67,
+            "pf_month_blocks": 3.0,
+            "n_position_changes": 38,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "BGI": {
+            "n_days": 861,
+            "net_ann_pct": 2.87,
+            "sharpe": 0.317,
+            "maxdd_pct": -18.03,
+            "monthly_mean_pct": 0.321,
+            "worst_month_pct": -6.95,
+            "pf_month_blocks": 1.24,
+            "n_position_changes": 38,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "CCM": {
+            "n_days": 861,
+            "net_ann_pct": 12.6,
+            "sharpe": 1.074,
+            "maxdd_pct": -17.03,
+            "monthly_mean_pct": 1.08,
+            "worst_month_pct": -6.65,
+            "pf_month_blocks": 2.39,
+            "n_position_changes": 38,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "ICF": {
+            "n_days": 861,
+            "net_ann_pct": 9.94,
+            "sharpe": 0.902,
+            "maxdd_pct": -13.17,
+            "monthly_mean_pct": 0.832,
+            "worst_month_pct": -4.84,
+            "pf_month_blocks": 2.11,
+            "n_position_changes": 38,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "WIN": {
+            "n_days": 863,
+            "net_ann_pct": -2.97,
+            "sharpe": -0.245,
+            "maxdd_pct": -21.16,
+            "monthly_mean_pct": -0.204,
+            "worst_month_pct": -6.0,
+            "pf_month_blocks": 0.84,
+            "n_position_changes": 39,
+            "date_min": "2021-07-19",
+            "date_max": "2024-12-30"
+          }
+        },
+        "portfolio": {
+          "n_days": 863,
+          "net_ann_pct": 6.87,
+          "sharpe": 1.371,
+          "maxdd_pct": -5.88,
+          "monthly_mean_pct": 0.555,
+          "worst_month_pct": -2.75,
+          "pf_month_blocks": 2.71,
+          "n_position_changes": 230,
+          "date_min": "2021-07-19",
+          "date_max": "2024-12-30"
+        }
+      },
+      "L126": {
+        "sleeves": {
+          "WDO": {
+            "n_days": 863,
+            "net_ann_pct": 6.67,
+            "sharpe": 0.71,
+            "maxdd_pct": -8.8,
+            "monthly_mean_pct": 0.557,
+            "worst_month_pct": -4.3,
+            "pf_month_blocks": 1.89,
+            "n_position_changes": 36,
+            "date_min": "2021-07-19",
+            "date_max": "2024-12-30"
+          },
+          "DI1": {
+            "n_days": 861,
+            "net_ann_pct": 11.65,
+            "sharpe": 1.074,
+            "maxdd_pct": -12.78,
+            "monthly_mean_pct": 0.949,
+            "worst_month_pct": -8.35,
+            "pf_month_blocks": 2.5,
+            "n_position_changes": 35,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "BGI": {
+            "n_days": 861,
+            "net_ann_pct": 8.2,
+            "sharpe": 0.805,
+            "maxdd_pct": -12.45,
+            "monthly_mean_pct": 0.714,
+            "worst_month_pct": -6.45,
+            "pf_month_blocks": 1.83,
+            "n_position_changes": 35,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "CCM": {
+            "n_days": 861,
+            "net_ann_pct": 12.98,
+            "sharpe": 1.142,
+            "maxdd_pct": -19.48,
+            "monthly_mean_pct": 1.107,
+            "worst_month_pct": -6.67,
+            "pf_month_blocks": 2.54,
+            "n_position_changes": 35,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "ICF": {
+            "n_days": 861,
+            "net_ann_pct": 5.98,
+            "sharpe": 0.588,
+            "maxdd_pct": -17.9,
+            "monthly_mean_pct": 0.529,
+            "worst_month_pct": -4.25,
+            "pf_month_blocks": 1.65,
+            "n_position_changes": 35,
+            "date_min": "2021-07-21",
+            "date_max": "2024-12-30"
+          },
+          "WIN": {
+            "n_days": 863,
+            "net_ann_pct": -9.91,
+            "sharpe": -1.018,
+            "maxdd_pct": -31.77,
+            "monthly_mean_pct": -0.816,
+            "worst_month_pct": -6.0,
+            "pf_month_blocks": 0.42,
+            "n_position_changes": 36,
+            "date_min": "2021-07-19",
+            "date_max": "2024-12-30"
+          }
+        },
+        "portfolio": {
+          "n_days": 863,
+          "net_ann_pct": 6.1,
+          "sharpe": 1.292,
+          "maxdd_pct": -5.81,
+          "monthly_mean_pct": 0.495,
+          "worst_month_pct": -1.86,
+          "pf_month_blocks": 2.74,
+          "n_position_changes": 212,
+          "date_min": "2021-07-19",
+          "date_max": "2024-12-30"
+        }
+      }
+    },
+    "E2b": {
+      "net_ann_pct": 5.65,
+      "sharpe": 0.767,
+      "maxdd_pct": -6.49,
+      "pf": 2.73,
+      "monthly_mean_pct": 0.466,
+      "worst_month_pct": -4.26,
+      "n_trades": 20,
+      "n_days": 863
+    },
+    "E3": {
+      "discovery_2023": {
+        "n": 230,
+        "win_rate": 0.8435,
+        "pf": 1.77,
+        "expectancy_bps": 3.119,
+        "exit_breakdown": {
+          "tp": 194,
+          "stop": 35,
+          "time": 1
+        }
+      },
+      "confirm_2024": {
+        "n": 235,
+        "win_rate": 0.7957,
+        "pf": 1.48,
+        "expectancy_bps": 2.184,
+        "exit_breakdown": {
+          "tp": 186,
+          "stop": 36,
+          "time": 13
+        }
+      }
+    }
+  },
+  "holdout": {
+    "E1": {
+      "L63": {
+        "sleeves": {
+          "WDO": {
+            "n_days": 385,
+            "net_ann_pct": 8.01,
+            "sharpe": 0.764,
+            "maxdd_pct": -6.39,
+            "monthly_mean_pct": 0.652,
+            "worst_month_pct": -3.44,
+            "pf_month_blocks": 1.83,
+            "n_position_changes": 18,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "DI1": {
+            "n_days": 385,
+            "net_ann_pct": 0.62,
+            "sharpe": 0.112,
+            "maxdd_pct": -8.53,
+            "monthly_mean_pct": 0.072,
+            "worst_month_pct": -5.74,
+            "pf_month_blocks": 1.09,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "BGI": {
+            "n_days": 385,
+            "net_ann_pct": -4.8,
+            "sharpe": -0.343,
+            "maxdd_pct": -19.13,
+            "monthly_mean_pct": -0.335,
+            "worst_month_pct": -7.22,
+            "pf_month_blocks": 0.79,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "CCM": {
+            "n_days": 385,
+            "net_ann_pct": -2.2,
+            "sharpe": -0.158,
+            "maxdd_pct": -20.38,
+            "monthly_mean_pct": -0.103,
+            "worst_month_pct": -8.46,
+            "pf_month_blocks": 0.94,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "ICF": {
+            "n_days": 385,
+            "net_ann_pct": -4.48,
+            "sharpe": -0.266,
+            "maxdd_pct": -18.43,
+            "monthly_mean_pct": -0.297,
+            "worst_month_pct": -7.97,
+            "pf_month_blocks": 0.81,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "WIN": {
+            "n_days": 385,
+            "net_ann_pct": -0.64,
+            "sharpe": -0.006,
+            "maxdd_pct": -16.24,
+            "monthly_mean_pct": -0.023,
+            "worst_month_pct": -4.69,
+            "pf_month_blocks": 0.98,
+            "n_position_changes": 18,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          }
+        },
+        "portfolio": {
+          "n_days": 385,
+          "net_ann_pct": -0.14,
+          "sharpe": 0.003,
+          "maxdd_pct": -4.89,
+          "monthly_mean_pct": 0.001,
+          "worst_month_pct": -3.46,
+          "pf_month_blocks": 1.0,
+          "n_position_changes": 112,
+          "date_min": "2025-01-02",
+          "date_max": "2026-07-17"
+        }
+      },
+      "L126": {
+        "sleeves": {
+          "WDO": {
+            "n_days": 385,
+            "net_ann_pct": 3.32,
+            "sharpe": 0.355,
+            "maxdd_pct": -8.5,
+            "monthly_mean_pct": 0.294,
+            "worst_month_pct": -3.61,
+            "pf_month_blocks": 1.32,
+            "n_position_changes": 18,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "DI1": {
+            "n_days": 385,
+            "net_ann_pct": -0.28,
+            "sharpe": 0.038,
+            "maxdd_pct": -9.76,
+            "monthly_mean_pct": 0.015,
+            "worst_month_pct": -5.75,
+            "pf_month_blocks": 1.01,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "BGI": {
+            "n_days": 385,
+            "net_ann_pct": -2.68,
+            "sharpe": -0.162,
+            "maxdd_pct": -15.17,
+            "monthly_mean_pct": -0.157,
+            "worst_month_pct": -6.29,
+            "pf_month_blocks": 0.9,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "CCM": {
+            "n_days": 385,
+            "net_ann_pct": -5.5,
+            "sharpe": -0.484,
+            "maxdd_pct": -23.81,
+            "monthly_mean_pct": -0.379,
+            "worst_month_pct": -8.46,
+            "pf_month_blocks": 0.78,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "ICF": {
+            "n_days": 385,
+            "net_ann_pct": -18.07,
+            "sharpe": -1.39,
+            "maxdd_pct": -34.57,
+            "monthly_mean_pct": -1.515,
+            "worst_month_pct": -8.94,
+            "pf_month_blocks": 0.36,
+            "n_position_changes": 19,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          },
+          "WIN": {
+            "n_days": 385,
+            "net_ann_pct": -0.57,
+            "sharpe": 0.0,
+            "maxdd_pct": -10.74,
+            "monthly_mean_pct": -0.013,
+            "worst_month_pct": -4.27,
+            "pf_month_blocks": 0.99,
+            "n_position_changes": 18,
+            "date_min": "2025-01-02",
+            "date_max": "2026-07-17"
+          }
+        },
+        "portfolio": {
+          "n_days": 385,
+          "net_ann_pct": -3.7,
+          "sharpe": -0.666,
+          "maxdd_pct": -7.8,
+          "monthly_mean_pct": -0.294,
+          "worst_month_pct": -3.46,
+          "pf_month_blocks": 0.56,
+          "n_position_changes": 112,
+          "date_min": "2025-01-02",
+          "date_max": "2026-07-17"
+        }
+      }
+    },
+    "E2a": {
+      "n_days": 385,
+      "net_ann_pct": 3.32,
+      "sharpe": 0.355,
+      "maxdd_pct": -8.5,
+      "monthly_mean_pct": 0.294,
+      "worst_month_pct": -3.61,
+      "pf_month_blocks": 1.32,
+      "n_position_changes": 18,
+      "date_min": "2025-01-02",
+      "date_max": "2026-07-17"
+    },
+    "E2b": {
+      "net_ann_pct": 6.95,
+      "sharpe": 0.77,
+      "maxdd_pct": -6.6,
+      "pf": 2.68,
+      "monthly_mean_pct": 0.571,
+      "worst_month_pct": -3.23,
+      "n_trades": 12,
+      "n_days": 385
+    },
+    "E3": {
+      "n": 350,
+      "win_rate": 0.8171,
+      "pf": 1.511,
+      "expectancy_bps": 2.335,
+      "exit_breakdown": {
+        "tp": 284,
+        "stop": 59,
+        "time": 7
+      }
+    },
+    "E3_by_year": {
+      "2025": {
+        "n": 225,
+        "win_rate": 0.8311,
+        "pf": 1.729,
+        "expectancy_bps": 2.954,
+        "exit_breakdown": {
+          "tp": 185,
+          "stop": 33,
+          "time": 7
+        }
+      },
+      "2026": {
+        "n": 125,
+        "win_rate": 0.792,
+        "pf": 1.221,
+        "expectancy_bps": 1.22,
+        "exit_breakdown": {
+          "tp": 99,
+          "stop": 26
+        }
+      }
+    }
+  },
+  "verdicts": {
+    "E1": "FAIL",
+    "E2a": "PASS",
+    "E2b": "PASS",
+    "E3": "PASS"
+  },
+  "anomalies": [
+    "E1 FAIL no holdout: a carteira depende de commodities agro (BGI/CCM/ICF), que viraram negativas em 2025+ (ICF L126 holdout net_ann=-18.07%, maxDD=-34.57%), enquanto WDO (net_ann=3.32%) e DI1 (net_ann=-0.28%) seguraram melhor. Motor real (DI1+agro) citado no FACTORY_REPORT nao se sustentou fora da amostra -- carteira like-for-like com E1 FALHA, mas os componentes individuais WDO (E2a) e carry WDO (E2b) PASSAM isoladamente.",
+    "E2b holdout com amostra pequena (n_trades=12), consistente com a ressalva ja registrada no FACTORY_REPORT ('n pequeno nas duas pernas'). PF/net_ann favoraveis, mas erro-padrao alto dado n baixo."
+  ],
+  "meta": {
+    "holdout_start": "2025-01-01",
+    "holdout_end": "2026-07-17",
+    "tolerance_etapa1": 0.15,
+    "proxy_date_max": "2026-07-21"
+  }
+}

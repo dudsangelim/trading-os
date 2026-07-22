@@ -1,0 +1,20 @@
+{"event": "rebalance", "sleeve": "WDO", "old": 0, "new": -1, "vol_weight_teorico": 1.148, "ts": "2026-07-22T04:06:13.056684+00:00"}
+{"event": "rebalance", "sleeve": "DI1", "old": 0, "new": 1, "vol_weight_teorico": 0.681, "ts": "2026-07-22T04:06:13.080856+00:00"}
+{"event": "rebalance", "sleeve": "BGI", "old": 0, "new": 1, "vol_weight_teorico": 1.033, "ts": "2026-07-22T04:06:13.096032+00:00"}
+{"event": "rebalance", "sleeve": "CCM", "old": 0, "new": -1, "vol_weight_teorico": 0.783, "ts": "2026-07-22T04:06:13.113494+00:00"}
+{"event": "rebalance", "sleeve": "ICF", "old": 0, "new": -1, "vol_weight_teorico": 0.126, "ts": "2026-07-22T04:06:13.130829+00:00"}
+{"event": "rebalance", "sleeve": "WIN", "old": 0, "new": -1, "vol_weight_teorico": 0.593, "ts": "2026-07-22T04:06:13.148962+00:00"}
+{"event": "carry_flip", "old": false, "new": true, "diff_pp": 9.61, "vol20": 0.0829, "med252": 0.1095, "gate_on": true, "ts": "2026-07-22T04:06:16.310918+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T04:06:16.320107+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T04:06:16.822045+00:00"}
+{"event": "front_error", "root": "DI1", "error": "RuntimeError('nenhum contrato real encontrado para DI1')", "ts": "2026-07-22T04:06:17.324445+00:00"}
+{"event": "front_error", "root": "BGI", "error": "RuntimeError('nenhum contrato real encontrado para BGI')", "ts": "2026-07-22T04:06:17.329300+00:00"}
+{"event": "front_error", "root": "CCM", "error": "RuntimeError('nenhum contrato real encontrado para CCM')", "ts": "2026-07-22T04:06:17.330802+00:00"}
+{"event": "front_error", "root": "ICF", "error": "RuntimeError('nenhum contrato real encontrado para ICF')", "ts": "2026-07-22T04:06:17.330802+00:00"}
+{"event": "order", "root": "WIN", "symbol": "WINQ26", "side": "sell", "target": -1, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T04:06:17.330802+00:00"}
+{"event": "run_done", "targets": {"WDO": -2, "DI1": 1, "BGI": 1, "CCM": -1, "ICF": -1, "WIN": -1}, "had": {}, "carry": true, "ts": "2026-07-22T04:06:17.841065+00:00"}
+{"event": "rebalance", "sleeve": "WDO", "old": 0, "new": -1, "vol_weight_teorico": 1.206, "ts": "2026-07-22T11:21:13.417276+00:00"}
+{"event": "carry_flip", "old": false, "new": true, "diff_pp": 9.61, "vol20": 0.0829, "med252": 0.1095, "gate_on": true, "ts": "2026-07-22T11:21:15.305692+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T11:21:15.307789+00:00"}
+{"event": "order", "root": "WDO", "symbol": "WDOQ26", "side": "sell", "target": -2, "prev": 0, "price": null, "deal": null, "ts": "2026-07-22T11:21:15.808872+00:00"}
+{"event": "run_done", "targets": {"WDO": -2}, "had": {}, "carry": true, "ts": "2026-07-22T11:21:16.313350+00:00"}

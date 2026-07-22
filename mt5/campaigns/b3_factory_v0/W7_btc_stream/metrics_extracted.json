@@ -1,0 +1,13 @@
+{
+  "source_file": "backtests/2c_revision_step2_validate/trades_oos_with_pwin.csv",
+  "filter": "p_win>=0.55 (thr=0.55), date<=2024-12-31",
+  "period_full_oos": "2023-02-09 to 2026-04-22 (original file)",
+  "period_used": "2023-02-09 to 2024-12-27",
+  "n_trades": 78,
+  "win_rate": 0.7308,
+  "profit_factor": 2.7035,
+  "expectancy_pct_net": 0.1858,
+  "max_drawdown_daily_compounded": -0.946,
+  "sharpe_daily_annualized": 6.305,
+  "note": "n=78 trades is small sample (report.md original full-OOS 2023-2026 has n=154 at thr=0.55; this subset truncated to <=2024-12-31 per task spec). No metrics.json or equity.csv artifact found for 2C v2 production \u2014 this is reconstructed from trades_oos_with_pwin.csv (S3 stop dinamico alpha=0.4 clamp 0.3-0.8%% + F_reduced features, thr=0.55) per backtests/2c_revision_step2_validate/report.md."
+}

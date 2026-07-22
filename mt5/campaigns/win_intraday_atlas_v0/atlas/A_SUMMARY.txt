@@ -1,0 +1,214 @@
+win_intraday_atlas_v0 -- Bateria A (estrutura temporal)
+seed=42 n_boot=1000 OOS_CUTOFF=2025-01-01 DISCOVERY<=2023-12-31 CONFIRM=2024
+
+[M15] arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WIN_cont_N_M15.parquet
+[M15] linhas brutas=46535, removidas OOS(>=2025-01-01)=14597, removidas fim-de-semana(anomalia)=0
+[M15] range apos filtro: 2021-07-19 09:00:00 -> 2024-12-30 18:15:00
+[M15] dias no calendario=863, validos(abrem 09:00)=860, descartados(Cinzas/anomalia abertura)=3
+    descartado: 2022-03-02 abre 13:00:00 fecha 18:15:00 n_bars=22
+    descartado: 2023-02-22 abre 13:00:00 fecha 18:15:00 n_bars=22
+    descartado: 2024-02-14 abre 13:00:00 fecha 18:15:00 n_bars=22
+[M15] distribuicao de horario de FECHAMENTO real por dia (dias validos): {datetime.time(18, 15): np.int64(456), datetime.time(17, 45): np.int64(404)}
+[M5] arquivo: C:\Users\Notebook\Documents\Claude\Projects\B3 Futuros\mt5_history\WIN_cont_N_M5.parquet
+[M5] linhas brutas=100000, removidas OOS(>=2025-01-01)=43389, removidas fim-de-semana(anomalia)=0
+[M5] range apos filtro: 2022-12-14 13:45:00 -> 2024-12-30 18:20:00
+[M5] dias no calendario=511, validos(abrem 09:00)=506, descartados(Cinzas/anomalia abertura)=5
+    descartado: 2022-12-14 abre 13:45:00 fecha 18:20:00 n_bars=56
+    descartado: 2023-01-24 abre 09:10:00 fecha 18:20:00 n_bars=111
+    descartado: 2023-02-22 abre 13:00:00 fecha 18:20:00 n_bars=65
+    descartado: 2024-02-14 abre 13:00:00 fecha 18:20:00 n_bars=65
+    descartado: 2024-03-08 abre 09:05:00 fecha 18:20:00 n_bars=112
+[M5] distribuicao de horario de FECHAMENTO real por dia (dias validos): {datetime.time(18, 20): np.int64(342), datetime.time(17, 50): np.int64(162), datetime.time(17, 55): np.int64(1), datetime.time(18, 25): np.int64(1)}
+
+[M15] dias validos DISCOVERY=610  CONFIRM=250
+[M5]  dias validos DISCOVERY(parcial, so' 2022-12-14+)=257  CONFIRM=249
+
+==============================================================================
+A1 -- Perfil de volatilidade por horario (media |ret| por barra)
+==============================================================================
+
+--- M15 | split=DISCOVERY | subset=ALL | dias=610 ---
+    top-5 horarios por vol: 10:30=24.19bps(n=610), 10:45=20.96bps(n=610), 10:00=20.62bps(n=610), 10:15=20.41bps(n=610), 11:30=19.11bps(n=610)
+    bottom-5 horarios por vol: 17:15=8.79bps(n=610), 17:30=9.71bps(n=610), 13:00=10.78bps(n=610), 13:45=10.86bps(n=610), 17:00=10.94bps(n=610)
+
+--- M15 | split=DISCOVERY | subset=EDT | dias=404 ---
+    top-5 horarios por vol: 10:30=24.13bps(n=404), 10:45=22.35bps(n=404), 10:15=20.90bps(n=404), 10:00=20.49bps(n=404), 11:00=19.16bps(n=404)
+    bottom-5 horarios por vol: 17:15=7.92bps(n=404), 17:30=8.16bps(n=404), 13:00=10.18bps(n=404), 13:15=10.39bps(n=404), 17:00=10.40bps(n=404)
+
+--- M15 | split=DISCOVERY | subset=EST | dias=206 ---
+    top-5 horarios por vol: 10:30=24.31bps(n=206), 11:30=23.12bps(n=206), 10:00=20.89bps(n=206), 11:45=19.48bps(n=206), 10:15=19.44bps(n=206)
+    bottom-5 horarios por vol: 15:45=9.95bps(n=206), 16:00=10.25bps(n=206), 17:15=10.51bps(n=206), 16:45=10.67bps(n=206), 14:00=10.90bps(n=206)
+
+--- M15 | split=CONFIRM | subset=ALL | dias=250 ---
+    top-5 horarios por vol: 10:30=16.79bps(n=250), 10:15=14.74bps(n=250), 10:00=13.53bps(n=250), 10:45=12.55bps(n=250), 11:30=12.14bps(n=250)
+    bottom-5 horarios por vol: 17:30=5.36bps(n=250), 17:45=5.46bps(n=250), 17:15=5.64bps(n=250), 18:00=5.71bps(n=250), 16:15=6.12bps(n=250)
+
+--- M15 | split=CONFIRM | subset=EDT | dias=167 ---
+    top-5 horarios por vol: 10:30=17.45bps(n=167), 10:15=15.06bps(n=167), 09:30=13.37bps(n=167), 10:45=12.82bps(n=167), 10:00=12.58bps(n=167)
+    bottom-5 horarios por vol: 17:30=3.85bps(n=167), 17:45=3.92bps(n=167), 18:00=4.61bps(n=167), 17:15=4.81bps(n=167), 16:30=5.72bps(n=167)
+
+--- M15 | split=CONFIRM | subset=EST | dias=83 ---
+    top-5 horarios por vol: 12:00=15.59bps(n=83), 10:30=15.47bps(n=83), 10:00=15.43bps(n=83), 11:30=15.42bps(n=83), 10:15=14.11bps(n=83)
+    bottom-5 horarios por vol: 14:00=6.44bps(n=83), 16:15=6.51bps(n=83), 15:45=6.99bps(n=83), 16:00=7.15bps(n=83), 17:15=7.31bps(n=83)
+
+[M5] janela DISCOVERY-PARCIAL usada: 2022-12-14 -> 2023-12-31 (M5 nao cobre o periodo 2021-2022 inteiro; ver PROTOCOL.md)
+
+--- M5 | split=DISCOVERY_PARTIAL | subset=ALL | dias=257 ---
+    top-5 horarios por vol: 10:30=14.89bps(n=257), 10:15=13.76bps(n=257), 10:35=13.26bps(n=257), 10:40=12.65bps(n=257), 10:05=11.88bps(n=257)
+--- M5 | split=DISCOVERY_PARTIAL | subset=EDT | dias=163 ---
+--- M5 | split=DISCOVERY_PARTIAL | subset=EST | dias=94 ---
+
+--- M5 | split=CONFIRM | subset=ALL | dias=249 ---
+    top-5 horarios por vol: 10:30=10.61bps(n=249), 10:15=9.11bps(n=249), 09:05=8.76bps(n=249), 10:35=8.65bps(n=249), 10:20=8.59bps(n=249)
+--- M5 | split=CONFIRM | subset=EDT | dias=167 ---
+--- M5 | split=CONFIRM | subset=EST | dias=82 ---
+
+[A1] salvo A_vol_profile.csv (889 linhas)
+
+==============================================================================
+A2 -- Perfil de real_volume por horario, por ano (M15)
+==============================================================================
+
+--- ano=2021 (dias=114) ---
+    top-5 horarios por volume medio: 10:30=1,024,750(n=114), 10:00=909,061(n=114), 10:45=876,354(n=114), 10:15=828,676(n=114), 11:30=815,764(n=114)
+
+--- ano=2022 (dias=249) ---
+    top-5 horarios por volume medio: 10:30=886,118(n=249), 10:00=775,070(n=249), 10:45=725,922(n=249), 11:00=699,619(n=249), 10:15=695,370(n=249)
+
+--- ano=2023 (dias=247) ---
+    top-5 horarios por volume medio: 10:30=878,734(n=247), 10:00=778,741(n=247), 10:15=767,791(n=247), 10:45=695,778(n=247), 11:00=691,326(n=247)
+
+--- ano=2024 (dias=250) ---
+    top-5 horarios por volume medio: 10:30=929,201(n=250), 10:15=807,221(n=250), 10:00=803,251(n=250), 10:45=705,354(n=250), 09:00=695,962(n=250)
+
+[A2] salvo A_volume_profile.csv (152 linhas)
+
+==============================================================================
+A3 -- Autocorrelacao local por hora cheia (10h-17h), M15, t_NW
+==============================================================================
+
+--- split=DISCOVERY ---
+    H=10:00  n= 610  slope=-0.0340  t_NW=-0.536 (lag=5)  [reversao]  cond_spread=-0.469bps IC95=[-3.433,+2.611]  mean(post|pre>0)=-0.275bps(n=312)  mean(post|pre<0)=+0.663bps(n=296)
+    H=11:00  n= 610  slope=-0.0168  t_NW=-0.536 (lag=5)  [reversao]  cond_spread=-0.240bps IC95=[-3.143,+2.416]  mean(post|pre>0)=-3.231bps(n=312)  mean(post|pre<0)=-2.751bps(n=292)
+    H=12:00  n= 610  slope=+0.0324  t_NW=+0.796 (lag=5)  [momentum]  cond_spread=+1.076bps IC95=[-1.262,+3.189]  mean(post|pre>0)=+1.584bps(n=310)  mean(post|pre<0)=-0.568bps(n=298)
+    H=13:00  n= 610  slope=-0.0804  t_NW=-1.983 (lag=5)  [reversao]  cond_spread=-1.476bps IC95=[-3.041,+0.233]  mean(post|pre>0)=-1.568bps(n=306)  mean(post|pre<0)=+1.384bps(n=300)
+    H=14:00  n= 610  slope=+0.0838  t_NW=+1.388 (lag=5)  [momentum]  cond_spread=+0.569bps IC95=[-1.202,+2.340]  mean(post|pre>0)=-0.016bps(n=303)  mean(post|pre<0)=-1.153bps(n=300)
+    H=15:00  n= 610  slope=-0.0404  t_NW=-0.863 (lag=5)  [reversao]  cond_spread=-0.482bps IC95=[-2.325,+1.329]  mean(post|pre>0)=-1.317bps(n=295)  mean(post|pre<0)=-0.353bps(n=311)
+    H=16:00  n= 610  slope=+0.0076  t_NW=+0.132 (lag=5)  [momentum]  cond_spread=+0.285bps IC95=[-1.633,+2.146]  mean(post|pre>0)=+0.296bps(n=299)  mean(post|pre<0)=-0.273bps(n=303)
+    H=17:00  n= 610  slope=+0.0548  t_NW=+1.272 (lag=5)  [momentum]  cond_spread=-0.033bps IC95=[-1.621,+1.569]  mean(post|pre>0)=-0.442bps(n=289)  mean(post|pre<0)=-0.377bps(n=314)
+
+--- split=CONFIRM ---
+    H=10:00  n= 250  slope=+0.0534  t_NW=+0.554 (lag=4)  [momentum]  cond_spread=+2.360bps IC95=[-0.863,+5.609]  mean(post|pre>0)=+1.145bps(n=117)  mean(post|pre<0)=-3.574bps(n=131)
+    H=11:00  n= 250  slope=+0.0023  t_NW=+0.052 (lag=4)  [momentum]  cond_spread=-0.648bps IC95=[-3.395,+1.808]  mean(post|pre>0)=-2.987bps(n=121)  mean(post|pre<0)=-1.692bps(n=127)
+    H=12:00  n= 250  slope=-0.0244  t_NW=-0.326 (lag=4)  [reversao]  cond_spread=-0.305bps IC95=[-2.629,+1.784]  mean(post|pre>0)=-0.770bps(n=127)  mean(post|pre<0)=-0.161bps(n=121)
+    H=13:00  n= 250  slope=+0.0116  t_NW=+0.216 (lag=4)  [momentum]  cond_spread=+0.230bps IC95=[-1.455,+1.860]  mean(post|pre>0)=-0.425bps(n=123)  mean(post|pre<0)=-0.884bps(n=126)
+    H=14:00  n= 250  slope=+0.0061  t_NW=+0.100 (lag=4)  [momentum]  cond_spread=-0.088bps IC95=[-1.824,+1.741]  mean(post|pre>0)=+0.186bps(n=136)  mean(post|pre<0)=+0.362bps(n=113)
+    H=15:00  n= 250  slope=-0.0788  t_NW=-1.331 (lag=4)  [reversao]  cond_spread=-1.259bps IC95=[-2.755,+0.479]  mean(post|pre>0)=-0.483bps(n=131)  mean(post|pre<0)=+2.036bps(n=116)
+    H=16:00  n= 250  slope=-0.0851  t_NW=-1.440 (lag=4)  [reversao]  cond_spread=-1.221bps IC95=[-2.632,+0.170]  mean(post|pre>0)=-0.558bps(n=122)  mean(post|pre<0)=+1.884bps(n=124)
+    H=17:00  n= 250  slope=-0.0823  t_NW=-1.868 (lag=4)  [reversao]  cond_spread=-0.505bps IC95=[-1.906,+0.911]  mean(post|pre>0)=-2.450bps(n=133)  mean(post|pre<0)=-1.440bps(n=115)
+
+[A3] salvo A_autocorr.csv (16 linhas)
+
+--- A3 candidatos (|t_NW|>=2 E IC95 cond_spread exclui 0) ---
+    nenhum
+
+==============================================================================
+A4 -- Horario da maxima (HOD) e minima (LOD) do dia, M15
+==============================================================================
+
+--- split=DISCOVERY (n_dias=610) ---
+    distribuicao HOD por hora: {9: np.int64(152), 10: np.int64(122), 11: np.int64(52), 12: np.int64(44), 13: np.int64(30), 14: np.int64(33), 15: np.int64(39), 16: np.int64(45), 17: np.int64(67), 18: np.int64(26)}
+    distribuicao LOD por hora: {9: np.int64(152), 10: np.int64(97), 11: np.int64(70), 12: np.int64(53), 13: np.int64(24), 14: np.int64(39), 15: np.int64(44), 16: np.int64(43), 17: np.int64(68), 18: np.int64(20)}
+    % HOD na 1a hora (09h): 24.9% (n=152/610)
+    % LOD na 1a hora (09h): 24.9% (n=152/610)
+    % AMBOS (HOD e LOD) na 1a hora: 0.2% (n=1/610)
+
+--- split=CONFIRM (n_dias=250) ---
+    distribuicao HOD por hora: {9: np.int64(88), 10: np.int64(36), 11: np.int64(24), 12: np.int64(18), 13: np.int64(6), 14: np.int64(14), 15: np.int64(13), 16: np.int64(14), 17: np.int64(7), 18: np.int64(30)}
+    distribuicao LOD por hora: {9: np.int64(73), 10: np.int64(48), 11: np.int64(29), 12: np.int64(17), 13: np.int64(13), 14: np.int64(14), 15: np.int64(9), 16: np.int64(17), 17: np.int64(6), 18: np.int64(24)}
+    % HOD na 1a hora (09h): 35.2% (n=88/250)
+    % LOD na 1a hora (09h): 29.2% (n=73/250)
+    % AMBOS (HOD e LOD) na 1a hora: 0.8% (n=2/250)
+
+[A4] salvo A_hod_lod.csv (24 linhas)
+
+==============================================================================
+A5 -- Tipologia diaria (trend_up / trend_down / range / mixed)
+==============================================================================
+
+--- Frequencias por split ---
+  split=DISCOVERY n=610 median_range=1912.5
+      mixed: n=290 (47.5%)
+      range: n=200 (32.8%)
+      trend_up: n=65 (10.7%)
+      trend_down: n=55 (9.0%)
+  split=CONFIRM n=250 median_range=1485.0
+      mixed: n=116 (46.4%)
+      range: n=85 (34.0%)
+      trend_down: n=25 (10.0%)
+      trend_up: n=24 (9.6%)
+
+--- Frequencias por ano ---
+  ano=2021 (split=DISCOVERY) n=114: mixed=54(47.4%), range=41(36.0%), trend_down=11(9.6%), trend_up=8(7.0%)
+  ano=2022 (split=DISCOVERY) n=249: mixed=109(43.8%), range=85(34.1%), trend_up=33(13.3%), trend_down=22(8.8%)
+  ano=2023 (split=DISCOVERY) n=247: mixed=127(51.4%), range=74(30.0%), trend_up=24(9.7%), trend_down=22(8.9%)
+  ano=2024 (split=CONFIRM) n=250: mixed=116(46.4%), range=85(34.0%), trend_down=25(10.0%), trend_up=24(9.6%)
+
+--- Cross: sinal da 1a hora (ret 09:00->10:00) x tipo do dia ---
+
+  split=DISCOVERY (n=610)
+type     mixed  range  trend_down  trend_up
+fh_sign                                    
+down       138     93          29        32
+flat         2      2           0         0
+up         150    105          26        33
+
+  split=CONFIRM (n=250)
+type     mixed  range  trend_down  trend_up
+fh_sign                                    
+down        64     49          15        10
+up          52     36          10        14
+
+--- E: ret restante do dia (10:00->close) condicional ao tipo-parcial da 1a hora ---
+
+  split=DISCOVERY n=610 mediana_range_1a_hora=700.0
+      1a_hora=down/high_vol n= 148  ret_restante_medio=-0.07bps IC95=[-18.96,19.17]
+      1a_hora=down/low_vol n= 144  ret_restante_medio=+3.16bps IC95=[-14.23,20.76]
+      1a_hora=up/high_vol n= 157  ret_restante_medio=-17.48bps IC95=[-36.52,1.83]
+      1a_hora=up/low_vol n= 157  ret_restante_medio=+9.89bps IC95=[-8.37,27.24]
+
+  split=CONFIRM n=250 mediana_range_1a_hora=627.5
+      1a_hora=down/high_vol n=  67  ret_restante_medio=-11.16bps IC95=[-29.86,6.55]
+      1a_hora=down/low_vol n=  71  ret_restante_medio=-14.11bps IC95=[-29.80,1.03]
+      1a_hora=up/high_vol n=  58  ret_restante_medio=+4.42bps IC95=[-13.22,21.27]
+      1a_hora=up/low_vol n=  54  ret_restante_medio=+9.44bps IC95=[-11.61,30.95]
+
+[A5] salvo A_typology.csv (52 linhas)
+
+==============================================================================
+A6 -- Range diario: distribuicao, correlacao D vs D-1, inside days
+==============================================================================
+
+--- Distribuicao do range diario por ano ---
+  ano=2021 n=114  q25=1747.5  mediana=2145.0  q75=2813.8
+  ano=2022 n=249  q25=1565.0  mediana=2035.0  q75=2675.0
+  ano=2023 n=247  q25=1405.0  mediana=1715.0  q75=2175.0
+  ano=2024 n=250  q25=1151.2  mediana=1485.0  q75=1888.8
+
+--- Correlacao range_D vs range_D-1, e % inside days, por split ---
+
+  split=DISCOVERY: corr(range_D, range_D-1) = 0.2858 (n=609)
+  split=DISCOVERY: % inside days = 11.1% (n=68/610)
+  split=DISCOVERY: pos-inside-day (D+1), n=67
+      ret(open->close) D+1 medio = +13.97bps IC95=[-15.61,+40.72]
+      |ret(open->close)| D+1 medio = 97.77bps IC95=[81.73,115.77]
+      range D+1 / mediana_range_split = 1.122 IC95=[1.028,1.230]  (>1 = expande, <1 = contrai vs tipico)
+
+  split=CONFIRM: corr(range_D, range_D-1) = 0.0611 (n=249)
+  split=CONFIRM: % inside days = 12.0% (n=30/250)
+  split=CONFIRM: pos-inside-day (D+1), n=29
+      ret(open->close) D+1 medio = -3.80bps IC95=[-31.86,+26.00]
+      |ret(open->close)| D+1 medio = 66.61bps IC95=[48.45,83.59]
+      range D+1 / mediana_range_split = 1.079 IC95=[0.955,1.223]  (>1 = expande, <1 = contrai vs tipico)
+
+[A6] salvo A_range.csv (10 linhas)

@@ -1,0 +1,258 @@
+==============================================================================
+t2_wdo_ptax_v0 -- Fase 0 (mapa descritivo) -- WDO PTAX fixing windows
+==============================================================================
+
+--- Passo 2: inspecao de dados ---
+M5 arquivo completo: 2022-12-26 13:00:00 -> 2026-07-17 18:25:00  (n=100000 barras)
+M5 IS (< 2025-01-01): 2022-12-26 13:00:00 -> 2024-12-30 18:25:00  (n=56206 barras, 43794 barras OOS descartadas)
+M5 IS: n dias unicos de pregao = 503
+
+M15 arquivo completo: 2021-07-19 09:00:00 -> 2026-07-17 18:15:00  (n=46534 barras)
+M15 IS (< 2025-01-01): 2021-07-19 09:00:00 -> 2024-12-30 18:15:00  (n=31935 barras, 14599 barras OOS descartadas)
+M15 IS: n dias unicos de pregao = 863
+
+--- Inspecao de barras ao redor das 4 janelas (M5 IS) ---
+ janela | n_dias_total | n_validos | %validos | miss_t1(W-35) | miss_t2(W-5) | miss_t3(W+5) | miss_t4(W+35)
+  10:00 |          503 |       500 |    99.4% |             3 |            3 |            3 |             3
+  11:00 |          503 |       500 |    99.4% |             3 |            3 |            3 |             3
+  12:00 |          503 |       500 |    99.4% |             3 |            3 |            3 |             3
+  13:00 |          503 |       500 |    99.4% |             3 |            3 |            0 |             0
+
+Salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\t2_wdo_ptax_v0\phase0\daily_windows_m5.csv  (n=2000 linhas)
+
+--- Perfil intradiario de volatilidade M5 IS (media |ret| por barra, bps) ---
+ horario |  bps_medio |      n
+09:05:00 |       9.17 |    497
+09:10:00 |       8.16 |    499
+09:15:00 |       7.83 |    500
+09:20:00 |       7.54 |    500
+09:25:00 |       6.69 |    500
+09:30:00 |       9.27 |    500
+09:35:00 |       7.18 |    500
+09:40:00 |       8.09 |    500
+09:45:00 |       7.23 |    500
+09:50:00 |       6.74 |    500
+09:55:00 |       7.54 |    500
+10:00:00 |       7.62 |    500
+10:05:00 |       6.50 |    500
+10:10:00 |       6.67 |    500
+10:15:00 |       6.44 |    500
+10:20:00 |       6.70 |    500
+10:25:00 |       5.87 |    500
+10:30:00 |       7.53 |    500
+10:35:00 |       7.03 |    500
+10:40:00 |       7.30 |    500
+10:45:00 |       6.66 |    500
+10:50:00 |       6.55 |    500
+10:55:00 |       5.79 |    500
+11:00:00 |       7.41 |    500
+11:05:00 |       6.29 |    500
+11:10:00 |       6.37 |    500
+11:15:00 |       6.16 |    500
+11:20:00 |       5.93 |    500
+11:25:00 |       5.63 |    500
+11:30:00 |       6.46 |    500
+11:35:00 |       5.89 |    500
+11:40:00 |       5.82 |    500
+11:45:00 |       5.84 |    500
+11:50:00 |       5.39 |    500
+11:55:00 |       5.19 |    500
+12:00:00 |       5.84 |    500
+12:05:00 |       5.01 |    500
+12:10:00 |       5.44 |    500
+12:15:00 |       5.19 |    500
+12:20:00 |       5.10 |    500
+12:25:00 |       4.46 |    500
+12:30:00 |       4.63 |    500
+12:35:00 |       4.26 |    500
+12:40:00 |       4.64 |    500
+12:45:00 |       4.36 |    500
+12:50:00 |       4.02 |    500
+12:55:00 |       4.60 |    500
+13:00:00 |       4.51 |    500
+13:05:00 |       3.96 |    503
+13:10:00 |       4.05 |    503
+13:15:00 |       4.22 |    503
+13:20:00 |       3.95 |    503
+13:25:00 |       3.81 |    503
+13:30:00 |       3.82 |    503
+13:35:00 |       3.90 |    503
+13:40:00 |       3.65 |    503
+13:45:00 |       4.08 |    503
+13:50:00 |       3.79 |    503
+13:55:00 |       4.12 |    503
+14:00:00 |       4.20 |    503
+14:05:00 |       3.91 |    503
+14:10:00 |       4.07 |    503
+14:15:00 |       3.98 |    503
+14:20:00 |       4.13 |    503
+14:25:00 |       3.99 |    503
+14:30:00 |       3.67 |    503
+14:35:00 |       3.96 |    503
+14:40:00 |       4.31 |    503
+14:45:00 |       4.13 |    503
+14:50:00 |       3.79 |    503
+14:55:00 |       4.30 |    503
+15:00:00 |       4.59 |    503
+15:05:00 |       3.78 |    503
+15:10:00 |       4.20 |    503
+15:15:00 |       4.01 |    503
+15:20:00 |       4.05 |    503
+15:25:00 |       3.82 |    503
+15:30:00 |       3.69 |    503
+15:35:00 |       3.99 |    503
+15:40:00 |       3.79 |    503
+15:45:00 |       3.61 |    503
+15:50:00 |       4.26 |    503
+15:55:00 |       3.69 |    503
+16:00:00 |       3.51 |    503
+16:05:00 |       3.20 |    503
+16:10:00 |       3.07 |    503
+16:15:00 |       3.09 |    503
+16:20:00 |       2.70 |    503
+16:25:00 |       2.75 |    503
+16:30:00 |       3.00 |    503
+16:35:00 |       2.92 |    503
+16:40:00 |       2.81 |    503
+16:45:00 |       2.75 |    503
+16:50:00 |       2.69 |    503
+16:55:00 |       2.94 |    503
+17:00:00 |       3.01 |    503
+17:05:00 |       2.88 |    503
+17:10:00 |       2.81 |    503
+17:15:00 |       2.57 |    503
+17:20:00 |       2.45 |    503
+17:25:00 |       2.53 |    503
+17:30:00 |       2.98 |    503
+17:35:00 |       2.65 |    502
+17:40:00 |       2.67 |    502
+17:45:00 |       2.95 |    502
+17:50:00 |       3.12 |    502
+17:55:00 |       3.71 |    502
+18:00:00 |       2.57 |    340
+18:05:00 |       2.67 |    339
+18:10:00 |       2.80 |    339
+18:15:00 |       3.02 |    339
+18:20:00 |       3.54 |    339
+18:25:00 |       4.38 |    339
+
+Destaque janelas PTAX (barras @W:00 e @W:05, dentro da consulta 10min):
+  janela 10:00 -> barra 10:00:00: 7.62 bps (n=500)
+  janela 10:00 -> barra 10:05:00: 6.50 bps (n=500)
+  janela 11:00 -> barra 11:00:00: 7.41 bps (n=500)
+  janela 11:00 -> barra 11:05:00: 6.29 bps (n=500)
+  janela 12:00 -> barra 12:00:00: 5.84 bps (n=500)
+  janela 12:00 -> barra 12:05:00: 5.01 bps (n=500)
+  janela 13:00 -> barra 13:00:00: 4.51 bps (n=500)
+  janela 13:00 -> barra 13:05:00: 3.96 bps (n=503)
+
+==============================================================================
+ANALISES POR JANELA (M5 IS)
+==============================================================================
+
+----- Janela 10:00 (n=500 dias validos) -----
+[1] ret_pre  media: +1.31 bps [IC95 -0.79, +3.47]
+[1] ret_post media: +1.01 bps [IC95 -1.05, +3.18]
+     breakdown por ano (ret_pre):
+       2022: n=   3  ret_pre_mean=  +7.99 bps  (n<60, nao conta p/ gate)
+       2023: n= 247  ret_pre_mean=  -0.75 bps
+       2024: n= 250  ret_pre_mean=  +3.27 bps
+[2] OLS ret_post ~ ret_pre: slope=-0.0207  t_NW=-0.43  (lag=5, n=500)
+[2] fade cond. media ret_post: +0.12 bps [IC95 -1.85, +2.16]  (n=488)
+     breakdown por ano (slope sign post~pre):
+       2022: n=   3  slope=+nan  (n<60, nao conta p/ gate)
+       2023: n= 247  slope=+0.0211
+       2024: n= 250  slope=-0.0550
+[3] robustez (exclui top/bottom 1% ret_pre, n=490):
+     ret_pre media: +1.29 bps [IC95 -0.70, +3.29]
+     OLS slope=-0.0325  t_NW=-0.56 (lag=5)
+     fade cond. media: +0.19 bps [IC95 -1.86, +2.31]
+[4] subset eom (n=25, descritivo, sem gate):
+     ret_pre media: +10.77 bps   ret_post media: -0.58 bps
+[5] grade M15 (n=860): ret_pre_mean=+0.09 bps (sinal=+)  slope=-0.0170  t_NW=-0.48
+
+----- Janela 11:00 (n=500 dias validos) -----
+[1] ret_pre  media: +0.43 bps [IC95 -1.36, +2.38]
+[1] ret_post media: +0.23 bps [IC95 -1.42, +1.79]
+     breakdown por ano (ret_pre):
+       2022: n=   3  ret_pre_mean=  +5.98 bps  (n<60, nao conta p/ gate)
+       2023: n= 247  ret_pre_mean=  -0.29 bps
+       2024: n= 250  ret_pre_mean=  +1.07 bps
+[2] OLS ret_post ~ ret_pre: slope=-0.0501  t_NW=-1.28  (lag=5, n=500)
+[2] fade cond. media ret_post: +0.35 bps [IC95 -1.34, +2.09]  (n=490)
+     breakdown por ano (slope sign post~pre):
+       2022: n=   3  slope=+nan  (n<60, nao conta p/ gate)
+       2023: n= 247  slope=-0.0829
+       2024: n= 250  slope=-0.0075
+[3] robustez (exclui top/bottom 1% ret_pre, n=490):
+     ret_pre media: +0.55 bps [IC95 -1.02, +2.23]
+     OLS slope=-0.0335  t_NW=-0.63 (lag=5)
+     fade cond. media: +0.17 bps [IC95 -1.53, +2.00]
+[4] subset eom (n=25, descritivo, sem gate):
+     ret_pre media: +2.99 bps   ret_post media: +4.08 bps
+[5] grade M15 (n=860): ret_pre_mean=-1.13 bps (sinal=-)  slope=-0.0556  t_NW=-1.40
+
+----- Janela 12:00 (n=500 dias validos) -----
+[1] ret_pre  media: +0.01 bps [IC95 -1.60, +1.50]
+[1] ret_post media: -0.26 bps [IC95 -1.77, +1.20]
+     breakdown por ano (ret_pre):
+       2022: n=   3  ret_pre_mean=  +9.22 bps  (n<60, nao conta p/ gate)
+       2023: n= 247  ret_pre_mean=  -0.40 bps
+       2024: n= 250  ret_pre_mean=  +0.30 bps
+[2] OLS ret_post ~ ret_pre: slope=0.0625  t_NW=1.26  (lag=5, n=500)
+[2] fade cond. media ret_post: -1.27 bps [IC95 -2.85, +0.15]  (n=486)
+     breakdown por ano (slope sign post~pre):
+       2022: n=   3  slope=+nan  (n<60, nao conta p/ gate)
+       2023: n= 247  slope=-0.0575
+       2024: n= 250  slope=+0.1890
+[3] robustez (exclui top/bottom 1% ret_pre, n=490):
+     ret_pre media: -0.12 bps [IC95 -1.58, +1.28]
+     OLS slope=0.0896  t_NW=1.70 (lag=5)
+     fade cond. media: -1.33 bps [IC95 -2.86, +0.13]
+[4] subset eom (n=25, descritivo, sem gate):
+     ret_pre media: +7.50 bps   ret_post media: -6.42 bps
+[5] grade M15 (n=860): ret_pre_mean=-1.54 bps (sinal=-)  slope=0.0285  t_NW=0.92
+
+----- Janela 13:00 (n=500 dias validos) -----
+[1] ret_pre  media: -0.02 bps [IC95 -1.37, +1.30]
+[1] ret_post media: +0.82 bps [IC95 -0.30, +1.97]
+     breakdown por ano (ret_pre):
+       2022: n=   3  ret_pre_mean= +24.04 bps  (n<60, nao conta p/ gate)
+       2023: n= 247  ret_pre_mean=  -0.33 bps
+       2024: n= 250  ret_pre_mean=  -0.00 bps
+[2] OLS ret_post ~ ret_pre: slope=0.0431  t_NW=0.98  (lag=5, n=500)
+[2] fade cond. media ret_post: -0.12 bps [IC95 -1.34, +0.94]  (n=484)
+     breakdown por ano (slope sign post~pre):
+       2022: n=   3  slope=+nan  (n<60, nao conta p/ gate)
+       2023: n= 247  slope=+0.0226
+       2024: n= 250  slope=+0.0803
+[3] robustez (exclui top/bottom 1% ret_pre, n=490):
+     ret_pre media: -0.04 bps [IC95 -1.25, +1.22]
+     OLS slope=0.0310  t_NW=0.56 (lag=5)
+     fade cond. media: +0.00 bps [IC95 -1.24, +1.16]
+[4] subset eom (n=25, descritivo, sem gate):
+     ret_pre media: +4.46 bps   ret_post media: -0.44 bps
+[5] grade M15 (n=860): ret_pre_mean=-1.05 bps (sinal=-)  slope=0.0362  t_NW=1.07
+
+==============================================================================
+TABELA DE GATES (PASS/FAIL)
+==============================================================================
+ janela |    D1    D2    D3    D4 |  H_drift ||    R1    R2    R3    R4    R5 |  H_rev
+--------------------------------------------------------------------------------------
+  10:00 |  FAIL  FAIL  FAIL  PASS |     FAIL ||  FAIL  FAIL  FAIL  FAIL  PASS |   FAIL
+  11:00 |  FAIL  FAIL  FAIL  FAIL |     FAIL ||  FAIL  FAIL  PASS  FAIL  PASS |   FAIL
+  12:00 |  FAIL  FAIL  FAIL  FAIL |     FAIL ||  FAIL  FAIL  FAIL  FAIL  FAIL |   FAIL
+  13:00 |  FAIL  PASS  FAIL  PASS |     FAIL ||  FAIL  FAIL  FAIL  FAIL  FAIL |   FAIL
+
+--- DECISAO (conforme regra pre-registrada) ---
+decision = premise_refuted
+  Nenhuma janela passou H_drift completo nem H_rev completo.
+  Fechar campanha sem variantes post-hoc.
+
+--- Nota eom (fora da decisao, n insuficiente p/ gate formal) ---
+  10:00: n=25  ret_pre=+10.77bps  ret_post=-0.58bps  >>> |efeito| >= 10bps -- registrar como hipotese futura separada (nao continuar nesta campanha)
+  11:00: n=25  ret_pre=+2.99bps  ret_post=+4.08bps
+  12:00: n=25  ret_pre=+7.50bps  ret_post=-6.42bps
+  13:00: n=25  ret_pre=+4.46bps  ret_post=-0.44bps
+
+Salvo: C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\t2_wdo_ptax_v0\phase0\t2_map_summary.json

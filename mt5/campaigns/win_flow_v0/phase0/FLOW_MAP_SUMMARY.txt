@@ -1,0 +1,169 @@
+==============================================================================
+win_flow_v0 -- Fase 0b -- build_flow_map.py
+==============================================================================
+IN_PARQUET = C:\Users\Notebook\Documents\Claude\Projects\Finanças\mt5\campaigns\win_flow_v0\phase0\flow_bars_1min.parquet
+
+linhas totais no parquet: 143664 (256 dias)
+HOLDOUT (>= 2026-04-01) removido: 42812 linhas, 76 dias -- NAO TOCADO nesta fase
+linhas DISCOVERY restantes: 100852 (180 dias)
+dias com gap interno de minuto (informativo, sinal e' row-based, nao afetado): 7 / 180
+
+H1 (2025-07 -> 2025-11): 99 dias, 55404 barras
+H2 (2025-12 -> 2026-03): 81 dias, 45448 barras
+
+NOTA METODOLOGICA: LARGE_OFI_k e' ponderado por vol_total (volume TOTAL do minuto), nao por volume 'large', pois buy_vol_l/sell_vol_l nao existem nas flow-bars da fase 0a (so large_ofi agregado). Aproximacao pre-registrada explicitamente.
+
+barras na grade de amostragem (5min, 09:05-17:30), antes de exigir historico k / alvo h: 18224
+
+total de testes (signal x k x h x half): 36
+
+==============================================================================
+TABELAS DE QUINTIS -- media do ret forward (bps) por quintil de sinal
+==============================================================================
+
+--- OFI_k5 -> fwd_ret_5min ---
+  [H1] n=9974 dias=99  Q1=+0.10bps(n=1995) | Q2=+0.02bps(n=1995) | Q3=+0.37bps(n=1994) | Q4=+0.08bps(n=1995) | Q5=-0.08bps(n=1995)
+        spread(Q5-Q1)=-0.18bps  IC95=[-0.59,+0.25]  spearman=-0.500
+  [H2] n=8186 dias=81  Q1=+0.57bps(n=1638) | Q2=+0.06bps(n=1637) | Q3=+0.54bps(n=1637) | Q4=+0.01bps(n=1637) | Q5=-0.44bps(n=1637)
+        spread(Q5-Q1)=-1.01bps  IC95=[-1.73,-0.29]  spearman=-0.900
+
+--- OFI_k5 -> fwd_ret_15min ---
+  [H1] n=9970 dias=99  Q1=+0.41bps(n=1994) | Q2=-0.01bps(n=1994) | Q3=+1.04bps(n=1994) | Q4=+0.26bps(n=1994) | Q5=-0.06bps(n=1994)
+        spread(Q5-Q1)=-0.48bps  IC95=[-1.10,+0.16]  spearman=-0.500
+  [H2] n=8186 dias=81  Q1=+0.74bps(n=1638) | Q2=-0.12bps(n=1637) | Q3=+0.97bps(n=1637) | Q4=+0.45bps(n=1637) | Q5=-0.07bps(n=1637)
+        spread(Q5-Q1)=-0.82bps  IC95=[-1.76,+0.20]  spearman=-0.200
+
+--- OFI_k5 -> fwd_ret_30min ---
+  [H1] n=9967 dias=99  Q1=+0.69bps(n=1994) | Q2=+0.68bps(n=1993) | Q3=+0.92bps(n=1993) | Q4=+0.99bps(n=1993) | Q5=-0.04bps(n=1994)
+        spread(Q5-Q1)=-0.73bps  IC95=[-1.51,+0.04]  spearman=-0.100
+  [H2] n=8186 dias=81  Q1=+1.07bps(n=1638) | Q2=-0.02bps(n=1637) | Q3=+2.43bps(n=1637) | Q4=+0.21bps(n=1637) | Q5=+0.34bps(n=1637)
+        spread(Q5-Q1)=-0.73bps  IC95=[-1.96,+0.48]  spearman=-0.100
+
+--- OFI_k15 -> fwd_ret_5min ---
+  [H1] n=9776 dias=99  Q1=+0.17bps(n=1956) | Q2=-0.11bps(n=1955) | Q3=+0.28bps(n=1955) | Q4=+0.01bps(n=1955) | Q5=+0.10bps(n=1955)
+        spread(Q5-Q1)=-0.07bps  IC95=[-0.52,+0.36]  spearman=-0.100
+  [H2] n=8024 dias=81  Q1=+0.31bps(n=1605) | Q2=-0.09bps(n=1605) | Q3=+0.25bps(n=1604) | Q4=+0.16bps(n=1605) | Q5=-0.05bps(n=1605)
+        spread(Q5-Q1)=-0.36bps  IC95=[-1.11,+0.46]  spearman=-0.400
+
+--- OFI_k15 -> fwd_ret_15min ---
+  [H1] n=9774 dias=99  Q1=+0.34bps(n=1955) | Q2=+0.01bps(n=1955) | Q3=+0.26bps(n=1954) | Q4=+0.98bps(n=1955) | Q5=-0.09bps(n=1955)
+        spread(Q5-Q1)=-0.43bps  IC95=[-1.31,+0.41]  spearman=-0.300
+  [H2] n=8024 dias=81  Q1=+0.60bps(n=1605) | Q2=+0.20bps(n=1605) | Q3=+0.07bps(n=1604) | Q4=+0.43bps(n=1605) | Q5=+0.67bps(n=1605)
+        spread(Q5-Q1)=+0.07bps  IC95=[-1.31,+1.61]  spearman=+0.300
+
+--- OFI_k15 -> fwd_ret_30min ---
+  [H1] n=9772 dias=99  Q1=+0.49bps(n=1955) | Q2=+0.45bps(n=1954) | Q3=+0.60bps(n=1954) | Q4=+1.60bps(n=1954) | Q5=-0.02bps(n=1955)
+        spread(Q5-Q1)=-0.51bps  IC95=[-1.67,+0.65]  spearman=-0.100
+  [H2] n=8024 dias=81  Q1=+1.57bps(n=1605) | Q2=+0.70bps(n=1605) | Q3=+1.40bps(n=1604) | Q4=-0.33bps(n=1605) | Q5=+0.98bps(n=1605)
+        spread(Q5-Q1)=-0.59bps  IC95=[-2.61,+1.30]  spearman=-0.500
+
+--- OFI_k30 -> fwd_ret_5min ---
+  [H1] n=9479 dias=99  Q1=+0.15bps(n=1896) | Q2=-0.01bps(n=1896) | Q3=-0.10bps(n=1895) | Q4=+0.12bps(n=1896) | Q5=+0.20bps(n=1896)
+        spread(Q5-Q1)=+0.05bps  IC95=[-0.41,+0.44]  spearman=+0.300
+  [H2] n=7781 dias=81  Q1=+0.23bps(n=1557) | Q2=-0.07bps(n=1556) | Q3=+0.59bps(n=1556) | Q4=-0.20bps(n=1556) | Q5=+0.31bps(n=1556)
+        spread(Q5-Q1)=+0.07bps  IC95=[-0.59,+0.71]  spearman=+0.100
+
+--- OFI_k30 -> fwd_ret_15min ---
+  [H1] n=9478 dias=99  Q1=+0.28bps(n=1896) | Q2=+0.14bps(n=1895) | Q3=-0.04bps(n=1896) | Q4=+0.46bps(n=1895) | Q5=+0.60bps(n=1896)
+        spread(Q5-Q1)=+0.32bps  IC95=[-0.70,+1.25]  spearman=+0.600
+  [H2] n=7781 dias=81  Q1=+0.59bps(n=1557) | Q2=+0.64bps(n=1556) | Q3=+0.49bps(n=1556) | Q4=+0.41bps(n=1556) | Q5=+0.42bps(n=1556)
+        spread(Q5-Q1)=-0.17bps  IC95=[-1.68,+1.30]  spearman=-0.800
+
+--- OFI_k30 -> fwd_ret_30min ---
+  [H1] n=9478 dias=99  Q1=+0.40bps(n=1896) | Q2=+0.86bps(n=1895) | Q3=+0.29bps(n=1896) | Q4=+0.76bps(n=1895) | Q5=+0.59bps(n=1896)
+        spread(Q5-Q1)=+0.19bps  IC95=[-1.61,+1.90]  spearman=+0.100
+  [H2] n=7781 dias=81  Q1=+0.47bps(n=1557) | Q2=+1.43bps(n=1556) | Q3=+1.64bps(n=1556) | Q4=+0.87bps(n=1556) | Q5=+0.54bps(n=1556)
+        spread(Q5-Q1)=+0.07bps  IC95=[-2.44,+2.26]  spearman=+0.100
+
+--- LARGE_OFI_k5 -> fwd_ret_5min ---
+  [H1] n=9973 dias=99  Q1=+0.06bps(n=1995) | Q2=-0.04bps(n=1994) | Q3=+0.45bps(n=1995) | Q4=+0.09bps(n=1994) | Q5=-0.08bps(n=1995)
+        spread(Q5-Q1)=-0.14bps  IC95=[-0.55,+0.29]  spearman=-0.200
+  [H2] n=8186 dias=81  Q1=+0.54bps(n=1638) | Q2=+0.20bps(n=1637) | Q3=+0.44bps(n=1637) | Q4=+0.00bps(n=1637) | Q5=-0.44bps(n=1637)
+        spread(Q5-Q1)=-0.98bps  IC95=[-1.65,-0.29]  spearman=-0.900
+
+--- LARGE_OFI_k5 -> fwd_ret_15min ---
+  [H1] n=9969 dias=99  Q1=+0.38bps(n=1994) | Q2=+0.14bps(n=1994) | Q3=+1.01bps(n=1993) | Q4=+0.22bps(n=1994) | Q5=-0.12bps(n=1994)
+        spread(Q5-Q1)=-0.49bps  IC95=[-1.17,+0.17]  spearman=-0.500
+  [H2] n=8186 dias=81  Q1=+0.79bps(n=1638) | Q2=+0.02bps(n=1637) | Q3=+0.58bps(n=1637) | Q4=+0.93bps(n=1637) | Q5=-0.35bps(n=1637)
+        spread(Q5-Q1)=-1.14bps  IC95=[-2.13,-0.09]  spearman=-0.300
+
+--- LARGE_OFI_k5 -> fwd_ret_30min ---
+  [H1] n=9966 dias=99  Q1=+0.68bps(n=1994) | Q2=+0.82bps(n=1993) | Q3=+0.99bps(n=1993) | Q4=+0.78bps(n=1993) | Q5=-0.06bps(n=1993)
+        spread(Q5-Q1)=-0.74bps  IC95=[-1.62,+0.18]  spearman=-0.300
+  [H2] n=8186 dias=81  Q1=+1.11bps(n=1638) | Q2=+0.17bps(n=1637) | Q3=+2.07bps(n=1637) | Q4=+1.00bps(n=1637) | Q5=-0.31bps(n=1637)
+        spread(Q5-Q1)=-1.43bps  IC95=[-2.65,-0.12]  spearman=-0.500
+
+--- LARGE_OFI_k15 -> fwd_ret_5min ---
+  [H1] n=9773 dias=99  Q1=+0.15bps(n=1955) | Q2=-0.10bps(n=1954) | Q3=+0.29bps(n=1955) | Q4=+0.08bps(n=1954) | Q5=+0.01bps(n=1955)
+        spread(Q5-Q1)=-0.14bps  IC95=[-0.60,+0.30]  spearman=-0.200
+  [H2] n=8024 dias=81  Q1=+0.19bps(n=1605) | Q2=+0.06bps(n=1605) | Q3=+0.17bps(n=1604) | Q4=+0.16bps(n=1605) | Q5=-0.01bps(n=1605)
+        spread(Q5-Q1)=-0.19bps  IC95=[-0.94,+0.56]  spearman=-0.700
+
+--- LARGE_OFI_k15 -> fwd_ret_15min ---
+  [H1] n=9771 dias=99  Q1=+0.24bps(n=1955) | Q2=+0.18bps(n=1954) | Q3=+0.52bps(n=1954) | Q4=+0.66bps(n=1954) | Q5=-0.08bps(n=1954)
+        spread(Q5-Q1)=-0.32bps  IC95=[-1.25,+0.63]  spearman=-0.100
+  [H2] n=8024 dias=81  Q1=+0.56bps(n=1605) | Q2=+0.31bps(n=1605) | Q3=+0.18bps(n=1604) | Q4=+0.49bps(n=1605) | Q5=+0.44bps(n=1605)
+        spread(Q5-Q1)=-0.12bps  IC95=[-1.46,+1.46]  spearman=-0.200
+
+--- LARGE_OFI_k15 -> fwd_ret_30min ---
+  [H1] n=9769 dias=99  Q1=+0.48bps(n=1954) | Q2=+0.73bps(n=1954) | Q3=+0.97bps(n=1953) | Q4=+0.87bps(n=1954) | Q5=+0.05bps(n=1954)
+        spread(Q5-Q1)=-0.43bps  IC95=[-1.77,+0.89]  spearman=-0.100
+  [H2] n=8024 dias=81  Q1=+1.27bps(n=1605) | Q2=+1.06bps(n=1605) | Q3=+1.30bps(n=1604) | Q4=+0.00bps(n=1605) | Q5=+0.69bps(n=1605)
+        spread(Q5-Q1)=-0.58bps  IC95=[-2.84,+1.49]  spearman=-0.600
+
+--- LARGE_OFI_k30 -> fwd_ret_5min ---
+  [H1] n=9476 dias=99  Q1=+0.13bps(n=1896) | Q2=+0.15bps(n=1895) | Q3=-0.14bps(n=1895) | Q4=+0.18bps(n=1895) | Q5=+0.03bps(n=1895)
+        spread(Q5-Q1)=-0.10bps  IC95=[-0.55,+0.35]  spearman=-0.100
+  [H2] n=7781 dias=81  Q1=+0.23bps(n=1557) | Q2=+0.24bps(n=1556) | Q3=+0.25bps(n=1556) | Q4=-0.07bps(n=1556) | Q5=+0.21bps(n=1556)
+        spread(Q5-Q1)=-0.02bps  IC95=[-0.80,+0.80]  spearman=-0.500
+
+--- LARGE_OFI_k30 -> fwd_ret_15min ---
+  [H1] n=9475 dias=99  Q1=+0.35bps(n=1895) | Q2=+0.41bps(n=1895) | Q3=-0.25bps(n=1895) | Q4=+0.73bps(n=1895) | Q5=+0.20bps(n=1895)
+        spread(Q5-Q1)=-0.15bps  IC95=[-1.19,+0.85]  spearman=-0.100
+  [H2] n=7781 dias=81  Q1=+0.77bps(n=1557) | Q2=+1.04bps(n=1556) | Q3=-0.05bps(n=1556) | Q4=+0.44bps(n=1556) | Q5=+0.35bps(n=1556)
+        spread(Q5-Q1)=-0.42bps  IC95=[-2.11,+1.36]  spearman=-0.600
+
+--- LARGE_OFI_k30 -> fwd_ret_30min ---
+  [H1] n=9475 dias=99  Q1=+0.73bps(n=1895) | Q2=+1.25bps(n=1895) | Q3=-0.29bps(n=1895) | Q4=+0.89bps(n=1895) | Q5=+0.31bps(n=1895)
+        spread(Q5-Q1)=-0.42bps  IC95=[-2.37,+1.42]  spearman=-0.300
+  [H2] n=7781 dias=81  Q1=+0.85bps(n=1557) | Q2=+1.59bps(n=1556) | Q3=+1.35bps(n=1556) | Q4=+0.75bps(n=1556) | Q5=+0.41bps(n=1556)
+        spread(Q5-Q1)=-0.44bps  IC95=[-3.33,+2.46]  spearman=-0.700
+
+==============================================================================
+AVALIACAO DE GATES
+==============================================================================
+
+G1 (h>=15, |spread|>=6bps, IC95 excl. 0, mesmo sinal em H1 e H2): FALHOU
+
+G2 (|spearman|>=0.9 em H1 e H2, na(s) combinacao(oes) de G1): FALHOU
+
+G3 (sobrevive a remocao dos 5% dias de maior |contribuicao diaria|):
+  (nenhuma combinacao chegou a G3 -- G1 ou G2 ja falharam)
+
+G3: FALHOU (0 combo(s) sobrevivem)
+
+G4 (acuracia classificacao >=70%): PASSOU na Fase 0a (80.85%) -- ja verificado
+
+==============================================================================
+maker_only_candidate (h=5min, |spread| entre 2 e 6 bps, IC95 excl. 0) -- informativo, NAO passa gate
+==============================================================================
+  nenhum combo qualifica em AMBAS as metades
+
+==============================================================================
+BREAKDOWN MANHA (ate 12:59) vs TARDE (13:00+)
+==============================================================================
+(nenhum combo passou G1 -- usando 'melhor combo' por maior media de |spread| H1/H2: LARGE_OFI_k5 h=30min, score=1.08bps)
+
+--- LARGE_OFI_k5 -> fwd_ret_30min ---
+  [H1/manha] n=4543  spread(Q5-Q1)=-1.33bps
+  [H1/tarde] n=5423  spread(Q5-Q1)=-0.83bps
+  [H2/manha] n=3732  spread(Q5-Q1)=-1.77bps
+  [H2/tarde] n=4454  spread(Q5-Q1)=-0.06bps
+
+==============================================================================
+DECISAO MECANICA
+==============================================================================
+G1/G2/G3 NAO passaram completamente (G4 ja passou na 0a) -> premise_refuted
+  G1: falhou (0 combo(s) candidatos)
+  G2: falhou (0 combo(s))
+  G3: falhou (0 combo(s))

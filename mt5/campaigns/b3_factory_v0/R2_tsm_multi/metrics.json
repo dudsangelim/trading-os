@@ -1,0 +1,430 @@
+{
+  "meta": {
+    "window_start": "2021-07-19",
+    "window_end": "2024-12-31",
+    "cutoff_2025_rule": "dados >= 2025-01-01 filtrados pos-load, PROIBIDOS por instrucao",
+    "L_grid": [
+      63,
+      126
+    ],
+    "F_rebal": 21,
+    "vol_window": 20,
+    "vol_target": 0.1,
+    "weight_cap": 3.0,
+    "cost_bps_normal": 1.5,
+    "cost_bps_high_fee": 3.0,
+    "high_fee_assets": [
+      "BGI",
+      "CCM",
+      "ICF"
+    ],
+    "roll_bps_month": 1.2,
+    "portfolio_sleeves": [
+      "WDO",
+      "DI1",
+      "BGI",
+      "CCM",
+      "ICF",
+      "WIN"
+    ],
+    "excluded_from_portfolio": [
+      "IND",
+      "DOL",
+      "BIT"
+    ],
+    "exclusion_reason": "IND correlaciona ~1 com WIN; DOL correlaciona ~1 com WDO; BIT tem historico curto (~2024+)"
+  },
+  "load_report": {
+    "WIN": {
+      "n_dropped_2025plus": 385,
+      "max_date_raw_before_filter": "2026-07-17",
+      "n_rows_in_window": 863,
+      "date_min": "2021-07-19",
+      "date_max": "2024-12-30"
+    },
+    "WDO": {
+      "n_dropped_2025plus": 385,
+      "max_date_raw_before_filter": "2026-07-17",
+      "n_rows_in_window": 863,
+      "date_min": "2021-07-19",
+      "date_max": "2024-12-30"
+    },
+    "IND": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "DOL": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "DI1": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "BGI": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "CCM": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "ICF": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 861,
+      "date_min": "2021-07-21",
+      "date_max": "2024-12-30"
+    },
+    "BIT": {
+      "n_dropped_2025plus": 387,
+      "max_date_raw_before_filter": "2026-07-21",
+      "n_rows_in_window": 174,
+      "date_min": "2024-04-23",
+      "date_max": "2024-12-30"
+    }
+  },
+  "results_by_L": {
+    "L63": {
+      "sleeves": {
+        "WIN": {
+          "n_days": 863,
+          "net_ann_pct": -2.46,
+          "sharpe": -0.245,
+          "maxdd_pct": -21.16,
+          "monthly_mean_pct": -0.204,
+          "worst_month_pct": -6.0,
+          "pf_month_blocks": 0.84
+        },
+        "WDO": {
+          "n_days": 863,
+          "net_ann_pct": 2.07,
+          "sharpe": 0.198,
+          "maxdd_pct": -16.31,
+          "monthly_mean_pct": 0.158,
+          "worst_month_pct": -5.01,
+          "pf_month_blocks": 1.17
+        },
+        "IND": {
+          "n_days": 861,
+          "net_ann_pct": -4.34,
+          "sharpe": -0.44,
+          "maxdd_pct": -23.05,
+          "monthly_mean_pct": -0.363,
+          "worst_month_pct": -5.86,
+          "pf_month_blocks": 0.73
+        },
+        "DOL": {
+          "n_days": 861,
+          "net_ann_pct": 1.86,
+          "sharpe": 0.171,
+          "maxdd_pct": -14.45,
+          "monthly_mean_pct": 0.15,
+          "worst_month_pct": -4.78,
+          "pf_month_blocks": 1.14
+        },
+        "DI1": {
+          "n_days": 861,
+          "net_ann_pct": 16.24,
+          "sharpe": 1.331,
+          "maxdd_pct": -18.01,
+          "monthly_mean_pct": 1.235,
+          "worst_month_pct": -9.67,
+          "pf_month_blocks": 3.0
+        },
+        "BGI": {
+          "n_days": 861,
+          "net_ann_pct": 3.47,
+          "sharpe": 0.317,
+          "maxdd_pct": -18.03,
+          "monthly_mean_pct": 0.321,
+          "worst_month_pct": -6.95,
+          "pf_month_blocks": 1.24
+        },
+        "CCM": {
+          "n_days": 861,
+          "net_ann_pct": 13.36,
+          "sharpe": 1.074,
+          "maxdd_pct": -17.03,
+          "monthly_mean_pct": 1.08,
+          "worst_month_pct": -6.65,
+          "pf_month_blocks": 2.39
+        },
+        "ICF": {
+          "n_days": 861,
+          "net_ann_pct": 10.63,
+          "sharpe": 0.902,
+          "maxdd_pct": -13.17,
+          "monthly_mean_pct": 0.832,
+          "worst_month_pct": -4.84,
+          "pf_month_blocks": 2.11
+        },
+        "BIT": {
+          "n_days": 174,
+          "net_ann_pct": 15.08,
+          "sharpe": 1.622,
+          "maxdd_pct": -3.64,
+          "monthly_mean_pct": 1.093,
+          "worst_month_pct": -1.17,
+          "pf_month_blocks": 6.31
+        }
+      },
+      "portfolio": {
+        "n_days": 863,
+        "net_ann_pct": 7.0,
+        "sharpe": 1.371,
+        "maxdd_pct": -5.88,
+        "monthly_mean_pct": 0.555,
+        "worst_month_pct": -2.75,
+        "pf_month_blocks": 2.71
+      },
+      "portfolio_sleeves_used": [
+        "WDO",
+        "DI1",
+        "BGI",
+        "CCM",
+        "ICF",
+        "WIN"
+      ]
+    },
+    "L126": {
+      "sleeves": {
+        "WIN": {
+          "n_days": 863,
+          "net_ann_pct": -9.48,
+          "sharpe": -1.018,
+          "maxdd_pct": -31.77,
+          "monthly_mean_pct": -0.816,
+          "worst_month_pct": -6.0,
+          "pf_month_blocks": 0.42
+        },
+        "WDO": {
+          "n_days": 863,
+          "net_ann_pct": 7.18,
+          "sharpe": 0.71,
+          "maxdd_pct": -8.8,
+          "monthly_mean_pct": 0.557,
+          "worst_month_pct": -4.3,
+          "pf_month_blocks": 1.89
+        },
+        "IND": {
+          "n_days": 861,
+          "net_ann_pct": -9.5,
+          "sharpe": -1.024,
+          "maxdd_pct": -36.9,
+          "monthly_mean_pct": -0.82,
+          "worst_month_pct": -4.84,
+          "pf_month_blocks": 0.41
+        },
+        "DOL": {
+          "n_days": 861,
+          "net_ann_pct": 8.0,
+          "sharpe": 0.751,
+          "maxdd_pct": -9.92,
+          "monthly_mean_pct": 0.63,
+          "worst_month_pct": -4.67,
+          "pf_month_blocks": 1.77
+        },
+        "DI1": {
+          "n_days": 861,
+          "net_ann_pct": 12.3,
+          "sharpe": 1.074,
+          "maxdd_pct": -12.78,
+          "monthly_mean_pct": 0.949,
+          "worst_month_pct": -8.35,
+          "pf_month_blocks": 2.5
+        },
+        "BGI": {
+          "n_days": 861,
+          "net_ann_pct": 8.79,
+          "sharpe": 0.805,
+          "maxdd_pct": -12.45,
+          "monthly_mean_pct": 0.714,
+          "worst_month_pct": -6.45,
+          "pf_month_blocks": 1.83
+        },
+        "CCM": {
+          "n_days": 861,
+          "net_ann_pct": 13.69,
+          "sharpe": 1.142,
+          "maxdd_pct": -19.48,
+          "monthly_mean_pct": 1.107,
+          "worst_month_pct": -6.67,
+          "pf_month_blocks": 2.54
+        },
+        "ICF": {
+          "n_days": 861,
+          "net_ann_pct": 6.62,
+          "sharpe": 0.588,
+          "maxdd_pct": -17.9,
+          "monthly_mean_pct": 0.529,
+          "worst_month_pct": -4.25,
+          "pf_month_blocks": 1.65
+        },
+        "BIT": {
+          "n_days": 174,
+          "net_ann_pct": 13.61,
+          "sharpe": 1.858,
+          "maxdd_pct": -1.91,
+          "monthly_mean_pct": 1.0,
+          "worst_month_pct": -0.42,
+          "pf_month_blocks": 22.23
+        }
+      },
+      "portfolio": {
+        "n_days": 863,
+        "net_ann_pct": 6.21,
+        "sharpe": 1.292,
+        "maxdd_pct": -5.81,
+        "monthly_mean_pct": 0.495,
+        "worst_month_pct": -1.86,
+        "pf_month_blocks": 2.74
+      },
+      "portfolio_sleeves_used": [
+        "WDO",
+        "DI1",
+        "BGI",
+        "CCM",
+        "ICF",
+        "WIN"
+      ]
+    }
+  },
+  "correlation_matrix_L126": {
+    "WIN": {
+      "WIN": 1.0,
+      "WDO": 0.0271,
+      "IND": 0.7355,
+      "DOL": 0.1091,
+      "DI1": 0.2192,
+      "BGI": -0.0093,
+      "CCM": -0.0115,
+      "ICF": -0.0608,
+      "BIT": 0.0307
+    },
+    "WDO": {
+      "WIN": 0.0271,
+      "WDO": 1.0,
+      "IND": 0.1068,
+      "DOL": 0.8741,
+      "DI1": 0.183,
+      "BGI": 0.0372,
+      "CCM": 0.0704,
+      "ICF": -0.0623,
+      "BIT": 0.0994
+    },
+    "IND": {
+      "WIN": 0.7355,
+      "WDO": 0.1068,
+      "IND": 1.0,
+      "DOL": 0.1893,
+      "DI1": 0.3115,
+      "BGI": -0.0718,
+      "CCM": -0.0158,
+      "ICF": -0.0541,
+      "BIT": 0.0857
+    },
+    "DOL": {
+      "WIN": 0.1091,
+      "WDO": 0.8741,
+      "IND": 0.1893,
+      "DOL": 1.0,
+      "DI1": 0.2605,
+      "BGI": 0.0162,
+      "CCM": 0.0557,
+      "ICF": -0.0681,
+      "BIT": 0.1103
+    },
+    "DI1": {
+      "WIN": 0.2192,
+      "WDO": 0.183,
+      "IND": 0.3115,
+      "DOL": 0.2605,
+      "DI1": 1.0,
+      "BGI": -0.0031,
+      "CCM": 0.0053,
+      "ICF": 0.0185,
+      "BIT": 0.0991
+    },
+    "BGI": {
+      "WIN": -0.0093,
+      "WDO": 0.0372,
+      "IND": -0.0718,
+      "DOL": 0.0162,
+      "DI1": -0.0031,
+      "BGI": 1.0,
+      "CCM": 0.1333,
+      "ICF": -0.0114,
+      "BIT": 0.0833
+    },
+    "CCM": {
+      "WIN": -0.0115,
+      "WDO": 0.0704,
+      "IND": -0.0158,
+      "DOL": 0.0557,
+      "DI1": 0.0053,
+      "BGI": 0.1333,
+      "CCM": 1.0,
+      "ICF": 0.0263,
+      "BIT": 0.0385
+    },
+    "ICF": {
+      "WIN": -0.0608,
+      "WDO": -0.0623,
+      "IND": -0.0541,
+      "DOL": -0.0681,
+      "DI1": 0.0185,
+      "BGI": -0.0114,
+      "CCM": 0.0263,
+      "ICF": 1.0,
+      "BIT": 0.0861
+    },
+    "BIT": {
+      "WIN": 0.0307,
+      "WDO": 0.0994,
+      "IND": 0.0857,
+      "DOL": 0.1103,
+      "DI1": 0.0991,
+      "BGI": 0.0833,
+      "CCM": 0.0385,
+      "ICF": 0.0861,
+      "BIT": 1.0
+    }
+  },
+  "bootstrap_portfolio_L126": {
+    "n_boot": 1000,
+    "block_size": 21,
+    "seed": 42,
+    "mean_ann_pct": 6.28,
+    "ci_2.5_pct": 0.6,
+    "ci_50_pct": 6.21,
+    "ci_97.5_pct": 13.02,
+    "pct_positive": 98.1
+  },
+  "bootstrap_portfolio_L63": {
+    "n_boot": 1000,
+    "block_size": 21,
+    "seed": 42,
+    "mean_ann_pct": 6.94,
+    "ci_2.5_pct": 1.01,
+    "ci_50_pct": 6.83,
+    "ci_97.5_pct": 13.3,
+    "pct_positive": 99.0
+  },
+  "bit_note": "BIT presente com 174 pregoes na janela [2024-04-23 .. 2024-12-30] - historico curto (~2024+), reportado separadamente, NAO entra na carteira."
+}
